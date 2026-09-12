@@ -1,0 +1,129 @@
+CATEGORY,KEY,DECISION,DETAIL
+social_posts_source,all platforms,manual-loomly-exporting.xlsx used as sole primary source,Family A/B dropped per plan §1a: manual-loomly's date coverage is a superset of both.
+li_engagement_override,2026-09-04 :: “Josh’s Step-Dad Story” Clip 4,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.25 -> native_ER=0.0
+li_engagement_override,2026-09-02 :: Gavin Kyer Surgical Mission Guatemala,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=23.94 -> native_ER=26.5625
+li_engagement_override,2025-10-30 :: Beyond Payer Bots,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.42 -> native_ER=9.8039
+li_engagement_override,2025-10-28 :: How Oncology Clinics Can Reclaim 16+ Hours a Week,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=3.94 -> native_ER=3.7037
+li_engagement_override,2025-10-23 :: Burnout by the Numbers,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.02 -> native_ER=5.2083
+li_engagement_override,2025-10-23 :: Sharing Innovation Beyond the Clinic,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.99 -> native_ER=5.9146
+li_engagement_override,2025-10-16 :: Why We Work at Hidalga,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.86 -> native_ER=5.9426
+li_engagement_override,2025-10-14 :: Breast Cancer Awareness Month,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.47 -> native_ER=5.1282
+li_engagement_override,2025-10-09 :: What Two Weeks of Waiting Means in Oncology,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.95 -> native_ER=5.4455
+li_engagement_override,2025-10-07 :: Venture Well: Aspire Program,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=8.24 -> native_ER=8.0645
+li_engagement_override,2025-10-06 :: We're looking forward to session 5 tomorrow!,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=4.17 -> native_ER=3.6697
+li_engagement_override,"2025-10-02 :: Thank you, NWA Startup Crawl 2025",overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=15.33 -> native_ER=14.922
+li_engagement_override,2025-11-27 :: Yong Zhu,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.42 -> native_ER=9.4421
+li_engagement_override,2025-11-25 :: Aspire Traveling,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=12.35 -> native_ER=11.1111
+li_engagement_override,2025-11-22 :: Data Driven Insight,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.45 -> native_ER=7.2464
+li_engagement_override,2025-11-20 :: Education + CTA,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=1.64 -> native_ER=1.9685
+li_engagement_override,2025-11-13 :: NSF Blog post,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=3.82 -> native_ER=3.5294
+li_engagement_override,2025-11-12 :: Drew Williamson,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.38 -> native_ER=7.2909
+li_engagement_override,2025-11-06 :: Honored to Walk for a Cure,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.84 -> native_ER=11.1765
+li_engagement_override,2025-11-04 :: Industry Insights-Prior Auth reform,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=4.02 -> native_ER=3.8095
+li_engagement_override,2026-05-29 :: When Paperwork Stands Between a Patient and Treatment,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=2.6 -> native_ER=2.6042
+li_engagement_override,2026-05-27 :: Karen Kilroy wins AI competition at University of Arkansas,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.36 -> native_ER=5.3619
+li_engagement_override,2026-05-22 :: Jeejo and Karen's Hash Chaining Audi Log Tech AI Agent / Age,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.64 -> native_ER=6.6667
+li_engagement_override,2026-05-20 :: Operations Command Center / The Dashboard Your Revenue Cycle,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=4.82 -> native_ER=4.8193
+li_engagement_override,2026-05-18 :: Why We Build: Joshua's Mission,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=20.13 -> native_ER=20.9035
+li_engagement_override,2026-05-15 :: Post COA conference takeaways,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.3 -> native_ER=6.6456
+li_engagement_override,2026-05-13 :: [Onward FX] Unscripted,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.43 -> native_ER=8.0119
+li_engagement_override,2026-05-11 :: Jeejo Pallayi: 25 Years Building Healthcare Systems,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=12.42 -> native_ER=7.7703
+li_engagement_override,2026-05-08 :: Post about HOPA conference experience,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.42 -> native_ER=7.1264
+li_engagement_override,2026-05-06 :: NSF I-Corps 2026 takeaways,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=15.98 -> native_ER=12.0332
+li_engagement_override,2026-05-04 :: The CMS Rule That Changes Everything for PA in 2027,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.38 -> native_ER=2.7174
+li_engagement_override,2026-05-01 :: Post ROC 2026 conference takeaways,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=23.51 -> native_ER=19.17
+li_engagement_override,2026-03-30 :: Post on Cancer support services,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.44 -> native_ER=3.4014
+li_engagement_override,2026-03-27 :: Karen Kilroy joins the team,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=8.92 -> native_ER=6.113
+li_engagement_override,"2026-03-25 :: CDIs w Dr. Metzner-Sadurski, Dr. Yuan, and support of Oncolo",overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.67 -> native_ER=3.5545
+li_engagement_override,2026-03-23 :: NSF I-Corps Customer Discovery support request,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.65 -> native_ER=4.6647
+li_engagement_override,"2026-03-21 :: Great opportunity to connect with @[Joshua Upshaw, Ph.D.](ur",overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=3.13 -> native_ER=1.5038
+li_engagement_override,2026-03-20 :: Joshua attending HOPA March 25-28,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=12.78 -> native_ER=5.102
+li_engagement_override,2026-03-20 :: Major Health Insurers Announce Prior Authorization Reform. W,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.59 -> native_ER=5.102
+li_engagement_override,2026-03-18 :: Innovation Pacesetter 2026 ABOY,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.29 -> native_ER=7.1665
+li_engagement_override,2026-03-16 :: GENEROUS (GENErating cost Reductions fOr U.S. Medicaid) Mode,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.37 -> native_ER=3.6269
+li_engagement_override,2026-03-13 :: Team and culture: PULSE Check- post on company core values,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=8.05 -> native_ER=5.2411
+li_engagement_override,2026-03-09 :: HIMSS 2026 Post (jeejo pt2),overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.65 -> native_ER=6.5327
+li_engagement_override,2026-03-06 :: Highway Venture's and VenturewellFLIPsapce cohort,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.46 -> native_ER=3.3797
+li_engagement_override,2026-03-04 :: Patient Story: Stephanie Cullum's Daughter,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.81 -> native_ER=4.3197
+li_engagement_override,2026-03-02 :: HIMSS 2026 Post (jeejo pt1),overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.48 -> native_ER=6.8285
+li_engagement_override,2026-06-29 :: NSF SBIR PH II application submission,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=4.44 -> native_ER=4.4444
+li_engagement_override,2026-06-26 :: Welcome Bri to the Team,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=13.38 -> native_ER=13.3779
+li_engagement_override,2026-06-24 :: Prior Authorization Often Places Burden on Patients With Can,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=2.22 -> native_ER=2.2222
+li_engagement_override,2026-06-22 :: Science Venture Studio consultant/advisor,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.19 -> native_ER=7.191
+li_engagement_override,2026-06-19 :: hidalga halo PA video,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=13.38 -> native_ER=13.3758
+li_engagement_override,2026-06-17 :: reframing healthcare NWA,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.69 -> native_ER=11.6883
+li_engagement_override,2026-06-15 :: Startup Prize LA,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=17.68 -> native_ER=17.6781
+li_engagement_override,2026-06-12 :: FlipSpace,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.15 -> native_ER=11.1455
+li_engagement_override,2026-06-10 :: Jeejo attending Microsoft Build 2026,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.41 -> native_ER=7.4074
+li_engagement_override,2026-06-08 :: BREAKING: 2027 ACA Proposal Could Cut Cancer Care Access,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=4.69 -> native_ER=4.6875
+li_engagement_override,2026-06-03 :: AI Governance in Community Oncology,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=2.13 -> native_ER=2.1277
+li_engagement_override,2026-06-01 :: PA through the VA memorial day reflection,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=3.65 -> native_ER=3.6364
+li_engagement_override,2026-07-31 :: Impact of prior authorization for oncology medications on pr,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.57 -> native_ER=9.4828
+li_engagement_override,2026-07-30 :: Building in healthcare tech means learning from people who'v,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=12.5 -> native_ER=12.5
+li_engagement_override,2026-07-29 :: Hidden Cost of Payer Variability in Community Oncology,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=15.85 -> native_ER=15.8537
+li_engagement_override,2026-07-27 :: Cutting oncology access delays AJMC webinar,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=2.99 -> native_ER=2.9851
+li_engagement_override,2026-07-23 :: Building for Operational Reality,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=14.06 -> native_ER=14.0625
+li_engagement_override,"2026-07-21 :: Prior Authorization, Step by Step",overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=27.16 -> native_ER=27.1605
+li_engagement_override,2026-07-17 :: Reducing Oncology Prior Auth Delays,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=12.7 -> native_ER=12.6984
+li_engagement_override,2026-07-15 :: The ripple effect of one delayed authorization,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=8.89 -> native_ER=8.8889
+li_engagement_override,2026-07-13 :: GLP-1 Agonists Are Associated With a Significant Reduction i,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=3.65 -> native_ER=3.5211
+li_engagement_override,2026-07-10 :: CMS Announces Early Adopters,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.0 -> native_ER=5.0
+li_engagement_override,2026-07-08 :: Beyond Workflow Templates & Manual Reports,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=19.38 -> native_ER=19.3798
+li_engagement_override,2026-07-06 :: What Policy-Aware Optimization Actually Means,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.67 -> native_ER=6.6667
+li_engagement_override,2026-07-03 :: Grace Schmidt: From Medical Coding to Marketing Strategy,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.36 -> native_ER=11.3636
+li_engagement_override,2026-07-01 :: Startup Junkies Podcast Recording,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.39 -> native_ER=9.3923
+li_engagement_override,2026-01-30 :: January newsletter going out today at 10:00 am CST! Happy ne,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=1.64 -> native_ER=1.8349
+li_engagement_override,2026-01-29 :: Traci Ditmore,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.38 -> native_ER=8.8
+li_engagement_override,2026-01-27 :: Quarterly Rocks Report,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=0.0 -> native_ER=11.4875
+li_engagement_override,2026-01-22 :: Matthew White,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.09 -> native_ER=7.1429
+li_engagement_override,2026-01-20 :: Natalie Freels,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.47 -> native_ER=10.5714
+li_engagement_override,2026-01-15 :: StartupPrize: Focus on Health Founder Spotlight,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=8.31 -> native_ER=8.2262
+li_engagement_override,2026-01-13 :: Medicare Advantage,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.87 -> native_ER=6.6038
+li_engagement_override,2026-01-08 :: Karen Kilroy,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.28 -> native_ER=10.0437
+li_engagement_override,"2026-01-06 :: Advisor/Consultant: Cian Robinson, MBA",overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.86 -> native_ER=9.0129
+li_engagement_override,2026-01-01 :: Prior Auth Burden for Physicians & Patients,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.55 -> native_ER=8.8785
+li_engagement_override,2026-02-27 :: #MCEDact,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.57 -> native_ER=4.1995
+li_engagement_override,2026-02-25 :: AR Business of the Year Awards,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.66 -> native_ER=5.8577
+li_engagement_override,2026-02-23 :: Early Signals from CMS’s Enhancing Oncology Model,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.81 -> native_ER=5.4054
+li_engagement_override,2026-02-20 :: Panel at Innovative Logistics and Advanced Technologies Summ,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.37 -> native_ER=6.9884
+li_engagement_override,2026-02-18 :: Stacy A. Chick,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.22 -> native_ER=6.3456
+li_engagement_override,2026-02-16 :: Innovation Day (story),overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=13.01 -> native_ER=8.0
+li_engagement_override,2026-02-14 :: The oncology bell story,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=17.14 -> native_ER=11.7021
+li_engagement_override,2026-02-11 :: Medicare Drug Price Cuts Could Put Oncology Practices at Ris,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.62 -> native_ER=4.6296
+li_engagement_override,2026-02-09 :: Gavin (Guatemala),overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.89 -> native_ER=7.7661
+li_engagement_override,2026-02-06 :: What does Hidalga mean story,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=13.93 -> native_ER=8.871
+li_engagement_override,2026-02-04 :: World Cancer Day (story),overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.48 -> native_ER=6.0748
+li_engagement_override,2026-02-02 :: Ancil Lea,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=12.67 -> native_ER=7.83
+li_engagement_override,2025-12-30 :: On AI → Prior-Auth Denials,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=12.31 -> native_ER=11.1888
+li_engagement_override,2025-12-26 :: Grateful to be working on digital innovation for oncology ad,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.02 -> native_ER=4.9231
+li_engagement_override,2025-12-25 :: NSF SBIR Ph I Workshop,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=8.45 -> native_ER=8.3612
+li_engagement_override,2025-12-23 :: AR 10X accelerator completion,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.03 -> native_ER=9.7625
+li_engagement_override,2025-12-18 :: Global Cancer Burden,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=8.24 -> native_ER=7.2917
+li_engagement_override,2025-12-16 :: Growth of AI in healthcare market,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=8.33 -> native_ER=7.438
+li_engagement_override,"2025-12-11 :: Advisor/Consultant: Jenn Pingul, MHA",overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.37 -> native_ER=11.2816
+li_engagement_override,2025-12-09 :: Trey Hulse,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.82 -> native_ER=8.864
+li_engagement_override,2025-12-04 :: Clinic focused,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.07 -> native_ER=4.5752
+li_engagement_override,2026-08-31 :: COA Comments on the Interoperability Standards and Prior Aut,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.59 -> native_ER=10.6061
+li_engagement_override,2026-08-28 :: “What Hidalga is Trying to Do” Clip 3,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.81 -> native_ER=11.1111
+li_engagement_override,"2026-08-26 :: ""The problem"" carousel test",overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=50.0 -> native_ER=50.5618
+li_engagement_override,2026-08-24 :: Prior Authorization Regulations by Region,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=55.96 -> native_ER=55.9633
+li_engagement_override,2026-08-19 :: New Marketing Site Teasers and Sneak Peaks pt 2,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.94 -> native_ER=7.0755
+li_engagement_override,2026-08-17 :: New Marketing Site Teasers and Sneak Peaks,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.19 -> native_ER=7.2727
+li_engagement_override,2026-08-14 :: “The Problem” Clip Video 2,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.87 -> native_ER=7.8652
+li_engagement_override,2026-08-12 :: Oncology Prior Authorization Metrics Every COO Should Track,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=22.5 -> native_ER=22.7848
+li_engagement_override,2026-08-10 :: API Transaction Efficiency,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=8.7 -> native_ER=8.6957
+li_engagement_override,2026-08-07 :: “Why the Hidalga Name” video Clip,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=13.21 -> native_ER=13.2075
+li_engagement_override,2026-08-05 :: Is this you?,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.56 -> native_ER=5.5556
+li_engagement_override,2026-08-04 :: Joshua attending cup of capital event,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.9 -> native_ER=5.9113
+li_engagement_override,2026-04-30 :: NWA Naturals Arvest Ball Park,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=17.09 -> native_ER=12.5596
+li_engagement_override,2026-04-27 :: Gavin Kyer defends Honors Thesis in executive functioning an,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.88 -> native_ER=5.1515
+li_engagement_override,2026-04-25 :: Joshua Gives Lectue to SEVI Entrepreneurship class at UARK,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=7.72 -> native_ER=5.0967
+li_engagement_override,2026-04-22 :: AHIP/BCBSA Prior Auth Reform Progress Report by Fierce Healt,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=4.23 -> native_ER=2.3697
+li_engagement_override,2026-04-17 :: Post on value of hidalga for specialty clinics,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=6.06 -> native_ER=3.4091
+li_engagement_override,2026-04-15 :: Janet Malmberg Advisor post,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=13.22 -> native_ER=9.593
+li_engagement_override,2026-04-13 :: Joshua attending COA April 28,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.15 -> native_ER=6.5217
+li_engagement_override,2026-04-10 :: Highlands Bell Ringing video and patient support services,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=14.1 -> native_ER=10.4911
+li_engagement_override,2026-04-08 :: Susan Sabo-Wagner advisor post,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=9.44 -> native_ER=7.2074
+li_engagement_override,2026-04-06 :: Joshua and Jeejo Attending Rural oncology conference April 1,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.19 -> native_ER=7.078
+li_engagement_override,2026-04-03 :: Posts about journal content,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.59 -> native_ER=3.3426
+li_engagement_override,2026-04-01 :: Team and culture: Conley promotion to R&D lead CTA,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.14 -> native_ER=6.8027
