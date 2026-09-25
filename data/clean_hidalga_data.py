@@ -121,12 +121,25 @@ def is_time_cell(v):
 
 
 def parse_labels(lbl):
-    """Return (segments list, canonical pillar, residual link tags)."""
+    """Return (segments list, canonical pillar(s) joined with '; ', residual
+    link tags). Loomly's LABELS field concatenates every tag on a post with
+    no delimiter (e.g. "CarouselOncology Operations LeaderThought Leadership
+    & Industry InsightsPatient-Centered Stories"), and posts are routinely
+    tagged with more than one content pillar -- so every canonical pillar
+    whose raw substring appears gets kept (in PILLAR_MAP order, deduped),
+    matching how multi-pillar posts are represented in Hidalga_Master_Data_v1
+    rather than silently keeping only the first match. Matching stays
+    case-sensitive: several residual link tags legitimately end in lowercase
+    "-link" (e.g. "blog-link", "Financial-ICP-link"), which a case-insensitive
+    match against the FORMAT_LABELS "Link" would wrongly clip."""
     if lbl is None:
         return [], None, None
     s = str(lbl)
     segs = [seg for seg in ICP_SEGMENTS if seg in s]
-    pillar = next((canon for raw, canon in PILLAR_MAP if raw in s), None)
+    pillars = []
+    for raw, canon in PILLAR_MAP:
+        if raw in s and canon not in pillars:
+            pillars.append(canon)
     residual = s
     for seg in ICP_SEGMENTS:
         residual = residual.replace(seg, "|")
@@ -135,7 +148,7 @@ def parse_labels(lbl):
     for f in FORMAT_LABELS:
         residual = residual.replace(f, "|")
     link_tags = [t.strip() for t in re.split(r"\|+", residual) if t.strip()]
-    return segs, pillar, ("; ".join(link_tags) if link_tags else None)
+    return segs, ("; ".join(pillars) if pillars else None), ("; ".join(link_tags) if link_tags else None)
 
 
 def read_offset_sheet(path, sheet, header_row):
@@ -341,11 +354,24 @@ def build_followers(social_xlsx):
     return fol.dropna(how="all").reset_index(drop=True)
 
 
+def _loomly_sheet_name(social_xlsx):
+    """The Loomly click-data sheet's name has drifted across export tools
+    (seen: "loomly-click-data", "Loomly_click") even though the row layout
+    is identical -- match on normalized text instead of one exact literal,
+    so a rename doesn't silently make build_loomly() return empty."""
+    for name in sheet_names(social_xlsx):
+        norm = re.sub(r"[^a-z]", "", name.lower())
+        if "loomly" in norm and "click" in norm:
+            return name
+    return None
+
+
 def build_loomly(social_xlsx):
-    if "loomly-click-data" not in sheet_names(social_xlsx):
+    sheet = _loomly_sheet_name(social_xlsx)
+    if sheet is None:
         return pd.DataFrame()
     wb = openpyxl.load_workbook(social_xlsx, read_only=True)
-    ws = wb["loomly-click-data"]
+    ws = wb[sheet]
     recs, cur = [], None
 
     for r in ws.iter_rows(min_row=2, values_only=True):
@@ -383,7 +409,7 @@ def build_loomly(social_xlsx):
         return "; ".join(out) if out else None
 
     rows = [{
-        "SOURCE_FILE": os.path.basename(social_xlsx) + " (loomly-click-data)",
+        "SOURCE_FILE": os.path.basename(social_xlsx) + f" ({sheet})",
         "CREATION_DATE": c["CREATION_DATE"], "POST_TIME": c["POST_TIME"],
         "SHORT_LINK": c["SHORT_LINK"], "DESTINATION_URL": c["DESTINATION_URL"],
         "TOTAL_CLICKS": c["TOTAL_CLICKS"],

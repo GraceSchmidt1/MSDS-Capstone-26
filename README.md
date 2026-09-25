@@ -14,7 +14,13 @@ reasoning behind every source-selection decision is in
 - **`clean_hidalga_data.py`** — the original monthly cleaner. Point it at
   exactly 3 fresh exports (social workbook + LinkedIn content export +
   LinkedIn visitors export) and it produces one cleaned workbook. Kept as-is
-  for that ongoing monthly use.
+  for that ongoing monthly use. Two parsing fixes landed since the v1 run:
+  `parse_labels()` now keeps *every* canonical content pillar a post is
+  tagged with instead of only the first match (posts tagged with more than
+  one pillar were silently losing the second); and the Loomly click-data
+  sheet is now matched by normalized name instead of one exact literal, so
+  a rename between export tools (`loomly-click-data` vs `Loomly_click`)
+  doesn't make `build_loomly()` silently return an empty sheet.
 - **`build_master_data.py`** — the one-time (v1) historical consolidation.
   Reuses `clean_hidalga_data.py`'s normalizers (label/pillar parsing,
   offset-sheet reading, format handling) and adds the source-selection,
@@ -36,8 +42,9 @@ reasoning behind every source-selection decision is in
 - **`Hidalga_Master_Data_v1.xlsx`** — the consolidated dataset. Sheets:
   Social Posts (unified), LinkedIn Posts (detail), LinkedIn Daily Metrics,
   Visitor Daily Metrics, Visitor Demographics, Follower Counts, Loomly
-  Clicks, Instagram Stories, LinkedIn New Followers (daily), Competitors,
-  plus QA sheets (join gaps, monthly summary, thin cells, label coverage).
+  Clicks (89 rows — see "Loomly click attribution" below), Instagram
+  Stories, LinkedIn New Followers (daily), Competitors, plus QA sheets
+  (join gaps, monthly summary, thin cells, label coverage).
 - **`merge_decisions.csv`** — every judgment call made while merging (e.g.
   each LinkedIn post row that had its Loomly-reported engagement numbers
   overwritten with LinkedIn's own native metrics), so it's auditable.
@@ -88,3 +95,18 @@ combined `LABELS` column split into separate `ICP_SEGMENTS` and
 Current state, per `QA Label Coverage`: **100% ICP and 100% content-pillar
 coverage** across Facebook, Instagram, and LinkedIn — every value is one of
 the 4 canonical ICP segments / 5 canonical content pillars, no free text.
+
+### Loomly click attribution (planned — no data changes made)
+
+`Loomly Clicks` (89 rows) carries `SHORT_LINK`, `DESTINATION_URL`,
+`CREATION_DATE`, `TOTAL_CLICKS`, and source/location breakdowns per link,
+but nothing that maps a click record to one specific post — `LINK_TAGS` on
+`Social Posts (unified)` holds category labels (e.g. `Financial-ICP-link`,
+`generic-website-link`), not the literal `loom.ly` short link, so there's
+no direct join key between the two sheets.
+
+Decision: attribute clicks to posts by matching `CREATION_DATE` to posting
+date against LinkedIn posts, rather than adding a join key to the data
+now. This is a modeling-stage join, not a cleaning-stage fix — no
+adjustments to `Loomly Clicks` or `Social Posts (unified)` are needed for
+it.
