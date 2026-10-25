@@ -54,5 +54,14 @@ cv:
   n_splits: 5
   n_repeats: 10
 
+# Regularized models (step 3). Features are standardized inside each fit. The penalty is tuned by
+# an inner K-fold on the training posts only (nested CV), so outer CV scores stay honest.
+regularization:
+  inner_splits: 5
+  ridge_alpha_grid: {min_exp: -2, max_exp: 4, num: 61}    # alphas = 10^linspace(min_exp, max_exp, num)
+  n_alphas: 100                                           # lasso / elastic net path length
+  l1_ratios: [0.1, 0.25, 0.5, 0.75, 0.9]                  # elastic net mix (1.0 would be pure lasso)
+  max_iter: 50000
+
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs

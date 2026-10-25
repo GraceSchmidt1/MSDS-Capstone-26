@@ -9,13 +9,16 @@ Writes outputs/runs/<YYYY-MM-DD>_<tag>/ containing
                              snapshot, package versions, seed: everything needed to reproduce the run
     fit_stats.csv            per model: n, features, R², adjusted R², AIC, residual SD
     coefficients_ols.csv     effect sizes: coefficient (pts), 95% CI, p-value, posts with feature
+    coefficients_regularized.csv  ridge / lasso / elastic net: coefficient per SD (importance) and in pts,
+                             whether kept (nonzero), chosen penalty
     cv_scores.csv            every CV split for every model; cv_summary.csv: mean and SD per model
+                             (regularized models scored with nested CV: penalty tuned on training posts only)
     vif.csv                  multicollinearity per feature
     influence.csv            per-post residuals, leverage, Cook's distance
     excluded_posts.csv       posts not modelled, with the reason
     figures/                 coefficient plot, diagnostics
 
-Step 2 scope: reference model + baseline OLS (per platform = main, pooled = check).
+Models: reference (mean), baseline OLS, ridge, lasso, elastic net; per platform = main, pooled = check.
 """
 from __future__ import annotations
 
@@ -33,8 +36,9 @@ import pandas as pd
 from modeling import plots
 from modeling.features import (DEFAULT_CONFIG, POOLED, REPO_ROOT, build_features, file_sha256, load_config,
                                load_master, prepare_posts)
-from modeling.models import (coef_table, cv_score, cv_splits, fit_ols, fit_stats, influence_table,
-                             ols_fit_predict, reference_fit_predict, vif_table)
+from modeling.models import (REGULARIZED, coef_table, cv_score, cv_splits, fit_ols, fit_regularized, fit_stats,
+                             influence_table, ols_fit_predict, reference_fit_predict, regularized_coef_table,
+                             regularized_fit_predict, vif_table)
 
 
 def git_info() -> dict:
@@ -69,7 +73,7 @@ def main(argv=None):
     model_sets = config["platforms"] + [POOLED]
     cv = config["cv"]
 
-    coefs, stats_rows, cv_rows, vifs, infls, excluded = [], [], [], [], [], []
+    coefs, stats_rows, cv_rows, vifs, infls, excluded, reg_coefs = [], [], [], [], [], [], []
     for p in model_sets:
         fs = build_features(prepared, p, config)
         res = fit_ols(fs)
@@ -81,6 +85,10 @@ def main(argv=None):
         splits = cv_splits(fs, cv["n_splits"], cv["n_repeats"], config["seed"])
         for name, fp in [("reference (mean)", reference_fit_predict), ("OLS", ols_fit_predict)]:
             cv_rows.append(cv_score(fs, splits, fp).assign(platform=p, model=name))
+        for name in REGULARIZED:
+            cv_rows.append(cv_score(fs, splits, regularized_fit_predict(name, config)).assign(platform=p, model=name))
+            reg_coefs.append(regularized_coef_table(fit_regularized(fs, name, config, splits), fs, name))
+        print(f"  {p}: done", flush=True)
 
     coefs = pd.concat(coefs, ignore_index=True)
     cv_scores = pd.concat(cv_rows, ignore_index=True)
@@ -89,7 +97,9 @@ def main(argv=None):
     cv_summary.columns = [f"{m}_{s}" for m, s in cv_summary.columns]
     infl = pd.concat(infls, ignore_index=True)
 
+    reg_coefs = pd.concat(reg_coefs, ignore_index=True)
     coefs.to_csv(out / "coefficients_ols.csv", index=False)
+    reg_coefs.to_csv(out / "coefficients_regularized.csv", index=False)
     pd.DataFrame(stats_rows).to_csv(out / "fit_stats.csv", index=False)
     cv_scores.to_csv(out / "cv_scores.csv", index=False)
     cv_summary.reset_index().to_csv(out / "cv_summary.csv", index=False)
@@ -102,6 +112,12 @@ def main(argv=None):
     plots.coef_plot(coefs, [POOLED], "Baseline OLS, pooled check (platform intercepts, SEs clustered by content)",
                     out / "figures" / "coef_ols_pooled.png")
     plots.diagnostics_plot(infl, config["platforms"], out / "figures" / "diagnostics_ols.png")
+    plots.coef_compare_plot(coefs, reg_coefs, config["platforms"],
+                            "OLS vs. regularized estimates, within each platform",
+                            out / "figures" / "coef_compare_by_platform.png")
+    plots.coef_compare_plot(coefs, reg_coefs, [POOLED], "OLS vs. regularized estimates, pooled check",
+                            out / "figures" / "coef_compare_pooled.png")
+    plots.cv_plot(cv_scores, model_sets, out / "figures" / "cv_performance.png")
 
     run_info = {
         "tag": args.tag, "created": dt.datetime.now().isoformat(timespec="seconds"),

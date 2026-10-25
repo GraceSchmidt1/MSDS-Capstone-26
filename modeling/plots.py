@@ -107,3 +107,77 @@ def diagnostics_plot(infl: pd.DataFrame, platforms: list[str], path):
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)
+
+
+MODEL_MARKER = {"Ridge": ("D", "none"), "Lasso": ("^", "none"), "Elastic net": ("s", "full")}
+
+
+def coef_compare_plot(ols: pd.DataFrame, reg: pd.DataFrame, platforms: list[str], title: str, path):
+    """OLS coefficient + 95% CI (platform color) beside ridge / lasso / elastic net estimates (gray shapes)."""
+    o = ols[(ols["feature"] != "const") & ols["platform"].isin(platforms)]
+    r = reg[reg["platform"].isin(platforms)]
+    features = list(dict.fromkeys(o["feature"]))
+    fig, axes = plt.subplots(1, len(platforms), figsize=(4.6 * len(platforms), 0.4 * len(features) + 1.8),
+                             sharey=True, squeeze=False)
+    offsets = {"OLS": -0.27, "Ridge": -0.09, "Lasso": 0.09, "Elastic net": 0.27}
+    for ax, p in zip(axes[0], platforms):
+        y = np.arange(len(features))
+        col = PLATFORM_COLOR[p]
+        ax.axvline(0, color=INK_MUTED, lw=1)
+        d = o[o["platform"] == p].set_index("feature").reindex(features)
+        ax.hlines(y + offsets["OLS"], d["ci_lo"], d["ci_hi"], color=col, lw=2, alpha=0.5)
+        ax.scatter(d["coef_pts"], y + offsets["OLS"], s=34, color=col, zorder=3, label="OLS (95% CI)")
+        for name, (marker, fill) in MODEL_MARKER.items():
+            m = r[(r["platform"] == p) & (r["model"] == name)].set_index("feature").reindex(features)
+            ax.scatter(m["coef_pts"], y + offsets[name], s=30, marker=marker, zorder=4, linewidths=1.2,
+                       edgecolors=INK_2, facecolors=INK_2 if fill == "full" else "none", label=name)
+        for yi, missing in zip(y, d["coef_pts"].isna()):
+            if missing:
+                ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
+                            fontsize=8, color=INK_MUTED, style="italic")
+        ax.set_title(p)
+        ax.set_xlabel("Effect on engagement rate (percentage points)")
+        ax.grid(axis="y", visible=False)
+    axes[0][0].set_yticks(np.arange(len(features)))
+    axes[0][0].set_yticklabels([textwrap.shorten(label(f), 44, placeholder="…") for f in features], fontsize=8.5)
+    axes[0][0].invert_yaxis()
+    handles, labels = axes[0][0].get_legend_handles_labels()
+    handles[0] = plt.Line2D([], [], color=INK_MUTED, marker="o", lw=2, label="OLS (95% CI), platform color")
+    labels[0] = handles[0].get_label()
+    fig.legend(handles, labels, loc="upper right", ncol=4, fontsize=8.5, bbox_to_anchor=(0.995, 1.0))
+    fig.suptitle(title, x=0.01, ha="left", fontsize=12, fontweight="semibold")
+    fig.text(0.01, -0.01, "Regularized estimates are shrunk toward 0; a lasso / elastic-net point at 0 means the "
+             "feature was dropped. Each panel has its own x-scale.", fontsize=8, color=INK_2)
+    fig.tight_layout(w_pad=2.5)
+    fig.savefig(path)
+    plt.close(fig)
+
+
+def cv_plot(cv_scores: pd.DataFrame, platforms: list[str], path):
+    """Held-out R² and MAE per model: mean across splits with ±1 SD, one panel row per metric."""
+    models = list(dict.fromkeys(cv_scores["model"]))
+    fig, axes = plt.subplots(2, len(platforms), figsize=(4.4 * len(platforms), 5.6), squeeze=False)
+    for j, p in enumerate(platforms):
+        d = cv_scores[cv_scores["platform"] == p].groupby("model", sort=False)
+        for i, (metric, xlabel) in enumerate([("r2", "Held-out R² (higher is better)"),
+                                              ("mae", "Held-out MAE, pts (lower is better)")]):
+            ax = axes[i][j]
+            mean, sd = d[metric].mean().reindex(models), d[metric].std().reindex(models)
+            yy = np.arange(len(models))
+            ax.hlines(yy, mean - sd, mean + sd, color=PLATFORM_COLOR[p], lw=2, alpha=0.5)
+            ax.scatter(mean, yy, s=40, color=PLATFORM_COLOR[p], zorder=3)
+            for yi, v in zip(yy, mean):
+                ax.annotate(f"{round(v, 2) + 0.0:.2f}", (v, yi), xytext=(0, -12),   # no "-0.00" textcoords="offset points", ha="center",
+                            fontsize=8, color=INK_2)
+            if metric == "r2":
+                ax.axvline(0, color=INK_MUTED, lw=1)
+                ax.set_title("Pooled (check)" if p == "pooled" else p)
+            ax.set_yticks(yy, models if j == 0 else [""] * len(models))
+            ax.set_ylim(len(models) - 0.3, -0.6)        # inverted, with room for the labels below each dot
+            ax.set_xlabel(xlabel)
+            ax.grid(axis="y", visible=False)
+    fig.suptitle("Cross-validated performance (5-fold × 10 repeats; ±1 SD across splits)", x=0.01, ha="left",
+                 fontsize=12, fontweight="semibold")
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)

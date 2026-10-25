@@ -1,0 +1,111 @@
+{
+  "tag": "step3_regularized",
+  "created": "2026-10-25T16:06:23",
+  "master": "data/Hidalga_Master_Data_v3.xlsx",
+  "master_sha256": "dacd1d2e7274d0138b9fbaac78a498b02fa40ed0f7a5b4ecb2d6724de4f2b44a",
+  "git": {
+    "commit": "731bddc880278730d68017de21800f4907edaff0",
+    "branch": "modeling",
+    "uncommitted_changes": true
+  },
+  "packages": {
+    "python": "3.13.5",
+    "numpy": "2.1.3",
+    "pandas": "2.3.3",
+    "statsmodels": "0.14.4",
+    "scikit-learn": "1.6.1",
+    "scipy": "1.15.3",
+    "matplotlib": "3.10.7",
+    "pyyaml": "6.0.2"
+  },
+  "seed": 26,
+  "config": {
+    "master": "data/Hidalga_Master_Data_v3.xlsx",
+    "posts_sheet": "Social Posts (unified)",
+    "linkedin_detail_sheet": "LinkedIn Posts (detail)",
+    "target": "ENGAGEMENT_RATE_UNIFIED_PCT",
+    "platforms": [
+      "Facebook",
+      "Instagram",
+      "LinkedIn"
+    ],
+    "icp_segments": [
+      "Oncology Clinic Leader",
+      "Oncology Financial Leader",
+      "Oncology Operations Leader",
+      "Oncology Technical Leader"
+    ],
+    "pillars": [
+      "Events & Partnerships",
+      "Patient-Centered Storytelling",
+      "Product Development & Innovations",
+      "Team Spotlights & Company Culture",
+      "Thought Leadership & Industry Insights"
+    ],
+    "pillar_reference": "Thought Leadership & Industry Insights",
+    "icp_reference": null,
+    "formats": {
+      "reference": "Image",
+      "Facebook": [
+        "Image",
+        "Multi-Image",
+        "Video",
+        "Link"
+      ],
+      "Instagram": [
+        "Image",
+        "Carousel",
+        "Video"
+      ],
+      "LinkedIn": [
+        "Image",
+        "Link",
+        "Video",
+        "Document",
+        "Multi-Image",
+        "Simple Status"
+      ]
+    },
+    "timing": {
+      "after_hour": 11
+    },
+    "features": {
+      "reach": [
+        "log2_impressions"
+      ],
+      "timing": [
+        "WEEKEND",
+        "AFTER_11"
+      ],
+      "linkedin_only": [
+        "BOOSTED"
+      ],
+      "sensitivity_only": [
+        "IN_EXPERIMENT_PERIOD"
+      ]
+    },
+    "seed": 26,
+    "cv": {
+      "n_splits": 5,
+      "n_repeats": 10
+    },
+    "regularization": {
+      "inner_splits": 5,
+      "ridge_alpha_grid": {
+        "min_exp": -2,
+        "max_exp": 4,
+        "num": 61
+      },
+      "n_alphas": 100,
+      "l1_ratios": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        0.9
+      ],
+      "max_iter": 50000
+    },
+    "output_dir": "outputs/runs"
+  }
+}
