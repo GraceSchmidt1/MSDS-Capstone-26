@@ -48,3 +48,11 @@ features:
   sensitivity_only: [IN_EXPERIMENT_PERIOD]   # collinear with format; excluded from main spec
 
 seed: 26
+
+# Cross-validation shared by every model (repeated K-fold; folds built over content pieces).
+cv:
+  n_splits: 5
+  n_repeats: 10
+
+# Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
+output_dir: outputs/runs

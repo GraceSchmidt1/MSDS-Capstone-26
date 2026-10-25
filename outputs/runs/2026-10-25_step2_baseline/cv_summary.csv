@@ -1,0 +1,9 @@
+platform,model,mae_mean,mae_std,rmse_mean,rmse_std,r2_mean,r2_std
+Facebook,reference (mean),8.013,0.934,10.034,1.323,-0.052,0.072
+Facebook,OLS,8.379,0.896,10.627,1.199,-0.203,0.233
+Instagram,reference (mean),6.465,1.417,8.664,2.18,-0.057,0.096
+Instagram,OLS,4.906,0.866,6.457,1.388,0.372,0.233
+LinkedIn,reference (mean),5.066,1.089,8.311,3.307,-0.075,0.133
+LinkedIn,OLS,5.259,1.159,8.68,3.287,-0.344,0.747
+pooled,reference (mean),7.489,0.583,9.86,1.09,-0.014,0.02
+pooled,OLS,6.083,0.707,8.643,1.214,0.221,0.093
