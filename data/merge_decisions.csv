@@ -127,3 +127,6 @@ li_engagement_override,2026-04-08 :: Susan Sabo-Wagner advisor post,overwrote Lo
 li_engagement_override,2026-04-06 :: Joshua and Jeejo Attending Rural oncology conference April 1,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=11.19 -> native_ER=7.078
 li_engagement_override,2026-04-03 :: Posts about journal content,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=5.59 -> native_ER=3.3426
 li_engagement_override,2026-04-01 :: Team and culture: Conley promotion to R&D lead CTA,overwrote Loomly metrics with LinkedIn-native detail row,loomly_ER_raw=10.14 -> native_ER=6.8027
+append_only_merge,Social Posts (unified),appended 17 of 313 incoming rows,"296 already in master, not overwritten; cleaned_092026_full.xlsx -> Hidalga_Master_Data_v2.xlsx"
+append_only_merge,Follower Counts,appended 3 of 27 incoming rows,"24 already in master, not overwritten; cleaned_092026_full.xlsx -> Hidalga_Master_Data_v2.xlsx"
+append_only_merge,Loomly Clicks,appended 6 of 66 incoming rows,"60 already in master, not overwritten; cleaned_092026_full.xlsx -> Hidalga_Master_Data_v2.xlsx"

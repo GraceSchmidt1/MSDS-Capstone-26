@@ -102,12 +102,19 @@ refuse to write over an existing master workbook.
 | Re-merging the same export | 0 rows appended |
 | Output exists / output = master / edited cell | refused / refused / caught by verify |
 
-The test output was written to a scratch folder only; no `_v2` has been
-created in `data/` yet.
+### Merge history
+
+| Version | Source | Pull date | Posts added | Notes |
+|---|---|---|---|---|
+| v1 | `build_master_data.py` (full consolidation) | 2026-09-25 | 374 | manual tag fixes applied afterward |
+| v2 | `data/092026-Social-Media-Data.xlsx` (cumulative Jan 1–Sep 29, 313 posts) | 2026-10-25 | 17 (Sep 11–29) | 296 already in v1 kept as-is; +3 follower-count months, +6 Loomly links; 1,665 differing values in `Unapplied Updates (log)`. "Cut Denial Rework Before It Hits the Queue" (Sep 14, all 3 platforms) has no content pillar yet. |
 
 ### Current outputs (in `data/`)
 
-- **`Hidalga_Master_Data_v1.xlsx`** — the consolidated dataset. Sheets:
+- **`Hidalga_Master_Data_v2.xlsx`** — **current master** (v1 + September
+  2026 posts, 391 social posts). Same sheets as v1 plus `Unapplied Updates (log)`.
+  Use this one for modeling. See "Merge history" above.
+- **`Hidalga_Master_Data_v1.xlsx`** — the original consolidated dataset, kept frozen. Sheets:
   Social Posts (unified), LinkedIn Posts (detail), LinkedIn Daily Metrics,
   Visitor Daily Metrics, Visitor Demographics, Follower Counts, Loomly
   Clicks (89 rows — see "Loomly click attribution" below), Instagram
