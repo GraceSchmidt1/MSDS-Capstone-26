@@ -1,0 +1,23 @@
+platform,feature,main_coef_pts,main_ci_lo,main_ci_hi,main_ci_excludes_0,variants,same_sign,ci_excludes_0_same_sign,variants_losing_it
+Facebook,log2_impressions,-1.3089731288233446,-3.1940983915086942,0.5761521338620048,False,4,3,0,"experiment_period, impression_weighted, log1p_target, drop_most_influential"
+Facebook,ICP: Oncology Financial Leader,3.6754238296103323,-2.146407186106907,9.497254845327571,False,5,5,0,"experiment_period, impression_weighted, log1p_target, no_reach_control, drop_most_influential"
+Facebook,Format: Multi-Image,1.7000261955562113,-3.4545737350826435,6.8546261261950665,False,5,5,0,"experiment_period, impression_weighted, log1p_target, no_reach_control, drop_most_influential"
+Facebook,Format: Video,-2.6759911422317924,-9.08434984126864,3.7323675568050545,False,5,5,0,"experiment_period, impression_weighted, log1p_target, no_reach_control, drop_most_influential"
+Facebook,Format: Link,-10.967474507676789,-21.4877459581965,-0.44720305715708086,True,5,5,3,"impression_weighted, log1p_target"
+Instagram,log2_impressions,-6.219477504771019,-8.87212112352958,-3.5668338860124593,True,4,4,3,impression_weighted
+Instagram,ICP: Oncology Financial Leader,-2.4167339107768044,-4.951049620394651,0.1175817988410417,False,5,5,0,"experiment_period, impression_weighted, log1p_target, no_reach_control, drop_most_influential"
+Instagram,Format: Carousel,3.5743822555105518,-0.12116958199440742,7.269934093015511,False,5,5,1,"experiment_period, impression_weighted, no_reach_control, drop_most_influential"
+Instagram,Format: Video,2.0939475939366563,-4.001742390694044,8.189637578567357,False,5,2,0,"experiment_period, impression_weighted, log1p_target, no_reach_control, drop_most_influential"
+LinkedIn,log2_impressions,-1.5119566563315827,-5.847119820587027,2.823206507923862,False,4,3,0,"experiment_period, impression_weighted, log1p_target, drop_most_influential"
+LinkedIn,ICP: Oncology Financial Leader,0.8586816111397788,-3.1962586261915984,4.913621848471156,False,5,4,0,"experiment_period, impression_weighted, log1p_target, no_reach_control, drop_most_influential"
+LinkedIn,Format: Link,-0.24339401864311874,-6.805899559943627,6.31911152265739,False,5,4,2,"experiment_period, log1p_target, no_reach_control"
+LinkedIn,Format: Video,-0.9425668061606732,-4.903804079856593,3.0186704675352467,False,5,3,0,"experiment_period, impression_weighted, log1p_target, no_reach_control, drop_most_influential"
+LinkedIn,Format: Document,12.47746649460304,1.1894113156896395,23.76552167351644,True,5,5,5,
+LinkedIn,Format: Multi-Image,5.273938371896561,-0.789410049507075,11.337286793300198,False,5,5,3,"experiment_period, log1p_target"
+pooled,log2_impressions,-2.130573112441498,-3.4331211999110667,-0.8280250249719292,True,4,4,3,log1p_target
+pooled,ICP: Oncology Financial Leader,0.7979405172988583,-1.1919549043979103,2.787835938995627,False,5,4,1,"experiment_period, impression_weighted, no_reach_control, drop_most_influential"
+pooled,Format: Multi-Image,3.56868221657448,0.23157188918574034,6.905792543963219,True,5,5,4,no_reach_control
+pooled,Format: Video,-3.4561990637800273,-5.704153199505033,-1.2082449280550218,True,5,5,5,
+pooled,Format: Link,-4.7255644853050205,-9.272497037510226,-0.1786319330998154,True,5,5,4,no_reach_control
+pooled,Format: Carousel,2.849850395725438,-1.072759074728045,6.772459866178922,False,5,5,1,"experiment_period, log1p_target, no_reach_control, drop_most_influential"
+pooled,Format: Document,9.267760346328007,-0.006963006764451052,18.542483699420465,False,5,5,4,experiment_period

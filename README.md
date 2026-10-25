@@ -11,10 +11,9 @@ reasoning behind every source-selection decision is in
 
 ### Project status (2026-10-25)
 
-Data preparation (proposal Stage 1, data-engineering half) is complete.
-**Current master: `data/Hidalga_Master_Data_v3.xlsx`**: 391 posts
-(124 Facebook, 130 Instagram, 137 LinkedIn), Sep 23 2025 – Sep 29 2026,
-ready for exploratory analysis.
+Data preparation, exploratory analysis, and the **Stage 1 engagement-rate
+regression** are complete. **Current master: `data/Hidalga_Master_Data_v3.xlsx`**:
+391 posts (124 Facebook, 130 Instagram, 137 LinkedIn), Sep 23 2025 – Sep 29 2026.
 
 Done so far:
 
@@ -34,7 +33,15 @@ Done so far:
 6. **Corrections (v3).** 40 posts' content pillar moved from `LABELS_RAW` into
    `CONTENT_PILLAR`, one garbled-label post given its reviewed pillar,
    `IN_EXPERIMENT_PERIOD` set for Q2–Q3 2026, and QA sheets regenerated.
-   100% ICP and pillar coverage.
+   100% ICP and pillar coverage. Follower Counts month labels later
+   standardized in v3 (Jan … Sept); LinkedIn's January follower count of 0 is
+   kept as exported.
+7. **Exploratory analysis.** `notebooks/01_eda_master_v3.ipynb`, merged to
+   `main` via PR #1 (see below).
+8. **Stage 1 regression on engagement rate.** Per-platform models with a pooled
+   check, built in `modeling/` with tests and versioned run outputs, written up
+   in `notebooks/02_regression_engagement_rate.ipynb` (`modeling` branch; see
+   "Stage 1 modeling" below).
 
 Scope decisions:
 
@@ -46,9 +53,14 @@ Scope decisions:
 - **Most recent pull wins for metrics.** Values already in the master
   are from the latest pull (Sep 25), so none of the logged differences from
   the September workbook were applied (see "Merge history").
+- **Compare within platform, not across.** Platforms differ in audience size,
+  impression counting, and engagement components (Instagram has no clicks or
+  shares), so EDA and models treat each platform separately; pooling is a check.
+- **The duplicated LinkedIn metrics on 2026-03-20 are left as is** (two posts
+  sharing one native metrics row; flagged in the EDA, not corrected).
 
-Next: exploratory analysis and charts (see "Notes for exploration and
-modeling" below), then Stage 1 models.
+Next: Stage 1 classification (high vs. low engagement, reusing
+`modeling/features.py`), then Stage 2 recommendations.
 
 ### Exploratory analysis (`EDA` branch)
 
@@ -62,6 +74,69 @@ distributions → pillar / ICP / format → timing → monthly trends and experi
 period → cross-posting and tag combinations → supporting sheets (followers,
 LinkedIn daily, visitors, Loomly clicks, Stories, competitors) → data-quality
 list, findings, modeling implications.
+
+## Stage 1 modeling: engagement-rate regression (`modeling` branch)
+
+**Question:** which content features, controlling for reach, are associated
+with a post's engagement rate, and how well can it be predicted?
+**Write-up:** [`notebooks/02_regression_engagement_rate.ipynb`](notebooks/02_regression_engagement_rate.ipynb)
+(reads the committed runs; does not refit, except a checked Stage 2 preview).
+
+### Design
+
+| | |
+|---|---|
+| Unit | one row per platform post; ICP segments and pillars as 0/1 columns (no exploded rows) |
+| Target | `ENGAGEMENT_RATE_UNIFIED_PCT`, in percentage points; 390 posts (the 0-impression post has no rate) |
+| Main analysis | one model per platform (FB 123, IG 130, LI 137); pooled model with platform intercepts as a check |
+| Features | `log2_impressions` (reach control), 4 ICP, 4 pillar (ref: Thought Leadership), format (ref: Image), weekend, after 11am, LinkedIn paid boost |
+| Models | reference (mean), OLS (HC3 SEs; pooled: clustered by content piece), ridge, lasso, elastic net |
+| Validation | repeated 5-fold × 10; regularized penalty tuned by nested CV; cross-posted content kept in one fold |
+| Trust checks | 500 bootstrap refits, permutation importance on held-out folds, 5 sensitivity variants |
+
+### Code (`modeling/`)
+
+- `config.yaml`: every setting (master path, vocabularies, reference
+  categories, formats per platform, CV, seed, sensitivity variants).
+- `features.py`: `build_features()` for real posts, `features_from_spec()` for
+  hypothetical posts (Stage 2); one shared encoder, so both encode identically.
+- `models.py`: CV splits, OLS, regularized models, VIF / influence, bootstrap
+  stability, permutation importance. `sensitivity.py`: one-change variants.
+- `run_regression.py` / `run_sensitivity.py`: CLIs that write a run folder.
+- `tests/`: 53 tests (no silent drops, one row per post, encoding matches tags,
+  determinism, spec round-trip, nested CV uses training posts only, …).
+
+```bash
+python -m pytest modeling/tests -q
+python -m modeling.run_regression --tag <name>     # steps 2–4, ~1 min
+python -m modeling.run_sensitivity --tag <name>    # step 5, ~1 min
+```
+
+Each run writes `outputs/runs/<date>_<tag>/` with CSVs, figures, and
+`run_info.json` (master path + SHA-256, git commit and clean/dirty flag,
+config snapshot, package versions, seed). Reruns are byte-identical. To use a new
+master, change `master:` in the config and rerun with a new tag.
+
+Committed runs: `2026-10-25_step2_baseline`, `_step3_regularized`,
+`_step4_importance` (contains steps 2–4), `_step5_sensitivity`.
+
+### Results
+
+Held-out R² (elastic net vs. reference mean): **Instagram 0.44** (0.57 with a
+log target), LinkedIn ≈0 (MAE 8% lower than the mean; 0.19 without one
+3-impression outlier), **Facebook ≈ mean (not predictable)**, pooled 0.24.
+
+| Finding | Effect | Robust? |
+|---|---|---|
+| LinkedIn **Document** posts | ≈ +12 pts vs. Image (+8 to +18 across variants) | **Yes**: 5/5 variants, 96% of refits, holds with the experiment flag. All 13 ran Jul–Sep 2026, so a period-specific factor can't be fully excluded. |
+| Instagram **reach** | ≈ −6 pts per doubling of impressions | **Yes**: 100% of refits, the dominant feature |
+| **Video** | not different within any platform once reach is controlled | The EDA's "video is worst" was a reach effect |
+| Instagram Carousel, LinkedIn Multi-Image | +2 to +5 pts | Suggestive (positive throughout, CI often crosses 0) |
+| ICP segment, pillar, day/time, paid boost, experiment period | ≈ 0 | No detectable effect at this sample size (OLS CIs, stability, importance agree) |
+
+Coefficients are associations, not causal effects.
+
+## Data pipeline: details
 
 ### Scripts (in `data/`)
 
