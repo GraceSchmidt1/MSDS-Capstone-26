@@ -256,3 +256,49 @@ def importance_plot(imp: pd.DataFrame, platforms: list[str], level: str, title: 
     fig.tight_layout(w_pad=2.5)
     fig.savefig(path)
     plt.close(fig)
+
+
+VARIANT_MARKER = {"experiment_period": "s", "impression_weighted": "D", "log1p_target": "^",
+                  "no_reach_control": "v", "drop_most_influential": "P"}
+
+
+def sensitivity_plot(ols: pd.DataFrame, key_features: list[str], variants: list[str], platforms: list[str], path):
+    """Key OLS effects (pts, 95% CI) under each sensitivity variant; main spec in the platform color."""
+    d_all = ols[ols["feature"].isin(key_features) & ols["platform"].isin(platforms)]
+    features = [f for f in key_features if f in set(d_all["feature"])]
+    n_v = len(variants)
+    fig, axes = plt.subplots(1, len(platforms), figsize=(4.2 * len(platforms), 0.62 * len(features) * n_v / 3 + 2),
+                             sharey=True, squeeze=False)
+    step = 0.8 / n_v
+    for ax, p in zip(axes[0], platforms):
+        ax.axvline(0, color=INK_MUTED, lw=1)
+        for k, v in enumerate(variants):
+            d = d_all[(d_all["platform"] == p) & (d_all["variant"] == v)].set_index("feature").reindex(features)
+            y = np.arange(len(features)) - 0.4 + step * (k + 0.5)
+            is_main = v == "main"
+            col = PLATFORM_COLOR[p] if is_main else INK_2
+            ax.hlines(y, d["ci_lo"], d["ci_hi"], color=col, lw=2 if is_main else 1.2, alpha=0.55)
+            ax.scatter(d["coef_pts"], y, s=34 if is_main else 22, color=col, zorder=3,
+                       marker="o" if is_main else VARIANT_MARKER.get(v, "o"), label=v.replace("_", " "))
+        for yi, f in enumerate(features):
+            if d_all[(d_all["platform"] == p) & (d_all["feature"] == f)].empty:
+                ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
+                            fontsize=8, color=INK_MUTED, style="italic")
+        ax.set_title("Pooled (check)" if p == "pooled" else p)
+        ax.set_xlabel("Effect on engagement rate (pts)")
+        ax.grid(axis="y", visible=False)
+    axes[0][0].set_yticks(np.arange(len(features)))
+    axes[0][0].set_yticklabels([textwrap.shorten(label(f), 34, placeholder="…") for f in features], fontsize=8.5)
+    axes[0][0].set_ylim(len(features) - 0.5, -0.5)
+    handles, labels = axes[0][-1].get_legend_handles_labels()
+    handles[0] = plt.Line2D([], [], color=INK_MUTED, marker="o", lw=2, label="main (platform color)")
+    labels[0] = handles[0].get_label()
+    fig.legend(handles, labels, loc="upper right", ncol=len(variants), fontsize=8, bbox_to_anchor=(0.995, 1.0))
+    fig.suptitle("Sensitivity: key OLS effects under one-change-at-a-time variants", x=0.01, ha="left",
+                 fontsize=12, fontweight="semibold", y=1.04)
+    fig.text(0.01, -0.02, "Dot = effect, line = 95% CI. log1p effects are converted to pts at the platform mean. "
+             "'no reach control' has no reach row by design. Each panel has its own x-scale.",
+             fontsize=8, color=INK_2)
+    fig.tight_layout(w_pad=2.0)
+    fig.savefig(path)
+    plt.close(fig)

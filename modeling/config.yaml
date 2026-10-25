@@ -71,5 +71,25 @@ permutation:
   model: Elastic net          # scored on the shared outer CV splits (nested tuning, as in step 3)
   n_repeats: 10               # shuffles per feature per split
 
+# Step 5: sensitivity runs. Each variant changes ONE thing relative to the main specification.
+# Run with:  python -m modeling.run_sensitivity --tag step5_sensitivity
+sensitivity:
+  model: Elastic net                # regularized model refit per variant (plus OLS)
+  key_features:                     # effects whose robustness is summarized (step 4 findings + checks)
+    - "log2_impressions"            # quoted: "Format: X" would otherwise parse as a YAML mapping
+    - "Format: Carousel"
+    - "Format: Document"
+    - "Format: Multi-Image"
+    - "Format: Video"
+    - "Format: Link"
+    - "ICP: Oncology Financial Leader"
+  variants:
+    main: {}
+    experiment_period: {add_experiment_flag: true}
+    impression_weighted: {weights: impressions}      # rate precision grows with impressions
+    log1p_target: {target_transform: log1p}          # effects reported in pts at the platform mean
+    no_reach_control: {drop_features: [log2_impressions]}
+    drop_most_influential: {drop_top_influential: 1} # largest Cook's D per model in the main OLS
+
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs
