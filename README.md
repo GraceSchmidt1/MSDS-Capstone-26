@@ -9,6 +9,47 @@ recent) source per record rather than concatenating everything. The full
 reasoning behind every source-selection decision is in
 [`DATA_CLEANING_PLAN.md`](DATA_CLEANING_PLAN.md).
 
+### Project status (2026-10-25)
+
+Data preparation (proposal Stage 1, data-engineering half) is complete.
+**Current master: `data/Hidalga_Master_Data_v3.xlsx`**: 391 posts
+(124 Facebook, 130 Instagram, 137 LinkedIn), Sep 23 2025 – Sep 29 2026,
+ready for exploratory analysis.
+
+Done so far:
+
+1. **Consolidation (v1).** ~35 overlapping raw exports reduced to one winning
+   source per data family, deduplicated, with superseded files archived to
+   `data/data_prev/` (see `DATA_CLEANING_PLAN.md`).
+2. **ICP/pillar tag backfill.** Keyword suggestions plus manual review for
+   posts that predate the taxonomy.
+3. **Unified engagement rate.** Added `ENGAGEMENT_RATE_UNIFIED_PCT` =
+   (reactions + comments + shares + clicks) ÷ impressions × 100, one formula
+   for all platforms, as the modeling target (see section below).
+4. **Append-only update pipeline.** `merge_into_master.py` adds new exports
+   as a new master version without changing existing rows. Build, clean, and
+   backfill scripts now refuse to overwrite a master workbook.
+5. **September 2026 merge (v2).** +17 posts (Sep 11–29), +3 follower-count
+   months, +6 Loomly links.
+6. **Corrections (v3).** 40 posts' content pillar moved from `LABELS_RAW` into
+   `CONTENT_PILLAR`, one garbled-label post given its reviewed pillar,
+   `IN_EXPERIMENT_PERIOD` set for Q2–Q3 2026, and QA sheets regenerated.
+   100% ICP and pillar coverage.
+
+Scope decisions:
+
+- **No pre-Sep-2025 backfill.** Older post-level exports aren't accessible,
+  so modeling uses the 391 posts available rather than the proposal's ~550 target.
+- **Experiment-period posts stay in.** Q2–Q3 2026 content experiments were
+  general and still help the modeling, so they're flagged with
+  `IN_EXPERIMENT_PERIOD` instead of being excluded.
+- **Most recent pull wins for metrics.** Values already in the master
+  are from the latest pull (Sep 25), so none of the logged differences from
+  the September workbook were applied (see "Merge history").
+
+Next: exploratory analysis and charts (see "Notes for exploration and
+modeling" below), then Stage 1 models.
+
 ### Scripts (in `data/`)
 
 - **`clean_hidalga_data.py`** — the original monthly cleaner. Point it at
@@ -28,6 +69,10 @@ reasoning behind every source-selection decision is in
   the plan. Run with `python3 build_master_data.py` from `data/`. It refuses to
   run if `Hidalga_Master_Data_v1.xlsx` already exists, because v1 now carries
   manual tag fixes a rebuild would erase. Use `merge_into_master.py` for new data.
+- **`apply_master_corrections.py`** — applies reviewed one-off corrections
+  (pillar fixes, experiment-period flag) to a master, writes the next version,
+  logs every changed cell to `Corrections (log)`, regenerates the QA sheets,
+  and verifies nothing else changed. Same never-overwrite rules as the merge.
 - **`merge_into_master.py`** — append-only update of the master with a fresh
   export (see "Adding new data" below).
 - **`move_superseded.py`** — archives every raw file `build_master_data.py`
@@ -52,10 +97,16 @@ reasoning behind every source-selection decision is in
 cd data
 # 1. clean the new export(s) to a scratch location (never to a Hidalga_Master_Data file)
 python3 clean_hidalga_data.py <new exports...> -o /tmp/cleaned_YYYYMM.xlsx
-# 2. append into the next master version
-python3 merge_into_master.py --master Hidalga_Master_Data_v1.xlsx \
+# 2. append into the next master version (always pass the current master)
+python3 merge_into_master.py --master Hidalga_Master_Data_v3.xlsx \
     --incoming /tmp/cleaned_YYYYMM.xlsx --pull-date YYYY-MM-DD
+# 3. if new posts need tag fixes, add them to apply_master_corrections.py and run
+python3 apply_master_corrections.py --master Hidalga_Master_Data_v4.xlsx
 ```
+
+Export a fresh workbook from Loomly for each update. If you append new posts
+to last month's workbook instead, its older posts carry stale metrics, which
+the merge will only log, never apply.
 
 What `merge_into_master.py` guarantees:
 
@@ -107,13 +158,32 @@ refuse to write over an existing master workbook.
 | Version | Source | Pull date | Posts added | Notes |
 |---|---|---|---|---|
 | v1 | `build_master_data.py` (full consolidation) | 2026-09-25 | 374 | manual tag fixes applied afterward |
-| v2 | `data/092026-Social-Media-Data.xlsx` (cumulative Jan 1–Sep 29, 313 posts) | 2026-10-25 | 17 (Sep 11–29) | 296 already in v1 kept as-is; +3 follower-count months, +6 Loomly links; 1,665 differing values in `Unapplied Updates (log)`. "Cut Denial Rework Before It Hits the Queue" (Sep 14, all 3 platforms) has no content pillar yet. |
+| v2 | `data/092026-Social-Media-Data.xlsx` (cumulative Jan 1–Sep 29, 313 posts) | 2026-10-25 | 17 (Sep 11–29) | 296 already in v1 kept as-is; +3 follower-count months, +6 Loomly links; 1,665 differing values in `Unapplied Updates (log)` (see note below) |
+| v3 | `apply_master_corrections.py` on v2 | — | 0 | 260 cells corrected, see `Corrections (log)`: 40 blank `CONTENT_PILLAR` filled from `LABELS_RAW`; "Cut Denial Rework Before It Hits the Queue" (3 rows) → Thought Leadership & Industry Insights; `IN_EXPERIMENT_PERIOD` = True for Apr 1–Sep 30 2026 (217 posts); QA sheets regenerated |
+
+**About v2's `Unapplied Updates (log)`.** The 092026 workbook is the August
+Social-Media-Data workbook with September's posts added; it isn't a fresh
+pull of the older posts. For every overlapping Facebook/Instagram post and
+Loomly link, its numbers are identical to the August export, and lower than
+v1's, which come from the Sep 25 manual Loomly pull. So the logged "incoming"
+values are older, not newer. Following the rule of keeping the most recent
+pull, the master's values were kept and none were applied. LinkedIn differences are Loomly vs.
+LinkedIn-native numbers and are never applied (plan §1b). **To refresh
+metrics in future, export a new workbook from Loomly rather than appending
+to the previous month's file.** Otherwise the log only holds stale numbers.
+
+**Experiment period caveat.** `IN_EXPERIMENT_PERIOD` covers every post dated
+Apr 1–Sep 30 2026, so it is the same as a "Q2–Q3 2026" time indicator. A
+model can't tell the experiment's effect apart from a time trend over the same
+months. Treat its coefficient as period effect, not causal experiment effect.
 
 ### Current outputs (in `data/`)
 
-- **`Hidalga_Master_Data_v2.xlsx`** — **current master** (v1 + September
-  2026 posts, 391 social posts). Same sheets as v1 plus `Unapplied Updates (log)`.
-  Use this one for modeling. See "Merge history" above.
+- **`Hidalga_Master_Data_v3.xlsx`** — **current master** (391 social posts,
+  Sep 2025–Sep 2026, 100% ICP and pillar coverage). Same sheets as v1 plus
+  `Unapplied Updates (log)` and `Corrections (log)`. Use this one for
+  exploration and modeling. See "Merge history" above.
+- **`Hidalga_Master_Data_v2.xlsx`** — v1 + September 2026 posts, before corrections.
 - **`Hidalga_Master_Data_v1.xlsx`** — the original consolidated dataset, kept frozen. Sheets:
   Social Posts (unified), LinkedIn Posts (detail), LinkedIn Daily Metrics,
   Visitor Daily Metrics, Visitor Demographics, Follower Counts, Loomly
@@ -170,6 +240,30 @@ Instagram's Loomly rate (engagement ÷ **reach**), and LinkedIn's native rate.
   comparable (no clicks component), so keep a platform term in any pooled model.
 - Null for the one Facebook post with 0 impressions (2025-12-02).
 
+### Notes for exploration and modeling (v3)
+
+Readiness check on `Social Posts (unified)`: 1 null target (0 impressions),
+every `POST_TIME` parses ("1:34 PM CDT" format, CDT/CST), no ICP or pillar
+cell below 3 posts per platform. Things charts and models need to handle:
+
+- **Very small posts make rates jumpy.** 27 posts have < 10 impressions
+  (e.g. 3 impressions → 66.7%). Use impression-weighted means or a minimum-impressions
+  filter, and show uncertainty.
+- **Formats depend on the platform.** Carousel is Instagram-only;
+  Document and Simple Status are LinkedIn-only. Compare formats within a
+  platform, or group thin formats before pooling.
+- **Instagram has no clicks**, so its unified rate is not fully comparable.
+  Plot per platform or keep a platform term. Medians: FB 12.9%, IG 16.9%, LI 7.2%.
+- **Small groups.** Patient-Centered Storytelling and Product Development
+  (9–13 posts per platform), Financial Leader (22–25). Report confidence
+  intervals.
+- **Multi-label tags.** 119 posts have more than one ICP segment and 12 more
+  than one pillar. Use 0/1 columns at the post level, or explode to one row
+  per segment and cluster standard errors by post (proposal §5).
+- **Experiment flag = time period** (see caveat above).
+- **10 LinkedIn posts** (the newest) still use Loomly metrics rather than
+  LinkedIn-native ones until a fresh LinkedIn content export is merged.
+
 ### ICP/pillar tagging backfill
 
 Historical posts (Sep 2025 onward) predated the current Q1 ICP segment/content
@@ -183,9 +277,12 @@ field instead of a real pillar). `Instagram Stories` also had its single
 combined `LABELS` column split into separate `ICP_SEGMENTS` and
 `CONTENT_PILLAR` columns to match `Social Posts (unified)`.
 
-Current state, per `QA Label Coverage`: **100% ICP and 100% content-pillar
-coverage** across Facebook, Instagram, and LinkedIn — every value is one of
-the 4 canonical ICP segments / 5 canonical content pillars, no free text.
+Current state (v3), per the regenerated `QA Label Coverage`: **100% ICP and
+100% content-pillar coverage** across Facebook, Instagram, and LinkedIn. Every
+value is one of the 4 canonical ICP segments / 5 canonical content pillars,
+with no free text. (v1's QA sheet also said 100%, but it was never regenerated
+after the manual fixes. 40 posts actually had their pillar in `LABELS_RAW`
+with `CONTENT_PILLAR` blank; v3 fixes this.)
 
 ### Loomly click attribution (planned — no data changes made)
 
