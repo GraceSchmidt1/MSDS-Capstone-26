@@ -91,5 +91,15 @@ sensitivity:
     no_reach_control: {drop_features: [log2_impressions]}
     drop_most_influential: {drop_top_influential: 1} # largest Cook's D per model in the main OLS
 
+# Stage 1 classification: high vs. low engagement. A label rule is fit on training posts only and
+# applied to held-out posts, separately per platform ("high" always means high for that platform).
+classification:
+  main_label: reach_adjusted
+  labels:
+    reach_adjusted: {type: reach_adjusted}   # rate above what reach alone predicts (median residual of a
+                                             # rate ~ log2(impressions) fit), i.e. beat expectation for its reach
+    above_median: {type: quantile, q: 0.5}   # rate above the platform median
+    top_tercile: {type: quantile, q: 0.6667} # rate in the platform's top third
+
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs
