@@ -50,6 +50,19 @@ Scope decisions:
 Next: exploratory analysis and charts (see "Notes for exploration and
 modeling" below), then Stage 1 models.
 
+### Exploratory analysis (`EDA` branch)
+
+[`notebooks/01_eda_master_v3.ipynb`](notebooks/01_eda_master_v3.ipynb) is a
+documented EDA of v3, run from `notebooks/`. It reads the master read-only
+(file hash checked at the end), drops no rows (unstable posts are flagged,
+not removed), and compares **within each platform** only. Group means are shown
+with 95% bootstrap CIs and an impression-weighted rate. Figures are saved to
+`notebooks/figures/`. Sections: data inventory and quality → target
+distributions → pillar / ICP / format → timing → monthly trends and experiment
+period → cross-posting and tag combinations → supporting sheets (followers,
+LinkedIn daily, visitors, Loomly clicks, Stories, competitors) → data-quality
+list, findings, modeling implications.
+
 ### Scripts (in `data/`)
 
 - **`clean_hidalga_data.py`** — the original monthly cleaner. Point it at
