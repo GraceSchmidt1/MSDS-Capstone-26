@@ -63,5 +63,13 @@ regularization:
   l1_ratios: [0.1, 0.25, 0.5, 0.75, 0.9]                  # elastic net mix (1.0 would be pure lasso)
   max_iter: 50000
 
+# Step 4: how much to trust each effect, and how much each feature matters.
+stability:
+  n_boot: 500                 # bootstrap refits (posts resampled; whole content pieces for pooled)
+  models: [Lasso, Elastic net, Ridge]   # penalty fixed at the value chosen on all posts
+permutation:
+  model: Elastic net          # scored on the shared outer CV splits (nested tuning, as in step 3)
+  n_repeats: 10               # shuffles per feature per split
+
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs

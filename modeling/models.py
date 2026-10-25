@@ -183,3 +183,94 @@ def regularized_coef_table(pipe, fs: FeatureSet, name: str) -> pd.DataFrame:
     t["alpha"] = model.alpha_
     t["l1_ratio"] = getattr(model, "l1_ratio_", 0.0 if name == "Ridge" else 1.0)
     return t
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Stability and importance (step 4)
+# ─────────────────────────────────────────────────────────────────────────────
+def _fixed_penalty_model(name: str, fitted_pipe, config: dict):
+    """Same model type with the penalty frozen at the value the full-data fit chose."""
+    from sklearn.linear_model import ElasticNet, Lasso, Ridge
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+
+    m = fitted_pipe[-1]
+    reg = config["regularization"]
+    if name == "Ridge":
+        model = Ridge(alpha=m.alpha_)
+    elif name == "Lasso":
+        model = Lasso(alpha=m.alpha_, max_iter=reg["max_iter"])
+    else:
+        model = ElasticNet(alpha=m.alpha_, l1_ratio=m.l1_ratio_, max_iter=reg["max_iter"])
+    return make_pipeline(StandardScaler(), model)
+
+
+def bootstrap_stability(fs: FeatureSet, name: str, fitted_pipe, config: dict) -> pd.DataFrame:
+    """
+    Refit `name` on n_boot bootstrap samples (penalty fixed) and summarize per feature:
+      selection_freq    share of refits where the feature is kept (nonzero); always 1 for ridge
+      sign_agreement    share of refits (among kept) whose sign matches the full-data estimate, or the
+                        refits' majority sign if the full-data fit dropped the feature
+      boot_lo/median/hi 2.5% / 50% / 97.5% of the effect in pts (dropped = 0)
+    Resampling is over content pieces, so cross-posted copies move together in the pooled model.
+    A binary feature that happens to be all-0 in a resample cannot be estimated and counts as dropped.
+    """
+    rng = np.random.default_rng(config["seed"])
+    X, y, groups = fs.X.to_numpy(), fs.y.to_numpy(), fs.groups.to_numpy()
+    unique = np.unique(groups)
+    rows_of = {g: np.where(groups == g)[0] for g in unique}
+    full = fitted_pipe[-1].coef_ / fitted_pipe[0].scale_
+    draws = np.zeros((config["stability"]["n_boot"], X.shape[1]))
+    for b in range(len(draws)):
+        idx = np.concatenate([rows_of[g] for g in rng.choice(unique, size=len(unique), replace=True)])
+        pipe = _fixed_penalty_model(name, fitted_pipe, config).fit(X[idx], y[idx])
+        draws[b] = pipe[-1].coef_ / pipe[0].scale_
+    kept = ~np.isclose(draws, 0)
+    # reference sign: the full-data estimate, or (if the full fit dropped the feature) the refits' majority
+    ref_sign = np.where(np.isclose(full, 0), np.sign(draws.sum(axis=0)), np.sign(full))
+    same_sign = (np.sign(draws) == ref_sign) & kept
+    lo, med, hi = np.percentile(draws, [2.5, 50, 97.5], axis=0)
+    return pd.DataFrame({
+        "platform": fs.platform, "model": name, "feature": fs.X.columns, "full_data_coef_pts": full,
+        "l1_ratio": getattr(fitted_pipe[-1], "l1_ratio_", 0.0 if name == "Ridge" else 1.0),
+        "selection_freq": kept.mean(axis=0),
+        "sign_agreement": np.where(kept.sum(axis=0) > 0, same_sign.sum(axis=0) / np.maximum(kept.sum(axis=0), 1),
+                                   np.nan),
+        "boot_lo": lo, "boot_median": med, "boot_hi": hi})
+
+
+def permutation_importance_cv(fs: FeatureSet, splits, name: str, config: dict, group_of) -> pd.DataFrame:
+    """
+    Held-out permutation importance on the shared outer splits. For each split the model is tuned and
+    fit on the training posts (nested, as in step 3), then each feature, and each feature group
+    jointly, is shuffled within the test fold n_repeats times. Importance = rise in test MAE (pts).
+    Returns one row per (split, level, unit) with the mean rise over repeats.
+    """
+    rng = np.random.default_rng(config["seed"])
+    X, y, groups = fs.X.to_numpy(), fs.y.to_numpy(), fs.groups.to_numpy()
+    cols = list(fs.X.columns)
+    units = [("feature", c, [i]) for i, c in enumerate(cols)]
+    for g in dict.fromkeys(group_of(c) for c in cols):
+        units.append(("group", g, [i for i, c in enumerate(cols) if group_of(c) == g]))
+    rows = []
+    for s, (tr, te) in enumerate(splits):
+        inner = group_kfold_splits(groups[tr], config["regularization"]["inner_splits"], 1, config["seed"])
+        pipe = make_regularized(name, inner, config).fit(X[tr], y[tr])
+        base = np.abs(y[te] - pipe.predict(X[te])).mean()
+        for level, unit, idx in units:
+            rises = []
+            for _ in range(config["permutation"]["n_repeats"]):
+                Xp = X[te].copy()
+                Xp[:, idx] = Xp[rng.permutation(len(te))][:, idx]      # shuffle the group's columns together
+                rises.append(np.abs(y[te] - pipe.predict(Xp)).mean() - base)
+            rows.append({"platform": fs.platform, "split": s, "level": level, "unit": unit,
+                         "mae_rise": float(np.mean(rises))})
+    return pd.DataFrame(rows)
+
+
+def summarize_importance(perm: pd.DataFrame) -> pd.DataFrame:
+    """Mean MAE rise across splits, its 2.5-97.5% spread, and the share of splits where it helped (>0)."""
+    g = perm.groupby(["platform", "level", "unit"], sort=False)["mae_rise"]
+    out = pd.DataFrame({"mae_rise_mean": g.mean(), "mae_rise_lo": g.quantile(0.025),
+                        "mae_rise_hi": g.quantile(0.975), "share_splits_helpful": g.apply(lambda s: (s > 0).mean())})
+    return out.reset_index()

@@ -121,6 +121,16 @@ def feature_columns(platform: str, config: dict, sensitivity: bool = False) -> l
     return cols
 
 
+def feature_group(feature: str) -> str:
+    """Plain-language group a feature belongs to (used for group-level importance)."""
+    for prefix, group in [("ICP: ", "ICP segment"), ("Pillar: ", "Content pillar"), ("Format: ", "Format"),
+                          ("Platform: ", "Platform")]:
+        if feature.startswith(prefix):
+            return group
+    return {"log2_impressions": "Reach (impressions)", "WEEKEND": "Timing", "AFTER_11": "Timing",
+            "BOOSTED": "Paid boost", "IN_EXPERIMENT_PERIOD": "Experiment period"}[feature]
+
+
 def _encode(df: pd.DataFrame, platform: str, config: dict, sensitivity: bool = False) -> pd.DataFrame:
     """Turn prepared rows into the feature matrix. Shared by real posts and hypothetical specs."""
     X = pd.DataFrame(index=df.index)

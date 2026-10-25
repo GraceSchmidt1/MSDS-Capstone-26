@@ -181,3 +181,78 @@ def cv_plot(cv_scores: pd.DataFrame, platforms: list[str], path):
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)
+
+
+def stability_plot(stab: pd.DataFrame, platforms: list[str], path):
+    """Share of 500 bootstrap refits that keep each feature (lasso, elastic net), one panel per platform."""
+    s = stab[stab["platform"].isin(platforms) & stab["model"].isin(["Lasso", "Elastic net"])]
+    features = list(dict.fromkeys(s["feature"]))
+    fig, axes = plt.subplots(1, len(platforms), figsize=(4.4 * len(platforms), 0.36 * len(features) + 1.8),
+                             sharey=True, squeeze=False)
+    for ax, p in zip(axes[0], platforms):
+        y = np.arange(len(features))
+        for x0 in (0.5, 0.8):
+            ax.axvline(x0, color=INK_MUTED, lw=1, ls=":" if x0 == 0.5 else "--")
+        for name, off in [("Lasso", -0.13), ("Elastic net", 0.13)]:
+            d = s[(s["platform"] == p) & (s["model"] == name)].set_index("feature").reindex(features)
+            marker, fill = MODEL_MARKER[name]
+            ax.hlines(y + off, 0, d["selection_freq"], color=PLATFORM_COLOR[p], lw=2, alpha=0.45)
+            ax.scatter(d["selection_freq"], y + off, s=30, marker=marker, zorder=3, linewidths=1.2,
+                       edgecolors=INK_2, facecolors=INK_2 if fill == "full" else "none", label=name)
+            for yi, missing in zip(y, d["selection_freq"].isna()):
+                if missing and name == "Lasso":
+                    ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
+                                fontsize=8, color=INK_MUTED, style="italic")
+        en_mix = s.loc[(s["platform"] == p) & (s["model"] == "Elastic net"), "l1_ratio"]
+        if len(en_mix) and en_mix.iloc[0] < 0.5:
+            ax.annotate(f"Elastic net chose a ridge-like mix (l1 = {en_mix.iloc[0]:.1f}),\nso it keeps nearly "
+                        "everything: read Lasso here", (0.98, 0.005), xycoords="axes fraction", ha="right",
+                        va="bottom", fontsize=8, color=INK_2, style="italic",
+                        bbox=dict(boxstyle="round,pad=0.3", fc=SURFACE, ec=GRID))
+        ax.set_xlim(0, 1.02)
+        ax.xaxis.set_major_formatter(plt.matplotlib.ticker.PercentFormatter(1.0))
+        ax.set_title("Pooled (check)" if p == "pooled" else p)
+        ax.set_xlabel("Share of bootstrap refits keeping the feature")
+        ax.grid(axis="y", visible=False)
+    axes[0][0].set_yticks(np.arange(len(features)))
+    axes[0][0].set_yticklabels([textwrap.shorten(label(f), 44, placeholder="…") for f in features], fontsize=8.5)
+    axes[0][0].invert_yaxis()
+    handles, labels = axes[0][0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper right", ncol=2, fontsize=8.5, bbox_to_anchor=(0.995, 1.0))
+    fig.suptitle("Stability: how often each feature survives 500 bootstrap refits", x=0.01, ha="left",
+                 fontsize=12, fontweight="semibold")
+    fig.text(0.01, -0.01, "Dashed line = 80% (stable); dotted = 50%. A feature kept in most refits is a robust "
+             "signal; one kept rarely is noise at this sample size.", fontsize=8, color=INK_2)
+    fig.tight_layout(w_pad=2.5)
+    fig.savefig(path)
+    plt.close(fig)
+
+
+def importance_plot(imp: pd.DataFrame, platforms: list[str], level: str, title: str, path):
+    """Permutation importance: rise in held-out MAE (pts) when a feature / group is shuffled; ±95% over splits."""
+    d_all = imp[(imp["level"] == level) & imp["platform"].isin(platforms)]
+    units = list(dict.fromkeys(d_all.sort_values("mae_rise_mean", ascending=False)["unit"]))
+    fig, axes = plt.subplots(1, len(platforms), figsize=(4.4 * len(platforms), 0.38 * len(units) + 1.6),
+                             sharey=True, squeeze=False)
+    for ax, p in zip(axes[0], platforms):
+        d = d_all[d_all["platform"] == p].set_index("unit").reindex(units)
+        y = np.arange(len(units))
+        ax.axvline(0, color=INK_MUTED, lw=1)
+        ax.hlines(y, d["mae_rise_lo"], d["mae_rise_hi"], color=PLATFORM_COLOR[p], lw=2, alpha=0.5)
+        ax.scatter(d["mae_rise_mean"], y, s=40, color=PLATFORM_COLOR[p], zorder=3)
+        for yi, missing in zip(y, d["mae_rise_mean"].isna()):
+            if missing:
+                ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
+                            fontsize=8, color=INK_MUTED, style="italic")
+        ax.set_title("Pooled (check)" if p == "pooled" else p)
+        ax.set_xlabel("Rise in held-out MAE when shuffled (pts)")
+        ax.grid(axis="y", visible=False)
+    axes[0][0].set_yticks(np.arange(len(units)))
+    axes[0][0].set_yticklabels([textwrap.shorten(label(u), 44, placeholder="…") for u in units], fontsize=8.5)
+    axes[0][0].invert_yaxis()
+    fig.suptitle(title, x=0.01, ha="left", fontsize=12, fontweight="semibold")
+    fig.text(0.01, -0.01, "Dot = mean over 50 held-out folds; line = 2.5–97.5% across folds. Near 0 = the model "
+             "doesn't rely on it. Each panel has its own x-scale.", fontsize=8, color=INK_2)
+    fig.tight_layout(w_pad=2.5)
+    fig.savefig(path)
+    plt.close(fig)

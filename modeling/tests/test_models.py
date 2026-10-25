@@ -2,9 +2,12 @@
 import numpy as np
 import pytest
 
-from modeling.features import POOLED, build_features, load_config, load_master, prepare_posts
-from modeling.models import (coef_table, cv_score, cv_splits, fit_ols, influence_table, ols_fit_predict,
-                             reference_fit_predict, vif_table)
+import modeling.models as m
+from modeling.features import POOLED, build_features, feature_group, load_config, load_master, prepare_posts
+from modeling.models import (REGULARIZED, bootstrap_stability, coef_table, cv_score, cv_splits, fit_ols,
+                             fit_regularized, influence_table, ols_fit_predict, permutation_importance_cv,
+                             reference_fit_predict, regularized_coef_table, regularized_fit_predict,
+                             summarize_importance, vif_table)
 
 CONFIG = load_config()
 CV = CONFIG["cv"]
@@ -72,9 +75,6 @@ def test_tables_have_one_row_per_feature_and_post(prepared):
 
 
 # ── regularized models (step 3) ──────────────────────────────────────────────
-from modeling.models import (REGULARIZED, fit_regularized, regularized_coef_table,  # noqa: E402
-                             regularized_fit_predict)
-
 
 @pytest.mark.parametrize("name", REGULARIZED)
 def test_regularized_deterministic_and_consistent(prepared, name):
@@ -108,3 +108,49 @@ def test_nested_cv_tunes_on_training_posts_only(prepared, monkeypatch):
         groups_tr = fs.groups.to_numpy()[tr]
         for i_tr, i_te in inner:                       # content pieces stay together inside the tuner too
             assert not set(groups_tr[i_tr]) & set(groups_tr[i_te])
+
+
+# ── stability and importance (step 4) ───────────────────────────────────────
+SMALL = {**CONFIG, "stability": {**CONFIG["stability"], "n_boot": 30},
+         "permutation": {**CONFIG["permutation"], "n_repeats": 3}}
+
+
+@pytest.mark.parametrize("name", ["Lasso", "Ridge"])
+def test_bootstrap_stability_deterministic_and_anchored(prepared, name):
+    fs = build_features(prepared, "Instagram", CONFIG)
+    splits = cv_splits(fs, 5, 1, CONFIG["seed"])
+    pipe = fit_regularized(fs, name, CONFIG, splits)
+    a = bootstrap_stability(fs, name, pipe, SMALL)
+    b = bootstrap_stability(fs, name, pipe, SMALL)
+    assert a.drop(columns="sign_agreement").equals(b.drop(columns="sign_agreement"))
+    # the full-data column is exactly the step 3 coefficient
+    np.testing.assert_allclose(a["full_data_coef_pts"], regularized_coef_table(pipe, fs, name)["coef_pts"])
+    assert a["selection_freq"].between(0, 1).all()
+    assert (a["boot_lo"] <= a["boot_median"]).all() and (a["boot_median"] <= a["boot_hi"]).all()
+
+
+def test_permutation_importance_units_and_determinism(prepared):
+    fs = build_features(prepared, "LinkedIn", CONFIG)
+    splits = cv_splits(fs, 5, 1, CONFIG["seed"])[:2]
+    a = permutation_importance_cv(fs, splits, "Lasso", SMALL, feature_group)
+    b = permutation_importance_cv(fs, splits, "Lasso", SMALL, feature_group)
+    assert a.equals(b)
+    groups = {feature_group(c) for c in fs.X.columns}
+    assert set(a.loc[a["level"] == "feature", "unit"]) == set(fs.X.columns)
+    assert set(a.loc[a["level"] == "group", "unit"]) == groups
+    assert len(a) == len(splits) * (fs.X.shape[1] + len(groups))
+    s = summarize_importance(a)
+    assert s["share_splits_helpful"].between(0, 1).all()
+
+
+def test_permutation_of_unused_feature_changes_nothing(prepared):
+    """A feature the model gives zero weight must have exactly zero importance."""
+    fs = build_features(prepared, "Facebook", CONFIG)       # lasso drops every Facebook feature
+    splits = cv_splits(fs, 5, 1, CONFIG["seed"])[:2]
+    perm = permutation_importance_cv(fs, splits, "Lasso", SMALL, feature_group)
+    pipes = [m.make_regularized("Lasso", m.group_kfold_splits(fs.groups.to_numpy()[tr], 5, 1, CONFIG["seed"]), CONFIG)
+             .fit(fs.X.to_numpy()[tr], fs.y.to_numpy()[tr]) for tr, _ in splits]
+    for s, pipe in enumerate(pipes):
+        zero = fs.X.columns[np.isclose(pipe[-1].coef_, 0)]
+        rows = perm[(perm["split"] == s) & (perm["level"] == "feature") & perm["unit"].isin(zero)]
+        assert len(rows) and np.allclose(rows["mae_rise"], 0)

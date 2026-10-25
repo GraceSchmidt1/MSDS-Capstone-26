@@ -1,0 +1,193 @@
+platform,model,feature,coef_per_sd,coef_pts,nonzero,alpha,l1_ratio
+Facebook,Ridge,log2_impressions,-0.5090693282046614,-0.3634785894397457,True,199.52623149688787,0.0
+Facebook,Ridge,ICP: Oncology Clinic Leader,-0.33962549150462634,-0.7741225277578718,True,199.52623149688787,0.0
+Facebook,Ridge,ICP: Oncology Financial Leader,0.4487122607413351,1.1708493538830653,True,199.52623149688787,0.0
+Facebook,Ridge,ICP: Oncology Operations Leader,0.3368873659880005,0.7146460229585683,True,199.52623149688787,0.0
+Facebook,Ridge,ICP: Oncology Technical Leader,-0.0797458941283798,-0.19018340775739617,True,199.52623149688787,0.0
+Facebook,Ridge,Pillar: Events & Partnerships,-0.2487839836089005,-0.6380630727986357,True,199.52623149688787,0.0
+Facebook,Ridge,Pillar: Patient-Centered Storytelling,-0.31663290395058047,-1.2158709298120942,True,199.52623149688787,0.0
+Facebook,Ridge,Pillar: Product Development & Innovations,0.2309341170256026,0.8867874314069362,True,199.52623149688787,0.0
+Facebook,Ridge,Pillar: Team Spotlights & Company Culture,-0.4652395522140344,-1.0225177690435274,True,199.52623149688787,0.0
+Facebook,Ridge,Format: Multi-Image,0.44010447881746323,1.1483885994403837,True,199.52623149688787,0.0
+Facebook,Ridge,Format: Video,-0.4530391106780621,-1.3844692055210035,True,199.52623149688787,0.0
+Facebook,Ridge,Format: Link,-0.725677321921134,-2.9427593547748074,True,199.52623149688787,0.0
+Facebook,Ridge,WEEKEND,-0.29832467908237564,-1.9339402096851503,True,199.52623149688787,0.0
+Facebook,Ridge,AFTER_11,0.2048922048059455,0.4185204151002658,True,199.52623149688787,0.0
+Facebook,Lasso,log2_impressions,-0.0,-0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,ICP: Oncology Clinic Leader,-0.0,-0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,ICP: Oncology Financial Leader,0.0,0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,ICP: Oncology Operations Leader,0.0,0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,ICP: Oncology Technical Leader,-0.0,-0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,Pillar: Events & Partnerships,-0.0,-0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,Pillar: Patient-Centered Storytelling,-0.0,-0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,Pillar: Product Development & Innovations,0.0,0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,Pillar: Team Spotlights & Company Culture,-0.0,-0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,Format: Multi-Image,0.0,0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,Format: Video,-0.0,-0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,Format: Link,-4.621416167545368e-16,-1.87407202189373e-15,False,1.5147597553980663,1.0
+Facebook,Lasso,WEEKEND,-0.0,-0.0,False,1.5147597553980663,1.0
+Facebook,Lasso,AFTER_11,0.0,0.0,False,1.5147597553980663,1.0
+Facebook,Elastic net,log2_impressions,-0.4721465131956176,-0.33711547547064713,True,1.6242272349337215,0.1
+Facebook,Elastic net,ICP: Oncology Clinic Leader,-0.3068337688552733,-0.699378988589504,True,1.6242272349337215,0.1
+Facebook,Elastic net,ICP: Oncology Financial Leader,0.42105663014290695,1.0986860099086861,True,1.6242272349337215,0.1
+Facebook,Elastic net,ICP: Oncology Operations Leader,0.31103467318875666,0.6598041797877344,True,1.6242272349337215,0.1
+Facebook,Elastic net,ICP: Oncology Technical Leader,-0.021300641164003833,-0.05079921127307352,True,1.6242272349337215,0.1
+Facebook,Elastic net,Pillar: Events & Partnerships,-0.19397040984471176,-0.4974812041441228,True,1.6242272349337215,0.1
+Facebook,Elastic net,Pillar: Patient-Centered Storytelling,-0.28236511278122745,-1.084282549097906,True,1.6242272349337215,0.1
+Facebook,Elastic net,Pillar: Product Development & Innovations,0.18409129753452924,0.7069109189566671,True,1.6242272349337215,0.1
+Facebook,Elastic net,Pillar: Team Spotlights & Company Culture,-0.4389090172375147,-0.9646477110190383,True,1.6242272349337215,0.1
+Facebook,Elastic net,Format: Multi-Image,0.41507731883194415,1.083083867071002,True,1.6242272349337215,0.1
+Facebook,Elastic net,Format: Video,-0.42383480499601933,-1.2952220281086713,True,1.6242272349337215,0.1
+Facebook,Elastic net,Format: Link,-0.6934156809511367,-2.811932273788579,True,1.6242272349337215,0.1
+Facebook,Elastic net,WEEKEND,-0.25437842704631836,-1.6490511950085565,True,1.6242272349337215,0.1
+Facebook,Elastic net,AFTER_11,0.1516370413445716,0.30973944347083676,True,1.6242272349337215,0.1
+Instagram,Ridge,log2_impressions,-5.297130929530974,-4.819705760428603,True,19.952623149688808,0.0
+Instagram,Ridge,ICP: Oncology Clinic Leader,0.7707780327616287,1.753870833783896,True,19.952623149688808,0.0
+Instagram,Ridge,ICP: Oncology Financial Leader,-0.7836832361760221,-2.0536579101174457,True,19.952623149688808,0.0
+Instagram,Ridge,ICP: Oncology Operations Leader,-0.5470955971251295,-1.162820602642722,True,19.952623149688808,0.0
+Instagram,Ridge,ICP: Oncology Technical Leader,-0.14131676652210384,-0.33161838493553647,True,19.952623149688808,0.0
+Instagram,Ridge,Pillar: Events & Partnerships,0.477872732952781,1.2522752468798404,True,19.952623149688808,0.0
+Instagram,Ridge,Pillar: Patient-Centered Storytelling,-0.14660170563526975,-0.5501634723791782,True,19.952623149688808,0.0
+Instagram,Ridge,Pillar: Product Development & Innovations,0.3105209210423102,1.1157435751429654,True,19.952623149688808,0.0
+Instagram,Ridge,Pillar: Team Spotlights & Company Culture,-0.41662243655535663,-0.9233017750503902,True,19.952623149688808,0.0
+Instagram,Ridge,Format: Carousel,1.115212921493811,2.7128266521943183,True,19.952623149688808,0.0
+Instagram,Ridge,Format: Video,-0.3555575429807912,-1.1469915971487545,True,19.952623149688808,0.0
+Instagram,Ridge,WEEKEND,-0.14709247889931729,-0.6516767751521584,True,19.952623149688808,0.0
+Instagram,Ridge,AFTER_11,-0.18280868208830126,-0.36566064018600736,True,19.952623149688808,0.0
+Instagram,Lasso,log2_impressions,-5.983416485947039,-5.4441370787328935,True,0.4206309661102475,1.0
+Instagram,Lasso,ICP: Oncology Clinic Leader,0.4472873455239744,1.0177822878843366,True,0.4206309661102475,1.0
+Instagram,Lasso,ICP: Oncology Financial Leader,-0.41502433113629106,-1.0875797276054124,True,0.4206309661102475,1.0
+Instagram,Lasso,ICP: Oncology Operations Leader,-0.3025091830461203,-0.6429660782925165,True,0.4206309661102475,1.0
+Instagram,Lasso,ICP: Oncology Technical Leader,-0.0,-0.0,False,0.4206309661102475,1.0
+Instagram,Lasso,Pillar: Events & Partnerships,0.20142178876379283,0.5278299071231615,True,0.4206309661102475,1.0
+Instagram,Lasso,Pillar: Patient-Centered Storytelling,-0.0,-0.0,False,0.4206309661102475,1.0
+Instagram,Lasso,Pillar: Product Development & Innovations,0.0,0.0,False,0.4206309661102475,1.0
+Instagram,Lasso,Pillar: Team Spotlights & Company Culture,-0.0,-0.0,False,0.4206309661102475,1.0
+Instagram,Lasso,Format: Carousel,0.9811036883046208,2.3865973778655625,True,0.4206309661102475,1.0
+Instagram,Lasso,Format: Video,0.0,0.0,False,0.4206309661102475,1.0
+Instagram,Lasso,WEEKEND,-0.0,-0.0,False,0.4206309661102475,1.0
+Instagram,Lasso,AFTER_11,-0.0,-0.0,False,0.4206309661102475,1.0
+Instagram,Elastic net,log2_impressions,-5.802503636320117,-5.279529725227355,True,0.40649262582726925,0.9
+Instagram,Elastic net,ICP: Oncology Clinic Leader,0.46059392711088665,1.048060817306138,True,0.40649262582726925,0.9
+Instagram,Elastic net,ICP: Oncology Financial Leader,-0.448778557862741,-1.1760333674394305,True,0.40649262582726925,0.9
+Instagram,Elastic net,ICP: Oncology Operations Leader,-0.33718806797856127,-0.7166740775672678,True,0.40649262582726925,0.9
+Instagram,Elastic net,ICP: Oncology Technical Leader,-0.0,-0.0,False,0.40649262582726925,0.9
+Instagram,Elastic net,Pillar: Events & Partnerships,0.2446579304798338,0.6411310986496865,True,0.40649262582726925,0.9
+Instagram,Elastic net,Pillar: Patient-Centered Storytelling,-0.0,-0.0,False,0.40649262582726925,0.9
+Instagram,Elastic net,Pillar: Product Development & Innovations,0.0,0.0,False,0.40649262582726925,0.9
+Instagram,Elastic net,Pillar: Team Spotlights & Company Culture,-0.0,-0.0,False,0.40649262582726925,0.9
+Instagram,Elastic net,Format: Carousel,0.9932159518755241,2.4160612325252946,True,0.40649262582726925,0.9
+Instagram,Elastic net,Format: Video,-0.0,-0.0,False,0.40649262582726925,0.9
+Instagram,Elastic net,WEEKEND,-0.0,-0.0,False,0.40649262582726925,0.9
+Instagram,Elastic net,AFTER_11,-0.0,-0.0,False,0.40649262582726925,0.9
+LinkedIn,Ridge,log2_impressions,-0.9322329082240098,-0.6423034462863754,True,199.52623149688787,0.0
+LinkedIn,Ridge,ICP: Oncology Clinic Leader,-0.025560982168948983,-0.05807459198444354,True,199.52623149688787,0.0
+LinkedIn,Ridge,ICP: Oncology Financial Leader,0.25479437526129467,0.659677069133751,True,199.52623149688787,0.0
+LinkedIn,Ridge,ICP: Oncology Operations Leader,-0.024449278919157002,-0.05205787684277958,True,199.52623149688787,0.0
+LinkedIn,Ridge,ICP: Oncology Technical Leader,-0.28877430410494453,-0.6825107157741308,True,199.52623149688787,0.0
+LinkedIn,Ridge,Pillar: Events & Partnerships,-0.16285059052531345,-0.4216294027459196,True,199.52623149688787,0.0
+LinkedIn,Ridge,Pillar: Patient-Centered Storytelling,-0.18032773762984272,-0.6153193640825934,True,199.52623149688787,0.0
+LinkedIn,Ridge,Pillar: Product Development & Innovations,-0.2633911615660787,-0.9317000851524003,True,199.52623149688787,0.0
+LinkedIn,Ridge,Pillar: Team Spotlights & Company Culture,0.008219853964292465,0.018215425798390507,True,199.52623149688787,0.0
+LinkedIn,Ridge,Format: Link,-0.1950470423951689,-0.5773646674442932,True,199.52623149688787,0.0
+LinkedIn,Ridge,Format: Video,-0.1639564255630775,-0.559456713874018,True,199.52623149688787,0.0
+LinkedIn,Ridge,Format: Document,1.5270232864199442,5.21055168710626,True,199.52623149688787,0.0
+LinkedIn,Ridge,Format: Multi-Image,0.45355034087566076,1.7435893368212483,True,199.52623149688787,0.0
+LinkedIn,Ridge,Format: Simple Status,-0.3992175533405927,-1.950827741631157,True,199.52623149688787,0.0
+LinkedIn,Ridge,WEEKEND,-0.12459130236262268,-0.7400353687031755,True,199.52623149688787,0.0
+LinkedIn,Ridge,AFTER_11,0.07195748444711422,0.14503591256344872,True,199.52623149688787,0.0
+LinkedIn,Ridge,BOOSTED,0.07000904534194834,0.3733384799811713,True,199.52623149688787,0.0
+LinkedIn,Lasso,log2_impressions,-0.4707109589489801,-0.3243173121979558,True,1.3043779217733718,1.0
+LinkedIn,Lasso,ICP: Oncology Clinic Leader,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,ICP: Oncology Financial Leader,0.0,0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,ICP: Oncology Operations Leader,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,ICP: Oncology Technical Leader,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,Pillar: Events & Partnerships,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,Pillar: Patient-Centered Storytelling,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,Pillar: Product Development & Innovations,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,Pillar: Team Spotlights & Company Culture,0.0,0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,Format: Link,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,Format: Video,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,Format: Document,2.7886488546595185,9.51550583649522,True,1.3043779217733718,1.0
+LinkedIn,Lasso,Format: Multi-Image,0.0,0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,Format: Simple Status,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,WEEKEND,-0.0,-0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,AFTER_11,0.0,0.0,False,1.3043779217733718,1.0
+LinkedIn,Lasso,BOOSTED,0.0,0.0,False,1.3043779217733718,1.0
+LinkedIn,Elastic net,log2_impressions,-0.6953079767863841,-0.4790634462487637,True,1.1755790526130672,0.9
+LinkedIn,Elastic net,ICP: Oncology Clinic Leader,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,ICP: Oncology Financial Leader,0.0,0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,ICP: Oncology Operations Leader,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,ICP: Oncology Technical Leader,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,Pillar: Events & Partnerships,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,Pillar: Patient-Centered Storytelling,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,Pillar: Product Development & Innovations,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,Pillar: Team Spotlights & Company Culture,0.0,0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,Format: Link,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,Format: Video,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,Format: Document,2.6551792924437074,9.060077252815015,True,1.1755790526130672,0.9
+LinkedIn,Elastic net,Format: Multi-Image,0.19094564235911238,0.734054758479619,True,1.1755790526130672,0.9
+LinkedIn,Elastic net,Format: Simple Status,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,WEEKEND,-0.0,-0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,AFTER_11,0.0,0.0,False,1.1755790526130672,0.9
+LinkedIn,Elastic net,BOOSTED,0.0,0.0,False,1.1755790526130672,0.9
+pooled,Ridge,log2_impressions,-2.754487374538622,-1.3021625656697122,True,79.43282347242821,0.0
+pooled,Ridge,ICP: Oncology Clinic Leader,0.18253000021462495,0.4153388265620224,True,79.43282347242821,0.0
+pooled,Ridge,ICP: Oncology Financial Leader,0.22189323295154306,0.5782087448532748,True,79.43282347242821,0.0
+pooled,Ridge,ICP: Oncology Operations Leader,0.06588293887649656,0.14003044274311607,True,79.43282347242821,0.0
+pooled,Ridge,ICP: Oncology Technical Leader,-0.15216732133263772,-0.35977394829534265,True,79.43282347242821,0.0
+pooled,Ridge,Pillar: Events & Partnerships,-0.1911772414388742,-0.495423133518849,True,79.43282347242821,0.0
+pooled,Ridge,Pillar: Patient-Centered Storytelling,-0.16627990304025542,-0.6058817444144216,True,79.43282347242821,0.0
+pooled,Ridge,Pillar: Product Development & Innovations,-0.012046552532455177,-0.04389457853350393,True,79.43282347242821,0.0
+pooled,Ridge,Pillar: Team Spotlights & Company Culture,-0.5329684148635998,-1.177971193141492,True,79.43282347242821,0.0
+pooled,Ridge,Format: Multi-Image,0.6507887209109865,2.3713088488830825,True,79.43282347242821,0.0
+pooled,Ridge,Format: Video,-1.1230201554913657,-3.62274604267606,True,79.43282347242821,0.0
+pooled,Ridge,Format: Link,-0.9107281609011677,-3.651035089905965,True,79.43282347242821,0.0
+pooled,Ridge,Format: Carousel,0.6955528038391035,2.694395917134133,True,79.43282347242821,0.0
+pooled,Ridge,Format: Document,1.5594691761123798,8.687584681046305,True,79.43282347242821,0.0
+pooled,Ridge,Format: Simple Status,-0.5407401603746523,-4.39351380304405,True,79.43282347242821,0.0
+pooled,Ridge,WEEKEND,-0.2012833654017292,-1.0819683374510938,True,79.43282347242821,0.0
+pooled,Ridge,AFTER_11,0.08961813668885193,0.18018650547565748,True,79.43282347242821,0.0
+pooled,Ridge,BOOSTED,0.18097925314442778,1.6087110012147512,True,79.43282347242821,0.0
+pooled,Ridge,Platform: Instagram,1.646769501963012,3.4933256456677175,True,79.43282347242821,0.0
+pooled,Ridge,Platform: LinkedIn,-0.10240311296501738,-0.2145147807754769,True,79.43282347242821,0.0
+pooled,Lasso,log2_impressions,-3.1756857204798026,-1.5012808204406116,True,0.2986351132868658,1.0
+pooled,Lasso,ICP: Oncology Clinic Leader,0.0,0.0,False,0.2986351132868658,1.0
+pooled,Lasso,ICP: Oncology Financial Leader,0.030421869675811453,0.0792732200408391,True,0.2986351132868658,1.0
+pooled,Lasso,ICP: Oncology Operations Leader,0.0,0.0,False,0.2986351132868658,1.0
+pooled,Lasso,ICP: Oncology Technical Leader,-0.0,-0.0,False,0.2986351132868658,1.0
+pooled,Lasso,Pillar: Events & Partnerships,-0.0,-0.0,False,0.2986351132868658,1.0
+pooled,Lasso,Pillar: Patient-Centered Storytelling,-0.0,-0.0,False,0.2986351132868658,1.0
+pooled,Lasso,Pillar: Product Development & Innovations,0.0,0.0,False,0.2986351132868658,1.0
+pooled,Lasso,Pillar: Team Spotlights & Company Culture,-0.1794072765775124,-0.39652744469363044,True,0.2986351132868658,1.0
+pooled,Lasso,Format: Multi-Image,0.582214883268536,2.1214431969772067,True,0.2986351132868658,1.0
+pooled,Lasso,Format: Video,-0.9931252486946779,-3.203718603800236,True,0.2986351132868658,1.0
+pooled,Lasso,Format: Link,-0.6842592526353825,-2.743139664740995,True,0.2986351132868658,1.0
+pooled,Lasso,Format: Carousel,0.5635190516264208,2.1829305029740818,True,0.2986351132868658,1.0
+pooled,Lasso,Format: Document,1.6823252030201374,9.371998424958056,True,0.2986351132868658,1.0
+pooled,Lasso,Format: Simple Status,-0.3620288031873531,-2.941484025897244,True,0.2986351132868658,1.0
+pooled,Lasso,WEEKEND,-0.0,-0.0,False,0.2986351132868658,1.0
+pooled,Lasso,AFTER_11,0.0,0.0,False,0.2986351132868658,1.0
+pooled,Lasso,BOOSTED,0.0011630367921754124,0.010338146775846095,True,0.2986351132868658,1.0
+pooled,Lasso,Platform: Instagram,1.7048598746229995,3.61655393495631,True,0.2986351132868658,1.0
+pooled,Lasso,Platform: LinkedIn,0.0,0.0,False,0.2986351132868658,1.0
+pooled,Elastic net,log2_impressions,-3.098156450563257,-1.4646294587526898,True,0.3094534512757562,0.9
+pooled,Elastic net,ICP: Oncology Clinic Leader,0.0,0.0,False,0.3094534512757562,0.9
+pooled,Elastic net,ICP: Oncology Financial Leader,0.048614127249298485,0.12667855222557742,True,0.3094534512757562,0.9
+pooled,Elastic net,ICP: Oncology Operations Leader,0.0,0.0,False,0.3094534512757562,0.9
+pooled,Elastic net,ICP: Oncology Technical Leader,-0.0,-0.0,False,0.3094534512757562,0.9
+pooled,Elastic net,Pillar: Events & Partnerships,-0.0,-0.0,False,0.3094534512757562,0.9
+pooled,Elastic net,Pillar: Patient-Centered Storytelling,-0.0,-0.0,False,0.3094534512757562,0.9
+pooled,Elastic net,Pillar: Product Development & Innovations,0.0,0.0,False,0.3094534512757562,0.9
+pooled,Elastic net,Pillar: Team Spotlights & Company Culture,-0.20967473878434476,-0.463424839688927,True,0.3094534512757562,0.9
+pooled,Elastic net,Format: Multi-Image,0.5714812007073824,2.0823323832514613,True,0.3094534512757562,0.9
+pooled,Elastic net,Format: Video,-0.995091193017197,-3.2100605354028895,True,0.3094534512757562,0.9
+pooled,Elastic net,Format: Link,-0.6998678221312785,-2.8057131497602383,True,0.3094534512757562,0.9
+pooled,Elastic net,Format: Carousel,0.5781308538392763,2.2395329348915247,True,0.3094534512757562,0.9
+pooled,Elastic net,Format: Document,1.6398936684938812,9.135618280361324,True,0.3094534512757562,0.9
+pooled,Elastic net,Format: Simple Status,-0.37960641767579506,-3.084302143615835,True,0.3094534512757562,0.9
+pooled,Elastic net,WEEKEND,-0.0,-0.0,False,0.3094534512757562,0.9
+pooled,Elastic net,AFTER_11,0.0,0.0,False,0.3094534512757562,0.9
+pooled,Elastic net,BOOSTED,0.004298429340414074,0.03820841586935952,True,0.3094534512757562,0.9
+pooled,Elastic net,Platform: Instagram,1.6784637691620514,3.560559339451255,True,0.3094534512757562,0.9
+pooled,Elastic net,Platform: LinkedIn,0.0,0.0,False,0.3094534512757562,0.9

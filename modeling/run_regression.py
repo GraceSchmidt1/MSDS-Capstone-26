@@ -9,6 +9,8 @@ Writes outputs/runs/<YYYY-MM-DD>_<tag>/ containing
                              snapshot, package versions, seed: everything needed to reproduce the run
     fit_stats.csv            per model: n, features, R², adjusted R², AIC, residual SD
     coefficients_ols.csv     effect sizes: coefficient (pts), 95% CI, p-value, posts with feature
+    stability.csv            bootstrap: share of refits keeping each feature, sign agreement, 95% interval
+    importance.csv           permutation importance (feature + group): rise in held-out MAE when shuffled
     coefficients_regularized.csv  ridge / lasso / elastic net: coefficient per SD (importance) and in pts,
                              whether kept (nonzero), chosen penalty
     cv_scores.csv            every CV split for every model; cv_summary.csv: mean and SD per model
@@ -38,7 +40,9 @@ from modeling.features import (DEFAULT_CONFIG, POOLED, REPO_ROOT, build_features
                                load_master, prepare_posts)
 from modeling.models import (REGULARIZED, coef_table, cv_score, cv_splits, fit_ols, fit_regularized, fit_stats,
                              influence_table, ols_fit_predict, reference_fit_predict, regularized_coef_table,
-                             regularized_fit_predict, vif_table)
+                             regularized_fit_predict, vif_table, bootstrap_stability,
+                             permutation_importance_cv, summarize_importance)
+from modeling.features import feature_group
 
 
 def git_info() -> dict:
@@ -74,6 +78,7 @@ def main(argv=None):
     cv = config["cv"]
 
     coefs, stats_rows, cv_rows, vifs, infls, excluded, reg_coefs = [], [], [], [], [], [], []
+    stab_rows, perm_rows = [], []
     for p in model_sets:
         fs = build_features(prepared, p, config)
         res = fit_ols(fs)
@@ -87,7 +92,12 @@ def main(argv=None):
             cv_rows.append(cv_score(fs, splits, fp).assign(platform=p, model=name))
         for name in REGULARIZED:
             cv_rows.append(cv_score(fs, splits, regularized_fit_predict(name, config)).assign(platform=p, model=name))
-            reg_coefs.append(regularized_coef_table(fit_regularized(fs, name, config, splits), fs, name))
+            pipe = fit_regularized(fs, name, config, splits)
+            reg_coefs.append(regularized_coef_table(pipe, fs, name))
+            if name in config["stability"]["models"]:
+                stab_rows.append(bootstrap_stability(fs, name, pipe, config))
+        perm_rows.append(permutation_importance_cv(fs, splits, config["permutation"]["model"], config,
+                                                   feature_group))
         print(f"  {p}: done", flush=True)
 
     coefs = pd.concat(coefs, ignore_index=True)
@@ -118,6 +128,22 @@ def main(argv=None):
     plots.coef_compare_plot(coefs, reg_coefs, [POOLED], "OLS vs. regularized estimates, pooled check",
                             out / "figures" / "coef_compare_pooled.png")
     plots.cv_plot(cv_scores, model_sets, out / "figures" / "cv_performance.png")
+
+    stability = pd.concat(stab_rows, ignore_index=True)
+    perm = pd.concat(perm_rows, ignore_index=True)
+    importance = summarize_importance(perm)
+    stability.to_csv(out / "stability.csv", index=False)
+    perm.to_csv(out / "permutation_scores.csv", index=False)
+    importance.to_csv(out / "importance.csv", index=False)
+    plots.stability_plot(stability, config["platforms"], out / "figures" / "stability_by_platform.png")
+    plots.stability_plot(stability, [POOLED], out / "figures" / "stability_pooled.png")
+    perm_model = config["permutation"]["model"]
+    plots.importance_plot(importance, model_sets, "group",
+                          f"Permutation importance by feature group ({perm_model}, held-out folds)",
+                          out / "figures" / "importance_groups.png")
+    plots.importance_plot(importance, config["platforms"], "feature",
+                          f"Permutation importance by feature ({perm_model}, held-out folds)",
+                          out / "figures" / "importance_features.png")
 
     run_info = {
         "tag": args.tag, "created": dt.datetime.now().isoformat(timespec="seconds"),
