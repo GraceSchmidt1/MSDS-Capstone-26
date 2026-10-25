@@ -261,6 +261,35 @@ def build_social_posts(manual_loomly_path):
 # ─────────────────────────────────────────────────────────────────────────────
 # 2. LinkedIn engagement ground-truth override (plan §1b)
 # ─────────────────────────────────────────────────────────────────────────────
+# Numerator columns for the unified engagement rate. Instagram's Loomly export
+# has no REACTIONS/SHARES/CLICKS columns, so LIKES stands in for reactions and
+# the missing components count as 0.
+UNIFIED_ER_COMPONENTS = {
+    "Facebook": ["REACTIONS", "COMMENTS", "SHARES", "CLICKS"],
+    "Instagram": ["LIKES", "COMMENTS", "SHARES", "CLICKS"],
+    "LinkedIn": ["REACTIONS", "COMMENTS", "SHARES", "CLICKS"],
+}
+
+
+def add_unified_engagement_rate(social_posts):
+    """ENGAGEMENT_RATE_UNIFIED_PCT = (reactions + comments + shares + clicks)
+    / impressions * 100, computed the same way on every platform (proposal §4).
+    ENGAGEMENT_RATE_PCT is left untouched: it mixes Facebook's derived rate,
+    Instagram's Loomly rate (engagement / reach) and LinkedIn's native rate.
+    Null when impressions are missing or 0."""
+    def rate(row):
+        imp = row["IMPRESSIONS"]
+        if pd.isna(imp) or imp <= 0:
+            return None
+        num = sum(0 if pd.isna(row[c]) else row[c] for c in UNIFIED_ER_COMPONENTS[row["PLATFORM"]])
+        return round(num / imp * 100, 4)
+
+    er = social_posts.apply(rate, axis=1)
+    social_posts.insert(social_posts.columns.get_loc("ENGAGEMENT_RATE_PCT") + 1,
+                        "ENGAGEMENT_RATE_UNIFIED_PCT", er)
+    return social_posts
+
+
 def title_sim(a, b):
     if not a or not b:
         return 0.0
@@ -489,6 +518,12 @@ def qa_report(social_posts):
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
 def main():
+    if os.path.exists(OUT_WORKBOOK):
+        # v1 carries manual tag fixes made after this build; rebuilding would erase them.
+        # New exports go through merge_into_master.py instead.
+        sys.exit(f"{OUT_WORKBOOK} already exists; refusing to rebuild over it. "
+                 "Use merge_into_master.py to add new data.")
+
     print("Building Social Posts (unified) from manual-loomly-exporting.xlsx ...")
     social_posts = build_social_posts(SRC["manual_loomly"])
 
@@ -497,6 +532,9 @@ def main():
 
     print("Applying LinkedIn engagement ground-truth override (plan §1b) ...")
     social_posts, li_join_gaps = apply_linkedin_engagement_override(social_posts, li_posts)
+
+    print("Adding unified engagement rate (one formula across platforms) ...")
+    social_posts = add_unified_engagement_rate(social_posts)
 
     print("Parsing LinkedIn visitor export (Family D) ...")
     vis_daily, vis_demo = build_visitors(SRC["li_visitors"])

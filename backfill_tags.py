@@ -30,6 +30,7 @@ Requires: pandas, openpyxl
 """
 from __future__ import annotations
 import argparse
+import os
 import re
 import sys
 
@@ -183,6 +184,8 @@ def main(argv=None):
     ap.add_argument("--review", required=True, help="Path to write the human-review CSV.")
     ap.add_argument("--sheet", default="Social Posts (unified)")
     args = ap.parse_args(argv)
+    if os.path.exists(args.output):
+        ap.error(f"{args.output} already exists; write the tagged workbook to a new path.")
 
     xl = pd.ExcelFile(args.input)
     sheets = {name: pd.read_excel(args.input, sheet_name=name) for name in xl.sheet_names}

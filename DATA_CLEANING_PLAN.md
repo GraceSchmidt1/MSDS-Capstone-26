@@ -430,6 +430,18 @@ growing master dataset that new exports get merged into." Concretely:
      `merge_decisions.csv` with old value → new value so nothing changes
      silently.
 
+   > **As implemented (2026-10-25): append-only, not "newest wins."** Per
+   > Grace's decision, `merge_into_master.py` never overwrites an existing
+   > master row. New keys are appended; for a key already in the master the
+   > master values are kept, and every differing incoming value (e.g. a later
+   > pull's higher impressions) is recorded in the workbook's
+   > `Unapplied Updates (log)` sheet instead of being applied. That way the newer
+   > numbers are kept without changing reviewed rows. Point 2 below therefore
+   > describes the original design, not current behavior. `clean_source.py`
+   > was not built separately: `clean_hidalga_data.py` fills that role for
+   > Social-Media-Data and LinkedIn exports. See the README's "Adding new
+   > data" section.
+
 2. **This means Claude Code should build the "most complete source per
    family" logic from §1a not as a one-time manual selection, but as a
    standing rule inside `merge_into_master.py`**: "newest `SOURCE_PULL_DATE`

@@ -515,6 +515,8 @@ def main(argv=None):
         label = args.month or dt.date.today().strftime("%Y-%m")
         out = f"Hidalga_Cleaned_Data_{label}.xlsx"
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
+    if os.path.basename(out).startswith("Hidalga_Master_Data") and os.path.exists(out):
+        ap.error(f"{out} is a master workbook; write elsewhere and use merge_into_master.py to add it.")
 
     write_workbook(out, sheets)
 
