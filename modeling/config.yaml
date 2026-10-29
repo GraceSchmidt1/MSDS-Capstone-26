@@ -100,6 +100,11 @@ classification:
                                              # rate ~ log2(impressions) fit), i.e. beat expectation for its reach
     above_median: {type: quantile, q: 0.5}   # rate above the platform median
     top_tercile: {type: quantile, q: 0.6667} # rate in the platform's top third
+  logistic:
+    max_iter: 1000              # plain (unpenalized) logistic; non-convergence is recorded per CV split
+  tree:
+    max_depth: 3                # shallow, so the rules stay readable
+    min_samples_leaf: 10        # no rule rests on fewer than 10 posts
 
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs

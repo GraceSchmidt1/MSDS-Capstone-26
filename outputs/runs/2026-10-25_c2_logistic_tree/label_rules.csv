@@ -1,0 +1,4 @@
+rule,platform,intercept,slope_per_doubling,residual_threshold
+reach_adjusted,Facebook,25.575960341514513,-2.965381629147653,2.6645352591003757e-15
+reach_adjusted,Instagram,41.28313661097409,-5.180332066182314,8.881784197001252e-16
+reach_adjusted,LinkedIn,8.585432713494251,-0.16646367244402704,0.0

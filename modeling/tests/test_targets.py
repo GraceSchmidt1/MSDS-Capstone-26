@@ -53,14 +53,32 @@ def test_quantile_rule_matches_definition(prepared):
     np.testing.assert_array_equal(rule.label(fs), expected)
 
 
-def test_reach_adjusted_rule_matches_definition(prepared):
+@pytest.mark.parametrize("platform", CONFIG["platforms"])
+def test_reach_adjusted_rule_matches_definition(prepared, platform):
+    """The line is a best median fit (no worse than statsmodels' iterative QuantReg), and label = residual > median."""
     import statsmodels.api as sm
-    fs = build_features(prepared, "Instagram", CONFIG)
+    fs = build_features(prepared, platform, CONFIG)
     rule = make_label_rule("reach_adjusted", CONFIG).fit(fs)
+    prm = rule.params[platform]
     reach, y = fs.X["log2_impressions"].to_numpy(), fs.y.to_numpy()
-    intercept, slope = sm.QuantReg(y, sm.add_constant(reach)).fit(q=0.5).params
-    resid = y - (intercept + slope * reach)
-    np.testing.assert_array_equal(rule.label(fs), (resid > np.median(resid)).astype(int))
+    resid = y - (prm["intercept"] + prm["slope_per_doubling"] * reach)
+    sm_params = sm.QuantReg(y, sm.add_constant(reach)).fit(q=0.5, max_iter=20000).params
+    assert np.abs(resid).sum() <= np.abs(y - sm.add_constant(reach) @ sm_params).sum() + 1e-6
+    assert prm["residual_threshold"] == pytest.approx(np.median(resid))
+    np.testing.assert_array_equal(rule.label(fs), (resid - np.median(resid) > 1e-9).astype(int))
+
+
+@pytest.mark.parametrize("platform", CONFIG["platforms"] + [POOLED])
+def test_reach_adjusted_labels_do_not_hinge_on_float_noise(prepared, platform, monkeypatch):
+    """Across all CV training folds, labels are identical whether ties are judged at 1e-9 or 1e-6."""
+    from modeling.targets import ReachAdjustedRule
+    fs = build_features(prepared, platform, CONFIG)
+    splits = cv_splits(fs, CONFIG["cv"]["n_splits"], CONFIG["cv"]["n_repeats"], CONFIG["seed"])
+    rules = [make_label_rule("reach_adjusted", CONFIG).fit(fs, tr) for tr, _ in splits]
+    strict = [r.label(fs) for r in rules]
+    monkeypatch.setattr(ReachAdjustedRule, "TIE_TOL", 1e-6)
+    for r, lab in zip(rules, strict):
+        np.testing.assert_array_equal(r.label(fs), lab)
 
 
 @pytest.mark.parametrize("platform", CONFIG["platforms"])

@@ -12,10 +12,10 @@ line), so "high" always means high *for that platform*.
 
   quantile        label = 1 if rate > the q-quantile of training rates (q = 0.5: above median;
                   q = 0.6667: top third). Posts exactly at the threshold are 0.
-  reach_adjusted  fit the median rate as a + b·log2(impressions) on training posts (quantile regression,
-                  robust to extreme small-reach posts); label = 1 if the post's residual is above the median
-                  training residual, i.e. it beat the typical rate for its reach. Using the median residual as
-                  the cut keeps the classes ~50/50.
+  reach_adjusted  fit the median rate as a + b·log2(impressions) on training posts (exact quantile
+                  regression, robust to extreme small-reach posts); label = 1 if the post's residual is above
+                  the median training residual, i.e. it beat the typical rate for its reach. Using the median
+                  residual as the cut keeps the classes ~50/50. Posts at the cut (within 1e-9) are 0.
 """
 from __future__ import annotations
 
@@ -91,21 +91,26 @@ class ReachAdjustedRule(LabelRule):
         super().__init__(config)
         self.name = name
 
+    # A median line passes exactly through some training posts; residuals within this of the cut count as
+    # ties (label 0, as for quantile rules) so float noise never decides a label.
+    TIE_TOL = 1e-9
+
     def _fit_platform(self, y, reach):
         if reach is None:
             raise ValueError("reach_adjusted labels need log2_impressions in the features")
         # Median (quantile) regression, not least squares: a few small-reach posts with extreme rates
         # (e.g. 3 impressions → 66.7%) would otherwise tilt the line and make the label track reach.
-        import statsmodels.api as sm
-        fit = sm.QuantReg(y, sm.add_constant(reach, has_constant="add")).fit(q=0.5)
-        intercept, slope = (float(v) for v in fit.params)
+        # Solved exactly as a linear program (HiGHS), so there is no iteration limit and reruns agree.
+        from sklearn.linear_model import QuantileRegressor
+        fit = QuantileRegressor(quantile=0.5, alpha=0, solver="highs").fit(reach.reshape(-1, 1), y)
+        intercept, slope = float(fit.intercept_), float(fit.coef_[0])
         resid = y - (intercept + slope * reach)
-        return {"intercept": float(intercept), "slope_per_doubling": float(slope),
+        return {"intercept": intercept, "slope_per_doubling": slope,
                 "residual_threshold": float(np.median(resid))}
 
     def _label_platform(self, params, y, reach):
         expected = params["intercept"] + params["slope_per_doubling"] * reach
-        return ((y - expected) > params["residual_threshold"]).astype(int)
+        return ((y - expected) - params["residual_threshold"] > self.TIE_TOL).astype(int)
 
 
 def make_label_rule(name: str, config: dict) -> LabelRule:
