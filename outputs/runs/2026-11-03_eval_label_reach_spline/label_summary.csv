@@ -1,0 +1,13 @@
+label,platform,posts,high,share_high
+reach_adjusted,Facebook,123,61,0.4959349593495935
+reach_adjusted,Instagram,130,62,0.47692307692307695
+reach_adjusted,LinkedIn,137,68,0.49635036496350365
+above_median,Facebook,123,61,0.4959349593495935
+above_median,Instagram,130,65,0.5
+above_median,LinkedIn,137,68,0.49635036496350365
+top_tercile,Facebook,123,40,0.3252032520325203
+top_tercile,Instagram,130,39,0.3
+top_tercile,LinkedIn,137,46,0.3357664233576642
+reach_spline,Facebook,123,58,0.4715447154471545
+reach_spline,Instagram,130,61,0.46923076923076923
+reach_spline,LinkedIn,137,65,0.4744525547445255
