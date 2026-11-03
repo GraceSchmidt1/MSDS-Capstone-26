@@ -147,6 +147,51 @@ Forest permutation importance, top group (AUC drop, reach-adjusted / above media
 - **Top-third F1 is low** (forest FB 0.09, IG 0.36) because only a third of posts are "high" and the
   cut is 0.5; compare on AUC / balanced accuracy.
 
+## C5: spline reach-adjusted label (run `2026-11-03_eval_label_reach_spline`, commits `7d1069d` code, `593b567`, `f0a8b42`)
+
+`reach_spline` = as reach-adjusted, but the expected (median) rate is a cubic spline in log2 impressions
+(4 knots at training-reach quantiles, linear beyond the outer knots), fit per platform on training posts
+only. Made the main label on 2026-11-03. Knot sensitivity (3 and 5 knots) from trial runs in the
+scratchpad, not committed.
+
+**Reach is removed much better than by the straight line.** Forest reach importance (AUC drop),
+line → spline 3 / 4 / 5 knots:
+
+| Platform | Line | 3 knots | 4 knots | 5 knots |
+|---|---|---|---|---|
+| Facebook | 0.12 | 0.08 | 0.06 | 0.03 |
+| Instagram | 0.09 | 0.01 | 0.01 | 0.01 |
+| LinkedIn | ≈ 0 | ≈ 0 | ≈ 0 | 0.02 |
+| Pooled | 0.07 | 0.03 | 0.03 | 0.02 |
+
+Held-out AUC, line → 4 knots: forest about unchanged (FB 0.66 → 0.64, IG 0.68 → 0.67, LI 0.65 → 0.65,
+pooled 0.65 → 0.64), but it now leans on content (IG format 0.06, ICP 0.06; FB ICP 0.05, intervals cross
+0). **Linear models gain once reach is out:** IG ridge 0.57 → 0.66, plain logit 0.54 → 0.65, elastic
+net 0.50 → 0.59; FB ridge 0.55 → 0.60; pooled ridge 0.57 → 0.60. LinkedIn unchanged (ridge 0.66).
+
+Plain-logit joint Wald tests: Format LI χ² = 16.3 (df 5, p = 0.006), pooled 27.3 (df 6, p < 0.001; was
+19.6 under the line); IG Format p = 0.06, IG ICP p = 0.10; everything else p > 0.12.
+
+Stable lasso effects (odds ratios) and whether they hold across knots:
+
+| Effect | 3 knots | 4 knots | 5 knots | Verdict |
+|---|---|---|---|---|
+| LI Document | 2.8 | 2.7 | 2.9 | robust (also every earlier label) |
+| LI Link | 0.22 | 0.23 | 0.22 | robust |
+| LI Team Spotlights | 1.9 | 1.9 | 2.2 | robust |
+| Pooled Link / Document | 0.35 / 1.9 | 0.36 / 1.8 | 0.28 / 2.5 | robust |
+| Pooled Carousel | 1.9 | 1.6 | 1.7 | new; robust across knots |
+| IG Carousel | 2.2 | 1.9 | – | holds at 3–4 knots only |
+| IG Events & Partnerships | 2.5 | 2.5 | – | holds at 3–4 knots only |
+| IG Operations / Financial Leader | 0.49 / 0.57 | 0.47 / 0.61 | – | holds at 3–4 knots only |
+
+- **Instagram content effects are knot-sensitive:** at 5 knots the IG lasso keeps no feature in even
+  half the refits (IG ridge AUC falls to 0.60). A more flexible reach curve may absorb content that is
+  correlated with reach, or 5 knots overfits ~100 training posts. Report the IG effects as
+  *suggestive*: they match the raw-rate labels (C4: Carousel ≈ 2.0–2.4, Events ≈ 2.3–2.7) and 3 and
+  4 knots, but not 5.
+- Facebook stays weak: no effect is stable at 4 or 5 knots.
+
 ## Methodological and code findings
 
 - **saga all-zero intercept (2026-11-02):** when every coefficient is zero, scikit-learn's saga stops after
@@ -167,3 +212,11 @@ Forest permutation importance, top group (AUC drop, reach-adjusted / above media
 - **Don't run two runs in parallel for the clean rerun:** the first to finish rewrites its `run_info.json`,
   which makes the tree dirty for the second (seen on the C4 reruns, 2026-11-02; fixed by rerunning the
   second alone). Commits: C4 runs `8df206e`, clean run_info `04d9bee`.
+- **Several runs in a row (2026-11-03):** run all, commit the folders, then rerun each with `--overwrite`;
+  after each rerun copy its `run_info.json` aside and `git checkout` it so the next rerun sees a clean
+  tree; restore all and commit together. Scratchpad trial runs (output outside the repo) can run in
+  parallel with an official run without dirtying it.
+- **Plain-logit crash on perfect separation (2026-11-03):** with a 3-knot spline label, all 3 Facebook
+  weekend posts are "low" and the full-data statsmodels logit raises `LinAlgError` (singular matrix),
+  stopping `run_classification` before CV. The 3-knot trial used a scratchpad wrapper that skips that
+  one fit. Repo code still crashes in this case; a guard (record "not estimable" instead) is pending.
