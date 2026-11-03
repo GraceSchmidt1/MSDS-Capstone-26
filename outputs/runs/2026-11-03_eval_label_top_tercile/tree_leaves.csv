@@ -1,0 +1,22 @@
+platform,leaf,rule,posts,high,share_high
+Facebook,2,impressions ≤ 16 AND impressions ≤ 6,12,3,0.25
+Facebook,4,impressions ≤ 16 AND impressions > 6 AND impressions ≤ 11,15,12,0.8
+Facebook,5,impressions ≤ 16 AND impressions > 6 AND impressions > 11,33,13,0.3939393939393939
+Facebook,8,impressions > 16 AND not Pillar: Team Spotlights & Company Culture AND impressions ≤ 31,32,11,0.34375
+Facebook,9,impressions > 16 AND not Pillar: Team Spotlights & Company Culture AND impressions > 31,11,0,0.0
+Facebook,10,impressions > 16 AND Pillar: Team Spotlights & Company Culture,20,1,0.05
+Instagram,1,impressions ≤ 13,14,13,0.9285714285714286
+Instagram,4,impressions > 13 AND impressions ≤ 24 AND not ICP: Oncology Operations Leader,17,9,0.5294117647058824
+Instagram,5,impressions > 13 AND impressions ≤ 24 AND ICP: Oncology Operations Leader,37,11,0.2972972972972973
+Instagram,7,impressions > 13 AND impressions > 24 AND not Format: Carousel,44,1,0.022727272727272728
+Instagram,8,impressions > 13 AND impressions > 24 AND Format: Carousel,18,5,0.2777777777777778
+LinkedIn,3,not Format: Document AND not Format: Multi-Image AND impressions ≤ 380,78,24,0.3076923076923077
+LinkedIn,4,not Format: Document AND not Format: Multi-Image AND impressions > 380,36,5,0.1388888888888889
+LinkedIn,5,not Format: Document AND Format: Multi-Image,10,7,0.7
+LinkedIn,6,Format: Document,13,10,0.7692307692307693
+pooled,3,impressions ≤ 13 AND not Platform: Instagram AND not AFTER_11,32,13,0.40625
+pooled,4,impressions ≤ 13 AND not Platform: Instagram AND AFTER_11,10,8,0.8
+pooled,5,impressions ≤ 13 AND Platform: Instagram,14,13,0.9285714285714286
+pooled,8,impressions > 13 AND not Format: Document AND not Format: Link,300,80,0.26666666666666666
+pooled,9,impressions > 13 AND not Format: Document AND Format: Link,21,1,0.047619047619047616
+pooled,10,impressions > 13 AND Format: Document,13,10,0.7692307692307693
