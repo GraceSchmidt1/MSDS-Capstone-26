@@ -80,6 +80,44 @@ Best-model AUC by label:
   (perfect separation), giving a weekend OR ≈ 0 with a meaningless CI. Don't report that row; penalized
   models are unaffected.
 
+## Evaluation framework, items 1–3 (trial runs 2026-11-02; official runs pending)
+
+Reach-adjusted label unless noted. Trial outputs were checked against the committed runs: every existing
+number is unchanged; only new columns, models and files were added.
+
+**Regression: standardized β (SDs of rate per SD of feature) and robust t:**
+
+| Platform | Largest effects (std β, t, p) |
+|---|---|
+| Instagram | reach −0.77 (t −4.6, p < 0.001); Carousel +0.17 (t 1.9, p 0.058) |
+| LinkedIn | Document +0.41 (t 2.2, p 0.030); Multi-Image +0.15 (t 1.7, p 0.088) |
+| Facebook | Link −0.27 (t −2.0, p 0.041; FB is not predictable, so treat as noise until multiple testing is handled) |
+| Pooled | reach −0.46 (t −3.2, p 0.001); Platform: Instagram +0.24 (p < 0.001); Document +0.17 (p 0.050) |
+
+**Logistic: joint Wald χ² per feature group:** **Format is the only group that matters anywhere:**
+LinkedIn χ² = 16.8 (df 5, p = 0.005), pooled χ² = 19.6 (df 6, p = 0.003). Every other group on every
+platform has p > 0.14. Reach p ≈ 0.7 everywhere (expected: the label removes linear reach).
+
+**Random forest benchmark (300 trees, untuned): the best model everywhere except LinkedIn:**
+
+| Platform | Forest AUC | Best linear / tree AUC | Forest F1 |
+|---|---|---|---|
+| Facebook | **0.66** | 0.56 (tree) | 0.60 |
+| Instagram | **0.68** | 0.62 (tree) | 0.54 |
+| LinkedIn | 0.65 | **0.66** (ridge) | 0.58 |
+| Pooled | **0.65** | 0.58 (tree) | 0.57 |
+
+- **The forest's top group on FB, IG and pooled is reach** (AUC drop 0.12 / 0.09 / 0.07), even though the
+  label is reach-adjusted. The adjustment is a *straight line* in log2 impressions, so any curved reach
+  pattern stays in the label, and only the forest can use it. **The reach-adjusted label is not fully
+  reach-free.** Open question: adjust reach non-linearly (e.g. a spline) and re-check.
+- Forest also uses ICP segment on Facebook (AUC drop 0.08) and pillar on Instagram (0.05), which no linear
+  model detects; possible interactions, unconfirmed.
+- On LinkedIn the forest adds nothing over ridge: the signal there is additive (format).
+- **Precision / recall / F1 at a 0.5 cut** are near 0 for lasso / elastic net on FB and IG because they
+  predict the base rate (just under 0.5) for every post, so nothing is called "high". AUC and balanced
+  accuracy are the fairer comparison there.
+
 ## Methodological and code findings
 
 - **saga all-zero intercept (2026-11-02):** when every coefficient is zero, scikit-learn's saga stops after

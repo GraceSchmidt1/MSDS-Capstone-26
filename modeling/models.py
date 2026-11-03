@@ -89,10 +89,22 @@ def fit_ols(fs: FeatureSet):
 
 
 def coef_table(res, fs: FeatureSet) -> pd.DataFrame:
-    """Effect sizes: coefficient (pts) with 95% CI, p-value, and how many posts have each binary feature."""
+    """
+    Effect sizes: coefficient (pts) with 95% CI, test statistic, p-value, standardized effects, and how many
+    posts have each binary feature.
+      t_stat         coefficient / robust SE (p-values use the normal reference, as statsmodels does for
+                     robust and clustered SEs)
+      coef_per_sd    effect of a one-SD change in the feature, in pts
+      std_beta       fully standardized: SDs of engagement rate per SD of the feature (comparable across
+                     features and platforms)
+    """
     ci = res.conf_int()
     t = pd.DataFrame({"feature": res.params.index, "coef_pts": res.params.values, "se": res.bse.values,
-                      "ci_lo": ci[0].values, "ci_hi": ci[1].values, "p_value": res.pvalues.values})
+                      "ci_lo": ci[0].values, "ci_hi": ci[1].values, "t_stat": res.tvalues.values,
+                      "p_value": res.pvalues.values})
+    sd_x = fs.X.std().reindex(t["feature"]).to_numpy()            # NaN for the constant
+    t["coef_per_sd"] = t["coef_pts"] * sd_x
+    t["std_beta"] = t["coef_per_sd"] / fs.y.std()
     binary = {c: int(fs.X[c].sum()) for c in fs.X.columns if set(np.unique(fs.X[c])) <= {0.0, 1.0}}
     t["posts_with_feature"] = t["feature"].map(binary)
     t.insert(0, "platform", fs.platform)

@@ -6,7 +6,8 @@ import numpy as np
 import pytest
 
 from modeling.classify import (PENALIZED, base_rate_fit_predict, bootstrap_stability_logistic, classification_scores,
-                               cv_score_classifier, fit_logit, fit_penalized, logistic_fit_predict, logit_effects,
+                               cv_score_classifier, fit_logit, fit_penalized, forest_fit_predict,
+                               logistic_fit_predict, logit_effects, logit_group_tests,
                                make_tree, penalized_coef_table, penalized_fit_predict,
                                permutation_importance_logistic, tree_fit_predict, tree_leaves)
 from modeling.features import POOLED, build_features, feature_group, load_config, load_master, prepare_posts
@@ -35,6 +36,11 @@ def test_scores_on_known_cases():
     assert perfect["brier"] == pytest.approx(np.mean([0.01, 0.04, 0.04, 0.01]))
     flat = classification_scores(y, np.full(4, 0.5))
     assert flat["auc"] == 0.5 and flat["brier"] == 0.25
+    assert flat["precision"] == 0 and flat["recall"] == 0 and flat["accuracy"] == 0.5   # 0.5 is not > 0.5
+    mixed = classification_scores(np.array([0, 0, 1, 1, 1]), np.array([0.6, 0.2, 0.9, 0.7, 0.1]))
+    assert mixed["accuracy"] == pytest.approx(3 / 5)
+    assert mixed["precision"] == pytest.approx(2 / 3) and mixed["recall"] == pytest.approx(2 / 3)
+    assert mixed["f1"] == pytest.approx(2 / 3)
 
 
 def test_models_only_see_training_labels(prepared):
@@ -52,12 +58,13 @@ def test_models_only_see_training_labels(prepared):
         np.testing.assert_array_equal(y_tr, make_label_rule(MAIN, CONFIG).fit(fs, tr).label(fs, tr))
 
 
-@pytest.mark.parametrize("model", ["logistic", "tree", "Lasso logistic"])
+@pytest.mark.parametrize("model", ["logistic", "tree", "Lasso logistic", "forest"])
 def test_held_out_rates_never_change_predictions(prepared, model):
     """Rewriting test-fold rates changes the test labels (so the scores) but never the predicted probabilities."""
     fs = build_features(prepared, "Instagram", CONFIG)
     tr, te = cv_splits(fs, 5, 1, CONFIG["seed"])[0]
-    fp = {"logistic": logistic_fit_predict(CONFIG), "tree": tree_fit_predict(CONFIG)}.get(model) \
+    fp = {"logistic": logistic_fit_predict(CONFIG), "tree": tree_fit_predict(CONFIG),
+          "forest": forest_fit_predict(CONFIG)}.get(model) \
         or penalized_fit_predict(model, CONFIG)
     probs = []
 
@@ -250,3 +257,40 @@ def test_permutation_of_unused_feature_changes_nothing(prepared):
         assert np.allclose(rows["auc_drop"], 0)
         checked += len(rows)
     assert checked > 0
+
+
+# ── evaluation framework: Wald tests and the random forest benchmark ────────
+@pytest.mark.parametrize("platform", CONFIG["platforms"] + [POOLED])
+def test_wald_tests(prepared, platform):
+    """Per feature: χ² = z², same p-value. Per group: a one-feature group equals that feature's test, and
+    the joint test matches statsmodels' own Wald test."""
+    fs, y = _labelled(prepared, platform)
+    res = fit_logit(fs, y)
+    e = logit_effects(res, fs, y).set_index("feature")
+    from scipy import stats
+    np.testing.assert_allclose(stats.chi2.sf(e["wald_chi2"], 1), e["p_value"], rtol=1e-6)
+    g = logit_group_tests(res, fs, feature_group).set_index("group")
+    assert g.loc["Reach (impressions)", "wald_chi2"] == pytest.approx(e.loc["log2_impressions", "wald_chi2"])
+    fmt = [c for c in fs.X.columns if feature_group(c) == "Format"]
+    restriction = np.eye(len(res.params))[[list(res.params.index).index(c) for c in fmt]]   # one row per format
+    sm_test = res.wald_test(restriction, scalar=True)
+    assert g.loc["Format", "wald_chi2"] == pytest.approx(float(sm_test.statistic))
+    assert g.loc["Format", "df"] == len(fmt)
+
+
+def test_forest_is_deterministic(prepared):
+    fs = build_features(prepared, "Instagram", CONFIG)
+    splits = cv_splits(fs, 5, 1, CONFIG["seed"])
+    a = cv_score_classifier(fs, splits, MAIN, CONFIG, forest_fit_predict(CONFIG))
+    b = cv_score_classifier(fs, splits, MAIN, CONFIG, forest_fit_predict(CONFIG))
+    assert a.equals(b)
+
+
+def test_forest_permutation_reusing_cv_fits_matches_refitting(prepared):
+    fs = build_features(prepared, "LinkedIn", CONFIG)
+    splits = cv_splits(fs, 5, 1, CONFIG["seed"])[:2]
+    fits = []
+    cv_score_classifier(fs, splits, MAIN, CONFIG, forest_fit_predict(CONFIG, fits))
+    a = permutation_importance_logistic(fs, splits, MAIN, "Random forest", SMALL, feature_group)
+    b = permutation_importance_logistic(fs, splits, MAIN, "Random forest", SMALL, feature_group, fitted=fits)
+    assert a.equals(b)

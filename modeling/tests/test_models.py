@@ -154,3 +154,19 @@ def test_permutation_of_unused_feature_changes_nothing(prepared):
         zero = fs.X.columns[np.isclose(pipe[-1].coef_, 0)]
         rows = perm[(perm["split"] == s) & (perm["level"] == "feature") & perm["unit"].isin(zero)]
         assert len(rows) and np.allclose(rows["mae_rise"], 0)
+
+
+# ── evaluation framework: test statistics and standardized effects ──────────
+@pytest.mark.parametrize("platform", CONFIG["platforms"] + [POOLED])
+def test_ols_t_stat_and_standardized_beta(prepared, platform):
+    fs = build_features(prepared, platform, CONFIG)
+    res = fit_ols(fs)
+    t = coef_table(res, fs).set_index("feature")
+    np.testing.assert_allclose(t["t_stat"], t["coef_pts"] / t["se"])
+    assert np.isnan(t.loc["const", "std_beta"])
+    # std_beta is the slope of an OLS fit on z-scored rate and features (same point estimates)
+    Xz = (fs.X - fs.X.mean()) / fs.X.std()
+    yz = (fs.y - fs.y.mean()) / fs.y.std()
+    import statsmodels.api as sm
+    z = sm.OLS(yz, sm.add_constant(Xz, has_constant="add")).fit().params.drop("const")
+    np.testing.assert_allclose(t.loc[z.index, "std_beta"], z, rtol=1e-8, atol=1e-10)

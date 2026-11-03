@@ -2,7 +2,7 @@
 """
 Run the Stage 1 high- vs. low-engagement classifier and write a self-describing run folder.
 
-    python -m modeling.run_classification --tag c3_penalized              (from the repo root)
+    python -m modeling.run_classification --tag eval_classification       (from the repo root)
     python -m modeling.run_classification --tag ... --label above_median  (another label definition)
 
 Writes outputs/runs/<YYYY-MM-DD>_<tag>/ containing
@@ -10,7 +10,8 @@ Writes outputs/runs/<YYYY-MM-DD>_<tag>/ containing
     label_summary.csv        posts / high / share high per label definition and platform (all posts)
     label_rules.csv          the label rule fit on all posts (thresholds, reach line)
     logistic_fit_stats.csv   per model: n, share high, pseudo R², AIC, converged
-    logistic_effects.csv     odds ratio (95% CI) and probability-point effect (95% CI) per feature
+    logistic_effects.csv     odds ratio (95% CI), Wald χ² and probability-point effect (95% CI) per feature
+    logistic_group_tests.csv joint Wald χ² per feature group (does format / pillar / ICP matter at all?)
     tree_leaves.csv          shallow tree on all posts: rule per leaf, posts, share high
     tree_importance.csv      share of the tree's split gain per feature
     coefficients_penalized.csv  ridge / lasso / elastic net logistic: log-odds per SD (importance), odds
@@ -18,12 +19,15 @@ Writes outputs/runs/<YYYY-MM-DD>_<tag>/ containing
     stability.csv            bootstrap: share of refits keeping each feature, sign agreement, odds-ratio interval
     permutation_scores.csv   drop in held-out AUC per split when a feature / group is shuffled;
                              importance.csv: mean and 2.5–97.5% spread across splits
-    cv_scores.csv            every CV split for every model (AUC, balanced accuracy, Brier, log loss);
+    permutation_scores_forest.csv, importance_forest.csv   the same for the random forest benchmark
+    cv_scores.csv            every CV split for every model (AUC, balanced accuracy, Brier, log loss,
+                             accuracy, precision, recall, F1);
                              cv_summary.csv: mean and SD per model. Labels are refit on each training fold.
     figures/                 effects, tree leaves, CV performance, stability, importance
 
 Models: base rate (reference), logistic regression, shallow decision tree (step C2); ridge, lasso, elastic
-net logistic with nested-CV penalty (step C3). Per platform = main, pooled = check.
+net logistic with nested-CV penalty (step C3); random forest benchmark (evaluation framework). Per platform =
+main, pooled = check.
 """
 from __future__ import annotations
 
@@ -36,7 +40,8 @@ import pandas as pd
 
 from modeling import plots
 from modeling.classify import (PENALIZED, base_rate_fit_predict, bootstrap_stability_logistic, cv_score_classifier,
-                               fit_logit, fit_penalized, logistic_fit_predict, logit_effects, logit_fit_stats,
+                               fit_logit, fit_penalized, forest_fit_predict, logistic_fit_predict, logit_effects,
+                               logit_fit_stats, logit_group_tests,
                                make_tree, penalized_coef_table, penalized_fit_predict,
                                permutation_importance_logistic, tree_fit_predict, tree_importance, tree_leaves)
 from modeling.features import DEFAULT_CONFIG, POOLED, REPO_ROOT, build_features, feature_group, file_sha256, \
@@ -76,7 +81,7 @@ def main(argv=None):
     cls = config["classification"]
 
     effects, stats_rows, leaves, tree_imp, cv_rows, rules = [], [], [], [], [], []
-    pen_coefs, stab_rows, perm_rows = [], [], []
+    pen_coefs, stab_rows, perm_rows, group_tests, forest_perm_rows = [], [], [], [], []
     for p in model_sets:
         fs = build_features(prepared, p, config)
         rule = make_label_rule(label_name, config).fit(fs)
@@ -86,6 +91,7 @@ def main(argv=None):
         res = fit_logit(fs, y)
         effects.append(logit_effects(res, fs, y))
         stats_rows.append(logit_fit_stats(res, fs, y))
+        group_tests.append(logit_group_tests(res, fs, feature_group))
         tree = make_tree(config).fit(fs.X.to_numpy(), y)
         leaves.append(tree_leaves(tree, fs, y))
         tree_imp.append(tree_importance(tree, fs))
@@ -93,7 +99,8 @@ def main(argv=None):
         perm_fits = []                       # the permutation model's per-split fits, reused for importance
         pen = [(n, penalized_fit_predict(n, config, perm_fits if n == cls["permutation"]["model"] else None))
                for n in PENALIZED]
-        for name, fp in models + pen:
+        forest_fits = []
+        for name, fp in models + pen + [("Random forest", forest_fit_predict(config, forest_fits))]:
             cv_rows.append(cv_score_classifier(fs, splits, label_name, config, fp).assign(platform=p, model=name))
         for name in PENALIZED:
             pipe = fit_penalized(fs, y, name, config, splits)
@@ -102,12 +109,14 @@ def main(argv=None):
                 stab_rows.append(bootstrap_stability_logistic(fs, y, name, pipe, config))
         perm_rows.append(permutation_importance_logistic(fs, splits, label_name, cls["permutation"]["model"],
                                                          config, feature_group, fitted=perm_fits))
+        forest_perm_rows.append(permutation_importance_logistic(fs, splits, label_name, "Random forest", config,
+                                                                feature_group, fitted=forest_fits))
         print(f"  {p}: done", flush=True)
 
     effects = pd.concat(effects, ignore_index=True)
     leaves = pd.concat(leaves, ignore_index=True)
     cv_scores = pd.concat(cv_rows, ignore_index=True)
-    metric_cols = ["auc", "balanced_accuracy", "brier", "log_loss"]
+    metric_cols = ["auc", "balanced_accuracy", "brier", "log_loss", "accuracy", "precision", "recall", "f1"]
     cv_summary = cv_scores.groupby(["platform", "model"], sort=False)[metric_cols].agg(["mean", "std"]).round(3)
     cv_summary.columns = [f"{m}_{s}" for m, s in cv_summary.columns]
     cv_summary["splits_with_fit_warning"] = cv_scores.groupby(["platform", "model"], sort=False)["fit_warning"].sum()
@@ -116,6 +125,7 @@ def main(argv=None):
     pd.concat(rules, ignore_index=True).to_csv(out / "label_rules.csv", index=False)
     pd.DataFrame(stats_rows).to_csv(out / "logistic_fit_stats.csv", index=False)
     effects.to_csv(out / "logistic_effects.csv", index=False)
+    pd.concat(group_tests, ignore_index=True).to_csv(out / "logistic_group_tests.csv", index=False)
     leaves.to_csv(out / "tree_leaves.csv", index=False)
     pd.concat(tree_imp, ignore_index=True).to_csv(out / "tree_importance.csv", index=False)
     pd.concat(pen_coefs, ignore_index=True).to_csv(out / "coefficients_penalized.csv", index=False)
@@ -125,6 +135,10 @@ def main(argv=None):
     perm.to_csv(out / "permutation_scores.csv", index=False)
     importance = summarize_importance(perm, metric="auc_drop")
     importance.to_csv(out / "importance.csv", index=False)
+    forest_perm = pd.concat(forest_perm_rows, ignore_index=True)
+    forest_perm.to_csv(out / "permutation_scores_forest.csv", index=False)
+    forest_importance = summarize_importance(forest_perm, metric="auc_drop")
+    forest_importance.to_csv(out / "importance_forest.csv", index=False)
     cv_scores.to_csv(out / "cv_scores.csv", index=False)
     cv_summary.reset_index().to_csv(out / "cv_summary.csv", index=False)
 
@@ -148,6 +162,9 @@ def main(argv=None):
     plots.importance_plot(importance, config["platforms"], "feature", f"Permutation importance by feature "
                           f"({perm_model}, held-out folds)", out / "figures" / "importance_features.png", "auc_drop",
                           auc_x)
+    plots.importance_plot(forest_importance, model_sets, "group", "Permutation importance by feature group (random "
+                          "forest benchmark, held-out folds)", out / "figures" / "importance_groups_forest.png",
+                          "auc_drop", auc_x)
     plots.cv_plot(cv_scores, model_sets, out / "figures" / "cv_performance.png", metrics=CLASSIFICATION_METRICS,
                   title="Cross-validated classification (5-fold × 10 repeats; labels refit per fold; ±1 SD)")
 

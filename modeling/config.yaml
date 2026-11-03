@@ -114,6 +114,10 @@ classification:
     max_iter: 20000
     saga_tol: 1.0e-5                             # lasso / elastic net solver tolerance. vs 1e-6: identical CV scores,
                                                  # penalties and odds ratios, ~1.7x faster (1e-4 shifted one split's tuning)
+  forest:                       # random forest benchmark (evaluation framework item 2); not tuned
+    n_estimators: 300
+    min_samples_leaf: 5
+    max_features: sqrt
   stability:
     n_boot: 500                 # bootstrap refits (whole content pieces resampled for pooled)
     models: [Lasso logistic, Elastic net logistic, Ridge logistic]   # penalty fixed at the full-data value

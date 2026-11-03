@@ -5,13 +5,16 @@ Step C2: reference (base rate), plain logistic regression, and a shallow decisio
 same shared CV splits as the regression.
 Step C3: penalized logistic regression (ridge, lasso, elastic net; penalty tuned by nested CV), bootstrap
 stability of its effects, and held-out permutation importance (drop in AUC).
+Evaluation framework (items 2–3): Wald χ² per feature and per feature group, accuracy / precision / recall /
+F1, and a random forest benchmark with its own permutation importance.
 
 Conventions
   - Labels come from modeling/targets.py. In CV the label rule is refit on each training fold and applied
     to the held-out fold, so held-out posts never influence their own labels.
   - Scores: ROC AUC (primary: does the model rank high-engagement posts above low ones? 0.5 = chance),
     balanced accuracy at a 0.5 cut, Brier score (mean squared error of the probability; lower is better),
-    log loss.
+    log loss; and accuracy, precision, recall, F1 for "high" at the same 0.5 cut. Precision is 0 when no
+    test post is predicted high (e.g. the base rate when under half the training posts are high).
   - Logistic effects are reported two ways: odds ratios (multiplicative, with 95% CI) and average
     marginal effects in probability points (pts): "posts with this feature are X pts more likely to be
     high". Per platform SEs are robust (HC0); the pooled check clusters by content piece, as in OLS.
@@ -34,12 +37,18 @@ from modeling.targets import make_label_rule
 # Cross-validation scoring (labels learned per training fold)
 # ─────────────────────────────────────────────────────────────────────────────
 def classification_scores(y_true, prob, threshold: float = 0.5) -> dict:
-    from sklearn.metrics import balanced_accuracy_score, brier_score_loss, log_loss, roc_auc_score
+    from sklearn.metrics import (accuracy_score, balanced_accuracy_score, brier_score_loss, f1_score, log_loss,
+                                 precision_score, recall_score, roc_auc_score)
     both = len(np.unique(y_true)) == 2
+    pred = (prob > threshold).astype(int)
     return {"auc": roc_auc_score(y_true, prob) if both else np.nan,
-            "balanced_accuracy": balanced_accuracy_score(y_true, (prob > threshold).astype(int)) if both else np.nan,
+            "balanced_accuracy": balanced_accuracy_score(y_true, pred) if both else np.nan,
             "brier": brier_score_loss(y_true, prob, pos_label=1),
-            "log_loss": log_loss(y_true, np.clip(prob, 1e-6, 1 - 1e-6), labels=[0, 1])}
+            "log_loss": log_loss(y_true, np.clip(prob, 1e-6, 1 - 1e-6), labels=[0, 1]),
+            "accuracy": accuracy_score(y_true, pred),
+            "precision": precision_score(y_true, pred, zero_division=0),
+            "recall": recall_score(y_true, pred, zero_division=0),
+            "f1": f1_score(y_true, pred, zero_division=0)}
 
 
 def cv_score_classifier(fs: FeatureSet, splits, label_name: str, config: dict, fit_predict_proba) -> pd.DataFrame:
@@ -93,6 +102,24 @@ def tree_fit_predict(config: dict):
     return fit_predict
 
 
+def make_forest(config: dict):
+    """Random forest benchmark (nonlinear, interactions allowed); untuned, settings from config."""
+    from sklearn.ensemble import RandomForestClassifier
+    f = config["classification"]["forest"]
+    return RandomForestClassifier(n_estimators=f["n_estimators"], min_samples_leaf=f["min_samples_leaf"],
+                                  max_features=f["max_features"], random_state=config["seed"])
+
+
+def forest_fit_predict(config: dict, record: list | None = None):
+    """`record`, if given, collects each split's fitted forest (in split order) for permutation importance."""
+    def fit_predict(X_tr, y_tr, X_te, groups_tr=None):
+        model = make_forest(config).fit(X_tr, y_tr)
+        if record is not None:
+            record.append(model)
+        return model.predict_proba(X_te)[:, 1]
+    return fit_predict
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Logistic regression on all posts: odds ratios and probability-point effects
 # ─────────────────────────────────────────────────────────────────────────────
@@ -109,6 +136,7 @@ def logit_effects(res, fs: FeatureSet, y) -> pd.DataFrame:
     """
     Per feature:
       odds_ratio (+ 95% CI)  multiplicative change in the odds of being high (per 0→1, or per doubling of reach)
+      wald_chi2              (coef / SE)², 1 df; its p-value is p_value
       ame_pts (+ 95% CI)     average marginal effect: change in P(high), in percentage points. For 0/1
                              features it is the average change from switching the feature off → on.
       share_high_with        raw share of high posts among posts that have the feature (descriptive)
@@ -117,7 +145,8 @@ def logit_effects(res, fs: FeatureSet, y) -> pd.DataFrame:
     ci = res.conf_int()
     t = pd.DataFrame({"feature": res.params.index, "coef_log_odds": res.params.values, "se": res.bse.values,
                       "odds_ratio": np.exp(res.params.values), "or_ci_lo": np.exp(ci[0].values),
-                      "or_ci_hi": np.exp(ci[1].values), "p_value": res.pvalues.values})
+                      "or_ci_hi": np.exp(ci[1].values), "wald_chi2": (res.params / res.bse).values ** 2,
+                      "p_value": res.pvalues.values})
     me = res.get_margeff(at="overall", method="dydx", dummy=True).summary_frame()
     me = pd.DataFrame({"feature": me.index, "ame_pts": 100 * me["dy/dx"].values,
                        "ame_ci_lo": 100 * me["Conf. Int. Low"].values, "ame_ci_hi": 100 * me["Cont. Int. Hi."].values})
@@ -128,6 +157,23 @@ def logit_effects(res, fs: FeatureSet, y) -> pd.DataFrame:
                                              if fs.X[c].sum() > 0})
     t.insert(0, "platform", fs.platform)
     return t
+
+
+def logit_group_tests(res, fs: FeatureSet, group_of) -> pd.DataFrame:
+    """
+    Joint Wald χ² test per feature group (H0: every coefficient in the group is 0), using the model's
+    robust / clustered covariance. Answers "does format (as a whole) matter?" where single features can't.
+    """
+    from scipy import stats
+    cols = list(res.params.index)
+    rows = []
+    for g in dict.fromkeys(group_of(c) for c in fs.X.columns):
+        idx = [cols.index(c) for c in fs.X.columns if group_of(c) == g]
+        b, V = res.params.to_numpy()[idx], res.cov_params().to_numpy()[np.ix_(idx, idx)]
+        chi2 = float(b @ np.linalg.solve(V, b))
+        rows.append({"platform": fs.platform, "group": g, "n_features": len(idx), "wald_chi2": chi2,
+                     "df": len(idx), "p_value": float(stats.chi2.sf(chi2, len(idx)))})
+    return pd.DataFrame(rows)
 
 
 def logit_fit_stats(res, fs: FeatureSet, y) -> dict:
@@ -317,6 +363,7 @@ def bootstrap_stability_logistic(fs: FeatureSet, y, name: str, fitted_pipe, conf
 
 def permutation_importance_logistic(fs: FeatureSet, splits, label_name: str, name: str, config: dict,
                                     group_of, fitted: list | None = None) -> pd.DataFrame:
+    # name: a PENALIZED model, or "Random forest" (benchmark; untuned, so no inner CV)
     """
     Held-out permutation importance on the shared outer splits. Per split the label rule is fit on the
     training posts, the model is tuned and fit on them (nested), then each feature, and each feature group
@@ -338,8 +385,12 @@ def permutation_importance_logistic(fs: FeatureSet, splits, label_name: str, nam
         y_tr, y_te = rule.label(fs, tr), rule.label(fs, te)
         if len(np.unique(y_te)) < 2:
             continue                                                   # AUC undefined on a one-class fold
-        pipe = fitted[s] if fitted is not None else \
-            _fit(make_penalized(name, _inner_splits(groups[tr], config), config), X[tr], y_tr)
+        if fitted is not None:
+            pipe = fitted[s]
+        elif name == "Random forest":
+            pipe = make_forest(config).fit(X[tr], y_tr)
+        else:
+            pipe = _fit(make_penalized(name, _inner_splits(groups[tr], config), config), X[tr], y_tr)
         base = roc_auc_score(y_te, pipe.predict_proba(X[te])[:, 1])
         for level, unit, idx in units:
             drops = []
