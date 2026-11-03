@@ -1,13 +1,13 @@
 {
   "tag": "c3_penalized",
-  "created": "2026-11-02T20:07:29",
+  "created": "2026-11-02T20:28:08",
   "label": "reach_adjusted",
   "master": "data/Hidalga_Master_Data_v3.xlsx",
   "master_sha256": "dacd1d2e7274d0138b9fbaac78a498b02fa40ed0f7a5b4ecb2d6724de4f2b44a",
   "git": {
-    "commit": "b62cd673d3a5ea10f3e691372ce642f49c23dfc7",
+    "commit": "c56c7189cf668a743dbd7f91da1b95de7ec6238d",
     "branch": "classification",
-    "uncommitted_changes": true
+    "uncommitted_changes": false
   },
   "packages": {
     "python": "3.13.5",
