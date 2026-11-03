@@ -80,10 +80,12 @@ Best-model AUC by label:
   (perfect separation), giving a weekend OR ≈ 0 with a meaningless CI. Don't report that row; penalized
   models are unaffected.
 
-## Evaluation framework, items 1–3 (trial runs 2026-11-02; official runs pending)
+## Evaluation framework, items 1–3 (runs `2026-11-03_eval_regression`, `…_eval_classification`, `…_eval_label_above_median`, `…_eval_label_top_tercile`; commits `7622674`, `c4bcde2`)
 
-Reach-adjusted label unless noted. Trial outputs were checked against the committed runs: every existing
-number is unchanged; only new columns, models and files were added.
+Reach-adjusted label unless noted. Outputs were checked against the earlier committed runs: every existing
+number is unchanged; only new columns, models and files were added. The official run CSVs are
+byte-identical to the 2026-11-02 trial runs, and the linear models under the two alternative labels
+match the C4 runs exactly.
 
 **Regression: standardized β (SDs of rate per SD of feature) and robust t:**
 
@@ -117,6 +119,33 @@ platform has p > 0.14. Reach p ≈ 0.7 everywhere (expected: the label removes l
 - **Precision / recall / F1 at a 0.5 cut** are near 0 for lasso / elastic net on FB and IG because they
   predict the base rate (just under 0.5) for every post, so nothing is called "high". AUC and balanced
   accuracy are the fairer comparison there.
+
+**Random forest under all three labels** (forest AUC; best other model in brackets):
+
+| Platform | Reach-adjusted | Above median | Top third |
+|---|---|---|---|
+| Facebook | **0.66** (0.56 tree) | **0.70** (0.62 tree) | **0.67** (0.63 logit) |
+| Instagram | **0.68** (0.62 tree) | **0.79** (0.77 logit) | **0.79** (0.79 logit) |
+| LinkedIn | 0.65 (**0.66** ridge) | 0.63 (**0.66** ridge) | 0.63 (**0.64** ridge) |
+| Pooled | **0.65** (0.58 tree) | **0.71** (0.62 tree) | **0.72** (0.67 logit) |
+
+Forest permutation importance, top group (AUC drop, reach-adjusted / above median / top third):
+
+- **Facebook: reach** 0.12 / 0.16 / 0.16 (2.5–97.5% interval over splits above 0 only under above-median; FB has
+  124 posts, so per-split intervals are wide). **Facebook is predictable only by the forest, and mainly
+  through reach,** under every label. Linear models with the same reach feature get ≈ 0.50–0.63, so the
+  reach–rate relationship on Facebook is likely curved (non-linear), not absent.
+- **Instagram: reach** 0.09 / 0.21 / 0.25 (interval above 0 under both raw labels). Under raw-rate labels the forest barely beats logistic
+  (the reach effect there is mostly linear); under the reach-adjusted label the leftover curve gives it
+  +0.06.
+- **LinkedIn: format** 0.09 / 0.09 / 0.09; reach ≈ 0 under every label. Forest never beats ridge, so the
+  LinkedIn signal is additive (format) and label-independent.
+- **Pooled: reach** 0.07 / 0.14 / 0.15, then **format** (0.05–0.06); both intervals above 0 under all
+  three labels.
+- Strengthens the open question above: a non-linear (spline) reach adjustment is the next test of
+  whether anything besides reach drives Facebook / Instagram.
+- **Top-third F1 is low** (forest FB 0.09, IG 0.36) because only a third of posts are "high" and the
+  cut is 0.5; compare on AUC / balanced accuracy.
 
 ## Methodological and code findings
 
