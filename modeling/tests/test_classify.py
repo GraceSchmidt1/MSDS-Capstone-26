@@ -5,10 +5,12 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
-from modeling.classify import (base_rate_fit_predict, classification_scores, cv_score_classifier, fit_logit,
-                               logistic_fit_predict, logit_effects, make_tree, tree_fit_predict, tree_leaves)
-from modeling.features import POOLED, build_features, load_config, load_master, prepare_posts
-from modeling.models import cv_splits
+from modeling.classify import (PENALIZED, base_rate_fit_predict, bootstrap_stability_logistic, classification_scores,
+                               cv_score_classifier, fit_logit, fit_penalized, logistic_fit_predict, logit_effects,
+                               make_tree, penalized_coef_table, penalized_fit_predict,
+                               permutation_importance_logistic, tree_fit_predict, tree_leaves)
+from modeling.features import POOLED, build_features, feature_group, load_config, load_master, prepare_posts
+from modeling.models import cv_splits, summarize_importance
 from modeling.targets import make_label_rule
 
 CONFIG = load_config()
@@ -50,12 +52,13 @@ def test_models_only_see_training_labels(prepared):
         np.testing.assert_array_equal(y_tr, make_label_rule(MAIN, CONFIG).fit(fs, tr).label(fs, tr))
 
 
-@pytest.mark.parametrize("model", ["logistic", "tree"])
+@pytest.mark.parametrize("model", ["logistic", "tree", "Lasso logistic"])
 def test_held_out_rates_never_change_predictions(prepared, model):
     """Rewriting test-fold rates changes the test labels (so the scores) but never the predicted probabilities."""
     fs = build_features(prepared, "Instagram", CONFIG)
     tr, te = cv_splits(fs, 5, 1, CONFIG["seed"])[0]
-    fp = logistic_fit_predict(CONFIG) if model == "logistic" else tree_fit_predict(CONFIG)
+    fp = {"logistic": logistic_fit_predict(CONFIG), "tree": tree_fit_predict(CONFIG)}.get(model) \
+        or penalized_fit_predict(model, CONFIG)
     probs = []
 
     def record(X_tr, y_tr, X_te, groups_tr):
@@ -139,3 +142,111 @@ def test_fit_warning_is_recorded(prepared):
 
     s = cv_score_classifier(fs, cv_splits(fs, 5, 1, CONFIG["seed"]), MAIN, CONFIG, warns)
     assert s["fit_warning"].all()
+
+
+# ── penalized logistic, stability and importance (step C3) ───────────────────
+CLS = CONFIG["classification"]
+SMALL = {**CONFIG, "classification": {**CLS, "stability": {**CLS["stability"], "n_boot": 30},
+                                      "permutation": {**CLS["permutation"], "n_repeats": 3}}}
+
+
+@pytest.mark.parametrize("name", PENALIZED)
+def test_penalized_deterministic_and_consistent(prepared, name):
+    fs, y = _labelled(prepared, "Instagram")
+    splits = cv_splits(fs, 5, 1, CONFIG["seed"])
+    a = penalized_coef_table(fit_penalized(fs, y, name, CONFIG, splits), fs, name, CONFIG)
+    b = penalized_coef_table(fit_penalized(fs, y, name, CONFIG, splits), fs, name, CONFIG)
+    np.testing.assert_array_equal(a["coef_per_sd"], b["coef_per_sd"])
+    assert list(a["feature"]) == list(fs.X.columns)
+    # per-SD log-odds and per-unit odds ratio describe the same effect
+    np.testing.assert_allclose(np.log(a["odds_ratio"]) * fs.X.std(ddof=0).to_numpy(), a["coef_per_sd"],
+                               rtol=1e-8, atol=1e-10)
+    assert (a["nonzero"] == ~np.isclose(a["coef_per_sd"], 0)).all()
+    if name == "Ridge logistic":
+        assert a["nonzero"].all()
+
+
+def test_strongest_lasso_penalty_is_the_base_rate(prepared):
+    """With every feature dropped, the lasso predicts the training share of high posts for every post."""
+    fs, y = _labelled(prepared, "LinkedIn")
+    cfg = {**CONFIG, "classification": {**CLS, "regularization": {**CLS["regularization"],
+                                                                   "C_grid": {"min_exp": -4, "max_exp": -4, "num": 1}}}}
+    pipe = fit_penalized(fs, y, "Lasso logistic", cfg, cv_splits(fs, 5, 1, CONFIG["seed"]))
+    assert np.allclose(pipe[-1].coef_, 0)
+    np.testing.assert_allclose(pipe.predict_proba(fs.X.to_numpy())[:, 1], y.mean(), rtol=1e-12)
+
+
+def test_nested_cv_tunes_on_training_posts_only(prepared, monkeypatch):
+    """The inner splits handed to the tuner index only outer-training rows and keep content pieces together."""
+    import modeling.classify as c
+    fs = build_features(prepared, POOLED, CONFIG)
+    seen = []
+    real = c.make_penalized
+
+    def spy(name, inner_cv, config):
+        seen.append(inner_cv)
+        return real(name, inner_cv, config)
+
+    monkeypatch.setattr(c, "make_penalized", spy)
+    outer = cv_splits(fs, 5, 1, CONFIG["seed"])[:2]
+    cv_score_classifier(fs, outer, MAIN, CONFIG, penalized_fit_predict("Lasso logistic", CONFIG))
+    for (tr, _), inner in zip(outer, seen):
+        assert max(max(i_tr.max(), i_te.max()) for i_tr, i_te in inner) < len(tr)
+        groups_tr = fs.groups.to_numpy()[tr]
+        for i_tr, i_te in inner:
+            assert not set(groups_tr[i_tr]) & set(groups_tr[i_te])
+
+
+@pytest.mark.parametrize("name", ["Lasso logistic", "Ridge logistic"])
+def test_bootstrap_stability_deterministic_and_anchored(prepared, name):
+    fs, y = _labelled(prepared, "Instagram")
+    pipe = fit_penalized(fs, y, name, CONFIG, cv_splits(fs, 5, 1, CONFIG["seed"]))
+    a = bootstrap_stability_logistic(fs, y, name, pipe, SMALL)
+    b = bootstrap_stability_logistic(fs, y, name, pipe, SMALL)
+    assert a.drop(columns="sign_agreement").equals(b.drop(columns="sign_agreement"))
+    np.testing.assert_allclose(a["full_data_odds_ratio"], penalized_coef_table(pipe, fs, name, CONFIG)["odds_ratio"])
+    assert a["selection_freq"].between(0, 1).all()
+    assert (a["or_lo"] <= a["or_median"]).all() and (a["or_median"] <= a["or_hi"]).all()
+
+
+def test_permutation_importance_units_and_determinism(prepared):
+    fs = build_features(prepared, "LinkedIn", CONFIG)
+    splits = cv_splits(fs, 5, 1, CONFIG["seed"])[:2]
+    a = permutation_importance_logistic(fs, splits, MAIN, "Lasso logistic", SMALL, feature_group)
+    b = permutation_importance_logistic(fs, splits, MAIN, "Lasso logistic", SMALL, feature_group)
+    assert a.equals(b)
+    groups = {feature_group(col) for col in fs.X.columns}
+    assert set(a.loc[a["level"] == "feature", "unit"]) == set(fs.X.columns)
+    assert set(a.loc[a["level"] == "group", "unit"]) == groups
+    assert len(a) == len(splits) * (fs.X.shape[1] + len(groups))
+    assert summarize_importance(a, metric="auc_drop")["share_splits_helpful"].between(0, 1).all()
+
+
+def test_permutation_reusing_cv_fits_matches_refitting(prepared):
+    """Passing the models recorded during CV scoring gives exactly the importance of refitting them."""
+    fs = build_features(prepared, "LinkedIn", CONFIG)
+    splits = cv_splits(fs, 5, 1, CONFIG["seed"])[:2]
+    fits = []
+    cv_score_classifier(fs, splits, MAIN, CONFIG, penalized_fit_predict("Lasso logistic", CONFIG, fits))
+    assert len(fits) == len(splits)
+    a = permutation_importance_logistic(fs, splits, MAIN, "Lasso logistic", SMALL, feature_group)
+    b = permutation_importance_logistic(fs, splits, MAIN, "Lasso logistic", SMALL, feature_group, fitted=fits)
+    assert a.equals(b)
+
+
+def test_permutation_of_unused_feature_changes_nothing(prepared):
+    """A feature the lasso gives zero weight must have exactly zero importance."""
+    import modeling.classify as c
+    fs = build_features(prepared, "Instagram", CONFIG)
+    splits = cv_splits(fs, 5, 1, CONFIG["seed"])[:2]
+    perm = permutation_importance_logistic(fs, splits, MAIN, "Lasso logistic", SMALL, feature_group)
+    checked = 0
+    for s, (tr, _) in enumerate(splits):
+        y_tr = make_label_rule(MAIN, CONFIG).fit(fs, tr).label(fs, tr)
+        pipe = c._fit(c.make_penalized("Lasso logistic", c._inner_splits(fs.groups.to_numpy()[tr], CONFIG), CONFIG),
+                      fs.X.to_numpy()[tr], y_tr)
+        zero = fs.X.columns[np.isclose(pipe[-1].coef_[0], 0)]
+        rows = perm[(perm["split"] == s) & (perm["level"] == "feature") & perm["unit"].isin(zero)]
+        assert np.allclose(rows["auc_drop"], 0)
+        checked += len(rows)
+    assert checked > 0

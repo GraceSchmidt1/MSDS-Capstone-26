@@ -105,6 +105,21 @@ classification:
   tree:
     max_depth: 3                # shallow, so the rules stay readable
     min_samples_leaf: 10        # no rule rests on fewer than 10 posts
+  # Step C3: penalized logistic. Features standardized inside each fit; C (= 1 / penalty strength) tuned
+  # by log loss on an inner K-fold of the training posts only (nested CV), as in the regression's step 3.
+  regularization:
+    inner_splits: 5
+    C_grid: {min_exp: -4, max_exp: 2, num: 31}   # Cs = 10^linspace(min_exp, max_exp, num)
+    l1_ratios: [0.1, 0.25, 0.5, 0.75, 0.9]       # elastic net mix (1.0 would be pure lasso)
+    max_iter: 20000
+    saga_tol: 1.0e-5                             # lasso / elastic net solver tolerance. vs 1e-6: identical CV scores,
+                                                 # penalties and odds ratios, ~1.7x faster (1e-4 shifted one split's tuning)
+  stability:
+    n_boot: 500                 # bootstrap refits (whole content pieces resampled for pooled)
+    models: [Lasso logistic, Elastic net logistic, Ridge logistic]   # penalty fixed at the full-data value
+  permutation:
+    model: Elastic net logistic # scored on the shared outer splits (labels and penalty refit per split)
+    n_repeats: 10               # shuffles per feature per split
 
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs

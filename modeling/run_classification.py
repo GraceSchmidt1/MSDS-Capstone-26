@@ -2,7 +2,7 @@
 """
 Run the Stage 1 high- vs. low-engagement classifier and write a self-describing run folder.
 
-    python -m modeling.run_classification --tag c2_logistic_tree          (from the repo root)
+    python -m modeling.run_classification --tag c3_penalized              (from the repo root)
     python -m modeling.run_classification --tag ... --label above_median  (another label definition)
 
 Writes outputs/runs/<YYYY-MM-DD>_<tag>/ containing
@@ -13,12 +13,17 @@ Writes outputs/runs/<YYYY-MM-DD>_<tag>/ containing
     logistic_effects.csv     odds ratio (95% CI) and probability-point effect (95% CI) per feature
     tree_leaves.csv          shallow tree on all posts: rule per leaf, posts, share high
     tree_importance.csv      share of the tree's split gain per feature
+    coefficients_penalized.csv  ridge / lasso / elastic net logistic: log-odds per SD (importance), odds
+                             ratio per unit, whether kept (nonzero), chosen C and mix
+    stability.csv            bootstrap: share of refits keeping each feature, sign agreement, odds-ratio interval
+    permutation_scores.csv   drop in held-out AUC per split when a feature / group is shuffled;
+                             importance.csv: mean and 2.5–97.5% spread across splits
     cv_scores.csv            every CV split for every model (AUC, balanced accuracy, Brier, log loss);
                              cv_summary.csv: mean and SD per model. Labels are refit on each training fold.
-    figures/                 effects, tree leaves, CV performance
+    figures/                 effects, tree leaves, CV performance, stability, importance
 
-Models: base rate (reference), logistic regression, shallow decision tree; per platform = main,
-pooled = check.
+Models: base rate (reference), logistic regression, shallow decision tree (step C2); ridge, lasso, elastic
+net logistic with nested-CV penalty (step C3). Per platform = main, pooled = check.
 """
 from __future__ import annotations
 
@@ -30,12 +35,13 @@ import sys
 import pandas as pd
 
 from modeling import plots
-from modeling.classify import (base_rate_fit_predict, cv_score_classifier, fit_logit, logistic_fit_predict,
-                               logit_effects, logit_fit_stats, make_tree, tree_fit_predict, tree_importance,
-                               tree_leaves)
-from modeling.features import DEFAULT_CONFIG, POOLED, REPO_ROOT, build_features, file_sha256, load_config, \
-    load_master, prepare_posts
-from modeling.models import cv_splits
+from modeling.classify import (PENALIZED, base_rate_fit_predict, bootstrap_stability_logistic, cv_score_classifier,
+                               fit_logit, fit_penalized, logistic_fit_predict, logit_effects, logit_fit_stats,
+                               make_tree, penalized_coef_table, penalized_fit_predict,
+                               permutation_importance_logistic, tree_fit_predict, tree_importance, tree_leaves)
+from modeling.features import DEFAULT_CONFIG, POOLED, REPO_ROOT, build_features, feature_group, file_sha256, \
+    load_config, load_master, prepare_posts
+from modeling.models import cv_splits, summarize_importance
 from modeling.run_regression import git_info, package_versions
 from modeling.targets import label_summary, make_label_rule
 
@@ -67,8 +73,10 @@ def main(argv=None):
     cv = config["cv"]
     models = [("base rate (reference)", base_rate_fit_predict), ("Logistic", logistic_fit_predict(config)),
               ("Decision tree", tree_fit_predict(config))]
+    cls = config["classification"]
 
     effects, stats_rows, leaves, tree_imp, cv_rows, rules = [], [], [], [], [], []
+    pen_coefs, stab_rows, perm_rows = [], [], []
     for p in model_sets:
         fs = build_features(prepared, p, config)
         rule = make_label_rule(label_name, config).fit(fs)
@@ -82,8 +90,18 @@ def main(argv=None):
         leaves.append(tree_leaves(tree, fs, y))
         tree_imp.append(tree_importance(tree, fs))
         splits = cv_splits(fs, cv["n_splits"], cv["n_repeats"], config["seed"])
-        for name, fp in models:
+        perm_fits = []                       # the permutation model's per-split fits, reused for importance
+        pen = [(n, penalized_fit_predict(n, config, perm_fits if n == cls["permutation"]["model"] else None))
+               for n in PENALIZED]
+        for name, fp in models + pen:
             cv_rows.append(cv_score_classifier(fs, splits, label_name, config, fp).assign(platform=p, model=name))
+        for name in PENALIZED:
+            pipe = fit_penalized(fs, y, name, config, splits)
+            pen_coefs.append(penalized_coef_table(pipe, fs, name, config))
+            if name in cls["stability"]["models"]:
+                stab_rows.append(bootstrap_stability_logistic(fs, y, name, pipe, config))
+        perm_rows.append(permutation_importance_logistic(fs, splits, label_name, cls["permutation"]["model"],
+                                                         config, feature_group, fitted=perm_fits))
         print(f"  {p}: done", flush=True)
 
     effects = pd.concat(effects, ignore_index=True)
@@ -100,6 +118,13 @@ def main(argv=None):
     effects.to_csv(out / "logistic_effects.csv", index=False)
     leaves.to_csv(out / "tree_leaves.csv", index=False)
     pd.concat(tree_imp, ignore_index=True).to_csv(out / "tree_importance.csv", index=False)
+    pd.concat(pen_coefs, ignore_index=True).to_csv(out / "coefficients_penalized.csv", index=False)
+    stability = pd.concat(stab_rows, ignore_index=True)
+    stability.to_csv(out / "stability.csv", index=False)
+    perm = pd.concat(perm_rows, ignore_index=True)
+    perm.to_csv(out / "permutation_scores.csv", index=False)
+    importance = summarize_importance(perm, metric="auc_drop")
+    importance.to_csv(out / "importance.csv", index=False)
     cv_scores.to_csv(out / "cv_scores.csv", index=False)
     cv_summary.reset_index().to_csv(out / "cv_summary.csv", index=False)
 
@@ -114,6 +139,15 @@ def main(argv=None):
                     "content)", out / "figures" / "logistic_effects_pooled.png", value="ame_pts", xlabel=ame_x,
                     note=ame_note)
     plots.tree_leaves_plot(leaves, config["platforms"], out / "figures" / "tree_leaves_by_platform.png")
+    pen_models = ("Lasso logistic", "Elastic net logistic")
+    plots.stability_plot(stability, config["platforms"], out / "figures" / "stability_by_platform.png", pen_models)
+    plots.stability_plot(stability, [POOLED], out / "figures" / "stability_pooled.png", pen_models)
+    perm_model, auc_x = cls["permutation"]["model"], "Drop in held-out AUC when shuffled"
+    plots.importance_plot(importance, model_sets, "group", f"Permutation importance by feature group ({perm_model}, "
+                          "held-out folds)", out / "figures" / "importance_groups.png", "auc_drop", auc_x)
+    plots.importance_plot(importance, config["platforms"], "feature", f"Permutation importance by feature "
+                          f"({perm_model}, held-out folds)", out / "figures" / "importance_features.png", "auc_drop",
+                          auc_x)
     plots.cv_plot(cv_scores, model_sets, out / "figures" / "cv_performance.png", metrics=CLASSIFICATION_METRICS,
                   title="Cross-validated classification (5-fold × 10 repeats; labels refit per fold; ±1 SD)")
 

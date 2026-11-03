@@ -113,6 +113,7 @@ def diagnostics_plot(infl: pd.DataFrame, platforms: list[str], path):
 
 
 MODEL_MARKER = {"Ridge": ("D", "none"), "Lasso": ("^", "none"), "Elastic net": ("s", "full")}
+LOGISTIC_MARKER = {f"{name} logistic": m for name, m in MODEL_MARKER.items()}   # classification (step C3)
 
 
 def coef_compare_plot(ols: pd.DataFrame, reg: pd.DataFrame, platforms: list[str], title: str, path):
@@ -192,9 +193,10 @@ def cv_plot(cv_scores: pd.DataFrame, platforms: list[str], path, metrics=REGRESS
     plt.close(fig)
 
 
-def stability_plot(stab: pd.DataFrame, platforms: list[str], path):
-    """Share of 500 bootstrap refits that keep each feature (lasso, elastic net), one panel per platform."""
-    s = stab[stab["platform"].isin(platforms) & stab["model"].isin(["Lasso", "Elastic net"])]
+def stability_plot(stab: pd.DataFrame, platforms: list[str], path, models=("Lasso", "Elastic net")):
+    """Share of 500 bootstrap refits that keep each feature (`models`: lasso, elastic net), one panel per platform."""
+    lasso, enet = models
+    s = stab[stab["platform"].isin(platforms) & stab["model"].isin(models)]
     features = list(dict.fromkeys(s["feature"]))
     fig, axes = plt.subplots(1, len(platforms), figsize=(4.4 * len(platforms), 0.36 * len(features) + 1.8),
                              sharey=True, squeeze=False)
@@ -202,17 +204,17 @@ def stability_plot(stab: pd.DataFrame, platforms: list[str], path):
         y = np.arange(len(features))
         for x0 in (0.5, 0.8):
             ax.axvline(x0, color=INK_MUTED, lw=1, ls=":" if x0 == 0.5 else "--")
-        for name, off in [("Lasso", -0.13), ("Elastic net", 0.13)]:
+        for name, off in [(lasso, -0.13), (enet, 0.13)]:
             d = s[(s["platform"] == p) & (s["model"] == name)].set_index("feature").reindex(features)
-            marker, fill = MODEL_MARKER[name]
+            marker, fill = {**MODEL_MARKER, **LOGISTIC_MARKER}[name]
             ax.hlines(y + off, 0, d["selection_freq"], color=PLATFORM_COLOR[p], lw=2, alpha=0.45)
             ax.scatter(d["selection_freq"], y + off, s=30, marker=marker, zorder=3, linewidths=1.2,
                        edgecolors=INK_2, facecolors=INK_2 if fill == "full" else "none", label=name)
             for yi, missing in zip(y, d["selection_freq"].isna()):
-                if missing and name == "Lasso":
+                if missing and name == lasso:
                     ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
                                 fontsize=8, color=INK_MUTED, style="italic")
-        en_mix = s.loc[(s["platform"] == p) & (s["model"] == "Elastic net"), "l1_ratio"]
+        en_mix = s.loc[(s["platform"] == p) & (s["model"] == enet), "l1_ratio"]
         if len(en_mix) and en_mix.iloc[0] < 0.5:
             ax.annotate(f"Elastic net chose a ridge-like mix (l1 = {en_mix.iloc[0]:.1f}),\nso it keeps nearly "
                         "everything: read Lasso here", (0.98, 0.005), xycoords="axes fraction", ha="right",
@@ -237,24 +239,26 @@ def stability_plot(stab: pd.DataFrame, platforms: list[str], path):
     plt.close(fig)
 
 
-def importance_plot(imp: pd.DataFrame, platforms: list[str], level: str, title: str, path):
-    """Permutation importance: rise in held-out MAE (pts) when a feature / group is shuffled; ±95% over splits."""
+def importance_plot(imp: pd.DataFrame, platforms: list[str], level: str, title: str, path, metric: str = "mae_rise",
+                    xlabel: str = "Rise in held-out MAE when shuffled (pts)"):
+    """Permutation importance: change in a held-out score (`metric`, e.g. MAE rise) when a feature / group is
+    shuffled; ±95% over splits."""
     d_all = imp[(imp["level"] == level) & imp["platform"].isin(platforms)]
-    units = list(dict.fromkeys(d_all.sort_values("mae_rise_mean", ascending=False)["unit"]))
+    units = list(dict.fromkeys(d_all.sort_values(f"{metric}_mean", ascending=False)["unit"]))
     fig, axes = plt.subplots(1, len(platforms), figsize=(4.4 * len(platforms), 0.38 * len(units) + 1.6),
                              sharey=True, squeeze=False)
     for ax, p in zip(axes[0], platforms):
         d = d_all[d_all["platform"] == p].set_index("unit").reindex(units)
         y = np.arange(len(units))
         ax.axvline(0, color=INK_MUTED, lw=1)
-        ax.hlines(y, d["mae_rise_lo"], d["mae_rise_hi"], color=PLATFORM_COLOR[p], lw=2, alpha=0.5)
-        ax.scatter(d["mae_rise_mean"], y, s=40, color=PLATFORM_COLOR[p], zorder=3)
-        for yi, missing in zip(y, d["mae_rise_mean"].isna()):
+        ax.hlines(y, d[f"{metric}_lo"], d[f"{metric}_hi"], color=PLATFORM_COLOR[p], lw=2, alpha=0.5)
+        ax.scatter(d[f"{metric}_mean"], y, s=40, color=PLATFORM_COLOR[p], zorder=3)
+        for yi, missing in zip(y, d[f"{metric}_mean"].isna()):
             if missing:
                 ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
                             fontsize=8, color=INK_MUTED, style="italic")
         ax.set_title("Pooled (check)" if p == "pooled" else p)
-        ax.set_xlabel("Rise in held-out MAE when shuffled (pts)")
+        ax.set_xlabel(xlabel)
         ax.grid(axis="y", visible=False)
     axes[0][0].set_yticks(np.arange(len(units)))
     axes[0][0].set_yticklabels([textwrap.shorten(label(u), 44, placeholder="…") for u in units], fontsize=8.5)

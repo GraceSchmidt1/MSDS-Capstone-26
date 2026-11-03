@@ -268,9 +268,9 @@ def permutation_importance_cv(fs: FeatureSet, splits, name: str, config: dict, g
     return pd.DataFrame(rows)
 
 
-def summarize_importance(perm: pd.DataFrame) -> pd.DataFrame:
-    """Mean MAE rise across splits, its 2.5-97.5% spread, and the share of splits where it helped (>0)."""
-    g = perm.groupby(["platform", "level", "unit"], sort=False)["mae_rise"]
-    out = pd.DataFrame({"mae_rise_mean": g.mean(), "mae_rise_lo": g.quantile(0.025),
-                        "mae_rise_hi": g.quantile(0.975), "share_splits_helpful": g.apply(lambda s: (s > 0).mean())})
+def summarize_importance(perm: pd.DataFrame, metric: str = "mae_rise") -> pd.DataFrame:
+    """Mean score loss (`metric`) across splits, its 2.5-97.5% spread, and the share of splits where it helped (>0)."""
+    g = perm.groupby(["platform", "level", "unit"], sort=False)[metric]
+    out = pd.DataFrame({f"{metric}_mean": g.mean(), f"{metric}_lo": g.quantile(0.025),
+                        f"{metric}_hi": g.quantile(0.975), "share_splits_helpful": g.apply(lambda s: (s > 0).mean())})
     return out.reset_index()
