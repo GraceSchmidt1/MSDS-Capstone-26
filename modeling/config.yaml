@@ -94,7 +94,7 @@ sensitivity:
 # Stage 1 classification: high vs. low engagement. A label rule is fit on training posts only and
 # applied to held-out posts, separately per platform ("high" always means high for that platform).
 classification:
-  main_label: reach_adjusted
+  main_label: reach_spline      # was reach_adjusted until 2026-11-03 (C5: the line left curved reach in the label)
   labels:
     reach_adjusted: {type: reach_adjusted}   # rate above what reach alone predicts (median residual of a
                                              # rate ~ log2(impressions) fit), i.e. beat expectation for its reach

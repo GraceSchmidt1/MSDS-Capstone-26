@@ -59,12 +59,13 @@ Scope decisions:
 - **The duplicated LinkedIn metrics on 2026-03-20 are left as is** (two posts
   sharing one native metrics row; flagged in the EDA, not corrected).
 
-Next (`classification` branch): Stage 1 classification, high vs. low engagement
-(C1 labels and C2 logistic/tree done; C3 penalized logistic, stability and
-importance in progress), then the label-definition check, then the
-quantitative evaluation framework (see "Planned: quantitative evaluation
-framework" below), then the classification write-up (notebook 03) and PR,
-then Stage 2 recommendations.
+Next (`classification` branch): Stage 1 classification, high vs. low engagement.
+Done: C1 labels, C2 logistic/tree, C3 penalized logistic with stability and
+importance, C4 label-definition check, evaluation framework items 1–3, and C5
+spline reach adjustment (`reach_spline`, now the main label; see
+`FINDINGS.md`). Remaining: evaluation framework items 4–7 (see "Planned:
+quantitative evaluation framework" below), the classification write-up
+(notebook 03) and PR, then Stage 2 recommendations.
 
 ### Exploratory analysis (`EDA` branch)
 
@@ -151,7 +152,7 @@ sizes and confidence intervals.
 | # | Test | Already in place | To do |
 |---|---|---|---|
 | 1 | **Regression:** coefficient t-tests, 95% CIs, standardized β; R², adjusted R², RMSE, MAE | OLS coefficients with HC3 CIs and p-values; R² / adjusted R² (`fit_stats.csv`); CV MAE and RMSE | Add t-statistics and standardized β to the OLS table; report as "a one-unit increase in X is associated with β pts (p = …)" |
-| 2 | **High vs. low classification:** median-split label; logistic (Wald χ², odds ratios); random forest benchmark; accuracy, precision, recall, F1, ROC-AUC | `above_median` label; logistic odds ratios with CIs and p-values (C2); CV AUC, balanced accuracy, Brier, log loss | Wald χ² per feature and jointly per feature group; accuracy / precision / recall / F1 in the CV scores; random forest benchmark (+ permutation importance); report `above_median` alongside the main `reach_adjusted` label |
+| 2 | **High vs. low classification:** median-split label; logistic (Wald χ², odds ratios); random forest benchmark; accuracy, precision, recall, F1, ROC-AUC | `above_median` label; logistic odds ratios with CIs and p-values (C2); CV AUC, balanced accuracy, Brier, log loss | Wald χ² per feature and jointly per feature group; accuracy / precision / recall / F1 in the CV scores; random forest benchmark (+ permutation importance); report `above_median` alongside the main label (`reach_spline` since C5; `reach_adjusted` before) |
 | 3 | **Which drivers matter most:** ranked table (feature, effect size, p-value) | Pieces exist separately (OLS, regularized, importance) | One ranked table per platform: standardized β (regression), odds ratio (logistic), permutation importance (tree-based benchmark) |
 | 4 | **Do segments / pillars differ?** One-way ANOVA (F, p), Tukey HSD post-hoc | Not started | Per platform, for content pillar and ICP segment; check with Welch ANOVA or Kruskal–Wallis, since rates are skewed with unequal variances. Multi-segment posts handled as in row 5 |
 | 5 | **Multi-segment dependence:** naive vs. clustered SEs | Main models avoid the problem (one row per post, 0/1 segment columns); pooled model clusters by content piece | Build the exploded data (one row per post × ICP segment); compare naive OLS SEs with post-clustered SEs (table: model, coefficient, SE, ratio). Same comparison for cross-posted content in the pooled model |
