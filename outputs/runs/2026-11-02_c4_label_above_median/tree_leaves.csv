@@ -1,0 +1,24 @@
+platform,leaf,rule,posts,high,share_high
+Facebook,2,impressions ≤ 21 AND impressions ≤ 6,12,3,0.25
+Facebook,4,impressions ≤ 21 AND impressions > 6 AND not ICP: Oncology Operations Leader,25,11,0.44
+Facebook,5,impressions ≤ 21 AND impressions > 6 AND ICP: Oncology Operations Leader,44,34,0.7727272727272727
+Facebook,7,impressions > 21 AND not AFTER_11,19,9,0.47368421052631576
+Facebook,9,impressions > 21 AND AFTER_11 AND impressions ≤ 28,13,0,0.0
+Facebook,10,impressions > 21 AND AFTER_11 AND impressions > 28,10,4,0.4
+Instagram,3,impressions ≤ 29 AND not Format: Carousel AND impressions ≤ 17,27,21,0.7777777777777778
+Instagram,4,impressions ≤ 29 AND not Format: Carousel AND impressions > 17,47,23,0.48936170212765956
+Instagram,5,impressions ≤ 29 AND Format: Carousel,16,15,0.9375
+Instagram,8,impressions > 29 AND impressions ≤ 42 AND impressions ≤ 34,10,1,0.1
+Instagram,9,impressions > 29 AND impressions ≤ 42 AND impressions > 34,12,5,0.4166666666666667
+Instagram,10,impressions > 29 AND impressions > 42,18,0,0.0
+LinkedIn,3,not Format: Link AND not Format: Document AND not AFTER_11,61,37,0.6065573770491803
+LinkedIn,4,not Format: Link AND not Format: Document AND AFTER_11,45,17,0.37777777777777777
+LinkedIn,5,not Format: Link AND Format: Document,13,11,0.8461538461538461
+LinkedIn,6,Format: Link,18,3,0.16666666666666666
+pooled,2,impressions ≤ 16 AND impressions ≤ 7,16,6,0.375
+pooled,4,impressions ≤ 16 AND impressions > 7 AND not ICP: Oncology Financial Leader,61,44,0.7213114754098361
+pooled,5,impressions ≤ 16 AND impressions > 7 AND ICP: Oncology Financial Leader,11,11,1.0
+pooled,8,impressions > 16 AND not Format: Video AND not Format: Document,255,116,0.4549019607843137
+pooled,9,impressions > 16 AND not Format: Video AND Format: Document,13,11,0.8461538461538461
+pooled,11,impressions > 16 AND Format: Video AND not Platform: LinkedIn,21,0,0.0
+pooled,12,impressions > 16 AND Format: Video AND Platform: LinkedIn,13,6,0.46153846153846156

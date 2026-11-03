@@ -1,0 +1,4 @@
+rule,platform,threshold_pct
+top_tercile,Facebook,16.6667
+top_tercile,Instagram,20.0
+top_tercile,LinkedIn,8.9721288
