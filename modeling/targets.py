@@ -16,6 +16,9 @@ line), so "high" always means high *for that platform*.
                   regression, robust to extreme small-reach posts); label = 1 if the post's residual is above
                   the median training residual, i.e. it beat the typical rate for its reach. Using the median
                   residual as the cut keeps the classes ~50/50. Posts at the cut (within 1e-9) are 0.
+  reach_spline    as reach_adjusted, but the median rate is a cubic spline in log2(impressions) (knots at
+                  training-reach quantiles, linear beyond the outer knots), so a curved reach–rate pattern is
+                  removed too, not just the straight-line part.
 """
 from __future__ import annotations
 
@@ -71,7 +74,9 @@ class LabelRule:
         return out
 
     def describe(self) -> pd.DataFrame:
-        return pd.DataFrame([{"rule": self.name, "platform": p, **v} for p, v in self.params.items()])
+        # Keys starting with "_" hold fitted objects used by label(), not reportable values.
+        return pd.DataFrame([{"rule": self.name, "platform": p, **{k: x for k, x in v.items() if not k.startswith("_")}}
+                             for p, v in self.params.items()])
 
 
 class QuantileRule(LabelRule):
@@ -113,12 +118,41 @@ class ReachAdjustedRule(LabelRule):
         return ((y - expected) - params["residual_threshold"] > self.TIE_TOL).astype(int)
 
 
+class ReachSplineRule(LabelRule):
+    def __init__(self, config: dict, name: str, n_knots: int):
+        super().__init__(config)
+        self.name, self.n_knots = name, n_knots
+
+    TIE_TOL = ReachAdjustedRule.TIE_TOL
+
+    def _fit_platform(self, y, reach):
+        if reach is None:
+            raise ValueError("reach_spline labels need log2_impressions in the features")
+        from sklearn.linear_model import QuantileRegressor
+        from sklearn.preprocessing import SplineTransformer
+        # Knots at training-reach quantiles; linear extrapolation so held-out posts outside the training
+        # reach range get a sensible expected rate. include_bias=False: the regression has its own intercept.
+        spline = SplineTransformer(n_knots=self.n_knots, degree=3, knots="quantile", extrapolation="linear",
+                                   include_bias=False).fit(reach.reshape(-1, 1))
+        fit = QuantileRegressor(quantile=0.5, alpha=0, solver="highs").fit(spline.transform(reach.reshape(-1, 1)), y)
+        resid = y - fit.predict(spline.transform(reach.reshape(-1, 1)))
+        knots = 2 ** spline.bsplines_[0].t[3:-3]
+        return {"knots_impressions": " ".join(f"{k:.1f}" for k in knots),
+                "residual_threshold": float(np.median(resid)), "_spline": spline, "_fit": fit}
+
+    def _label_platform(self, params, y, reach):
+        expected = params["_fit"].predict(params["_spline"].transform(reach.reshape(-1, 1)))
+        return ((y - expected) - params["residual_threshold"] > self.TIE_TOL).astype(int)
+
+
 def make_label_rule(name: str, config: dict) -> LabelRule:
     spec = config["classification"]["labels"][name]
     if spec["type"] == "quantile":
         return QuantileRule(config, float(spec["q"]), name)
     if spec["type"] == "reach_adjusted":
         return ReachAdjustedRule(config, name)
+    if spec["type"] == "reach_spline":
+        return ReachSplineRule(config, name, int(spec["n_knots"]))
     raise ValueError(f"Unknown label type: {spec['type']}")
 
 

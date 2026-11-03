@@ -68,25 +68,41 @@ def test_reach_adjusted_rule_matches_definition(prepared, platform):
     np.testing.assert_array_equal(rule.label(fs), (resid - np.median(resid) > 1e-9).astype(int))
 
 
+@pytest.mark.parametrize("name", ["reach_adjusted", "reach_spline"])
 @pytest.mark.parametrize("platform", CONFIG["platforms"] + [POOLED])
-def test_reach_adjusted_labels_do_not_hinge_on_float_noise(prepared, platform, monkeypatch):
+def test_reach_adjusted_labels_do_not_hinge_on_float_noise(prepared, platform, name, monkeypatch):
     """Across all CV training folds, labels are identical whether ties are judged at 1e-9 or 1e-6."""
-    from modeling.targets import ReachAdjustedRule
     fs = build_features(prepared, platform, CONFIG)
     splits = cv_splits(fs, CONFIG["cv"]["n_splits"], CONFIG["cv"]["n_repeats"], CONFIG["seed"])
-    rules = [make_label_rule("reach_adjusted", CONFIG).fit(fs, tr) for tr, _ in splits]
+    rules = [make_label_rule(name, CONFIG).fit(fs, tr) for tr, _ in splits]
     strict = [r.label(fs) for r in rules]
-    monkeypatch.setattr(ReachAdjustedRule, "TIE_TOL", 1e-6)
+    monkeypatch.setattr(type(rules[0]), "TIE_TOL", 1e-6)
     for r, lab in zip(rules, strict):
         np.testing.assert_array_equal(r.label(fs), lab)
 
 
+@pytest.mark.parametrize("name", ["reach_adjusted", "reach_spline"])
 @pytest.mark.parametrize("platform", CONFIG["platforms"])
-def test_reach_adjusted_label_is_not_a_reach_proxy(prepared, platform):
-    """The main label should be nearly uncorrelated with reach (unlike above-median on Instagram)."""
+def test_reach_adjusted_label_is_not_a_reach_proxy(prepared, platform, name):
+    """The reach-adjusted labels should be nearly uncorrelated with reach (unlike above-median on Instagram)."""
     fs = build_features(prepared, platform, CONFIG)
-    lab = make_label_rule("reach_adjusted", CONFIG).fit(fs).label(fs)
+    lab = make_label_rule(name, CONFIG).fit(fs).label(fs)
     assert abs(np.corrcoef(lab, fs.X["log2_impressions"])[0, 1]) < 0.15
+
+
+@pytest.mark.parametrize("platform", CONFIG["platforms"])
+def test_reach_spline_removes_a_curved_reach_pattern(prepared, platform):
+    """With a U-shaped rate–reach curve, the straight line leaves the middle third mostly "low"; the spline
+    labels every reach third close to 50/50."""
+    fs = build_features(prepared, platform, CONFIG)
+    reach = fs.X["log2_impressions"].to_numpy()
+    noise = np.random.default_rng(0).normal(0, 0.5, len(reach))
+    curved = replace(fs, y=fs.y * 0 + 10 + 3 * (reach - np.median(reach)) ** 2 + noise)
+    thirds = np.digitize(reach, np.quantile(reach, [1 / 3, 2 / 3]))
+    share = {n: [make_label_rule(n, CONFIG).fit(curved).label(curved)[thirds == k].mean() for k in range(3)]
+             for n in ["reach_adjusted", "reach_spline"]}
+    assert share["reach_adjusted"][1] < 0.25
+    assert all(abs(s - 0.5) < 0.2 for s in share["reach_spline"])
 
 
 @pytest.mark.parametrize("name", LABELS)
@@ -125,5 +141,6 @@ def test_errors(prepared):
     with pytest.raises(ValueError):
         make_label_rule("x", bad)
     no_reach = replace(fs, X=fs.X.drop(columns="log2_impressions"))
-    with pytest.raises(ValueError):
-        make_label_rule("reach_adjusted", CONFIG).fit(no_reach)
+    for name in ("reach_adjusted", "reach_spline"):
+        with pytest.raises(ValueError):
+            make_label_rule(name, CONFIG).fit(no_reach)
