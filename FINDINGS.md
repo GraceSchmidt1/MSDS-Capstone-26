@@ -192,6 +192,73 @@ Stable lasso effects (odds ratios) and whether they hold across knots:
   4 knots, but not 5.
 - Facebook stays weak: no effect is stable at 4 or 5 knots.
 
+## Evaluation framework, items 3–7 (run `2026-11-04_eval_framework`, commits `00c9260` code, `50d578b`, `493168d`)
+
+Two outcomes: **rate** and **rate vs. reach** (rate minus the spline-expected rate for the post's reach).
+Items 3 and 6 read the committed runs `2026-11-03_eval_regression` and `2026-11-03_eval_label_reach_spline`.
+BH = Benjamini–Hochberg false-discovery-rate adjustment; Holm = family-wise.
+
+**Item 4: pillars and ICP segments do not differ detectably on any platform.**
+- Single-tag posts (87–133 per test), ANOVA / Welch / Kruskal–Wallis: no test has BH-adjusted p < 0.05
+  (smallest 0.18). Uncorrected, only Facebook pillar on rate vs. reach approaches it (ANOVA p = 0.059,
+  Kruskal p = 0.051; post-clustered test on all posts p = 0.037, BH 0.23).
+- Effect sizes are small: ω² ≤ 0.05 everywhere (pillar or ICP explains ≤ 5% of rate variance).
+- **Tukey HSD: no pair of pillars or segments differs** on any platform or outcome.
+
+**Item 5: duplicated rows do not distort the SEs; unequal variance does.**
+- Post × tag rows (multi-segment posts repeated): post-clustered SE / naive SE = 0.64–1.39 (median
+  ≈ 0.8–1.0); clustered / HC3 = 0.76–1.00. Repeating a post across its segments does not inflate
+  uncertainty here. Two uncorrected flips (FB Patient-Centered Storytelling, LI Technical Leader become
+  p < 0.05 when clustered), neither survives multiple testing.
+- Pooled model (cross-posted content): clustered / naive up to **1.8× for reach and Document**, 1.6× for
+  Platform: LinkedIn, 1.25× for Link; pooled Document p goes 0.001 (naive) → 0.050 (clustered). But
+  clustered / HC3 is 0.69–1.06: the inflation is heteroscedasticity (e.g. Document posts' rates vary
+  widely), not cross-posting. **Naive (non-robust) SEs should not be used; robust or clustered SEs are.**
+  Simple Status goes the other way (0.53×, p 0.11 → 0.003) with only 6 posts: don't trust that p.
+
+**Item 7: effect sizes** (Hedges' g on rate vs. reach unless noted; formats vs. Image; 95% CI excluding 0):
+
+| Platform | Feature | g (95% CI) | Size |
+|---|---|---|---|
+| LinkedIn | Document (13 posts) | **2.17 (1.50 to 2.84)**, +14 pts | very large |
+| LinkedIn | Multi-Image (10) | 1.52 (0.83 to 2.22) | large |
+| LinkedIn | Link (18) / Simple Status (6) | −1.11 / −1.10 | large |
+| Instagram | Carousel (28) | 0.49 (0.06 to 0.92) | medium |
+| Instagram | Events & Partnerships (23) | 0.48 (0.03 to 0.94) | medium |
+| Instagram | Operations Leader (87) | −0.45 (−0.82 to −0.08) | medium |
+| Instagram | Video, raw rate only | −1.79 on rate, n.s. on rate vs. reach | reach effect |
+| Facebook | Product Development pillar (9) / Operations Leader (82) | 0.82 / 0.41 | CIs near 0 |
+| Pooled | Document / Multi-Image / Link | 1.87 / 0.51 / −0.48 | |
+
+CIs are unadjusted. Partial R² (share of remaining variance a group explains, in-sample OLS):
+- **LinkedIn Format 0.19 of rate, 0.36 of rate vs. reach**; every other LinkedIn group ≤ 0.05.
+- **Instagram reach 0.42 of raw rate**, ≈ 0 of rate vs. reach (the spline removes it); format, ICP and
+  pillar 0.02–0.06.
+- Facebook: every group ≤ 0.09. Pooled: Format 0.09 / 0.15, reach 0.08 of rate.
+- Pillar and ICP never exceed 0.08 anywhere, consistent with item 4.
+
+**Item 6: CV as mean ± SD across the 50 splits** (`cv_mean_sd.csv`):
+- Regression R² (elastic net): IG 0.44 ± 0.15, pooled 0.24 ± 0.08, FB −0.05 ± 0.07, LI −0.01 ± 0.30.
+  The LinkedIn SD shows how unstable that number is.
+- Classification AUC, reach-spline label (ridge / forest): FB 0.60 ± 0.10 / 0.64 ± 0.11, IG 0.66 ± 0.11 /
+  0.67 ± 0.10, LI 0.66 ± 0.10 / 0.65 ± 0.08, pooled 0.60 ± 0.05 / 0.64 ± 0.05. Per-platform SDs ≈ 0.1: the
+  per-platform AUCs overlap, so differences of < 0.05 between models are not meaningful.
+
+**Item 3: ranked drivers (`driver_ranking.csv`). Per-feature p-values mostly do not survive multiple
+testing:**
+- Within each platform (BH over its 13–17 features), only **Instagram reach** (regression) survives on a
+  single platform. **LinkedIn Document: regression p 0.030 → BH 0.52; logistic p 0.061 → BH 0.35.**
+- Pooled survivors: Platform: Instagram, reach, Video, Simple Status (regression, also Holm), and
+  **Link** (logistic, BH and Holm 0.035).
+- **Group-level tests do survive:** BH across feature groups on the joint Wald χ² (reach-spline
+  label): LinkedIn Format p = 0.006 → 0.037, pooled Format < 0.001 → 0.001; no other group < 0.24.
+- Features with ≥ 2 independent lines of support (BH-significant p and / or stable lasso in regression
+  and logistic): LinkedIn Document; Instagram Carousel, Financial Leader, reach; pooled Link,
+  Document, Carousel, Video, Simple Status, reach, Platform: Instagram.
+- **Reporting rule that follows:** claim *format matters* (group test, survives correction, large effect
+  sizes, stable across labels) rather than single-feature p-values. Present single features with effect
+  sizes, CIs and stability, flagged as exploratory where their adjusted p ≥ 0.05.
+
 ## Methodological and code findings
 
 - **saga all-zero intercept (2026-11-02):** when every coefficient is zero, scikit-learn's saga stops after

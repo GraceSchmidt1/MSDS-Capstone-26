@@ -61,11 +61,11 @@ Scope decisions:
 
 Next (`classification` branch): Stage 1 classification, high vs. low engagement.
 Done: C1 labels, C2 logistic/tree, C3 penalized logistic with stability and
-importance, C4 label-definition check, evaluation framework items 1–3, and C5
-spline reach adjustment (`reach_spline`, now the main label; see
-`FINDINGS.md`). Remaining: evaluation framework items 4–7 (see "Planned:
-quantitative evaluation framework" below), the classification write-up
-(notebook 03) and PR, then Stage 2 recommendations.
+importance, C4 label-definition check, C5 spline reach adjustment
+(`reach_spline`, now the main label), and the quantitative evaluation
+framework, items 1–7 (see "Quantitative evaluation framework" below; results in
+`FINDINGS.md`). Remaining: the classification write-up (notebook 03) and PR,
+then Stage 2 recommendations.
 
 ### Exploratory analysis (`EDA` branch)
 
@@ -141,7 +141,13 @@ log target), LinkedIn ≈0 (MAE 8% lower than the mean; 0.19 without one
 
 Coefficients are associations, not causal effects.
 
-## Planned: quantitative evaluation framework (added 2026-11-02)
+## Quantitative evaluation framework (added 2026-11-02; done 2026-11-04)
+
+**Status:** items 1–2 are in `run_regression` / `run_classification`; items 3–7 are
+`modeling/evaluate.py`, run with `python -m modeling.run_evaluation --tag <name>`
+(run `outputs/runs/2026-11-04_eval_framework`). Results and the reporting rule
+they imply are in `FINDINGS.md`. The table below is the original plan. Candidate
+new features (day of week, posting hour, segment count) are not yet added.
 
 **Goal:** every methodological claim gets a defined statistical test and an effect
 size, not only stability or importance checks (e.g., section 5 of notebook 02
