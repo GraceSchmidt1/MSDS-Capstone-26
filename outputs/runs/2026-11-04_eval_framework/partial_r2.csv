@@ -1,0 +1,175 @@
+platform,outcome,level,unit,n_features,partial_r2,full_r2
+Facebook,rate,feature,log2_impressions,1,0.024466495614918937,0.1599709691327592
+Facebook,rate,feature,ICP: Oncology Clinic Leader,1,0.0005991583175253739,0.1599709691327592
+Facebook,rate,feature,ICP: Oncology Financial Leader,1,0.01991047511892633,0.1599709691327592
+Facebook,rate,feature,ICP: Oncology Operations Leader,1,0.006381214573219253,0.1599709691327592
+Facebook,rate,feature,ICP: Oncology Technical Leader,1,0.00036026663014580986,0.1599709691327592
+Facebook,rate,feature,Pillar: Events & Partnerships,1,0.009287161180258553,0.1599709691327592
+Facebook,rate,feature,Pillar: Patient-Centered Storytelling,1,0.0005551605381138874,0.1599709691327592
+Facebook,rate,feature,Pillar: Product Development & Innovations,1,0.003964762641885268,0.1599709691327592
+Facebook,rate,feature,Pillar: Team Spotlights & Company Culture,1,0.012004559004831791,0.1599709691327592
+Facebook,rate,feature,Format: Multi-Image,1,0.003960735130518869,0.1599709691327592
+Facebook,rate,feature,Format: Video,1,0.006889258220419234,0.1599709691327592
+Facebook,rate,feature,Format: Link,1,0.06693878277795534,0.1599709691327592
+Facebook,rate,feature,WEEKEND,1,0.009494443102838309,0.1599709691327592
+Facebook,rate,feature,AFTER_11,1,0.0042575851933538324,0.1599709691327592
+Facebook,rate,group,Reach (impressions),1,0.024466495614918937,0.1599709691327592
+Facebook,rate,group,ICP segment,4,0.03338015604827233,0.1599709691327592
+Facebook,rate,group,Content pillar,4,0.02719149383950714,0.1599709691327592
+Facebook,rate,group,Format,3,0.08511185983476763,0.1599709691327592
+Facebook,rate,group,Timing,2,0.013361401641979017,0.1599709691327592
+Facebook,rate_vs_reach,feature,log2_impressions,1,0.030578697875621307,0.17152292494736998
+Facebook,rate_vs_reach,feature,ICP: Oncology Clinic Leader,1,0.00023034722975590337,0.17152292494736998
+Facebook,rate_vs_reach,feature,ICP: Oncology Financial Leader,1,0.01679340707372837,0.17152292494736998
+Facebook,rate_vs_reach,feature,ICP: Oncology Operations Leader,1,0.028985863170210766,0.17152292494736998
+Facebook,rate_vs_reach,feature,ICP: Oncology Technical Leader,1,0.004907452893347158,0.17152292494736998
+Facebook,rate_vs_reach,feature,Pillar: Events & Partnerships,1,0.013148507122275391,0.17152292494736998
+Facebook,rate_vs_reach,feature,Pillar: Patient-Centered Storytelling,1,0.0026647866560650037,0.17152292494736998
+Facebook,rate_vs_reach,feature,Pillar: Product Development & Innovations,1,0.03901806459055214,0.17152292494736998
+Facebook,rate_vs_reach,feature,Pillar: Team Spotlights & Company Culture,1,0.007498786011582869,0.17152292494736998
+Facebook,rate_vs_reach,feature,Format: Multi-Image,1,0.010033404224496882,0.17152292494736998
+Facebook,rate_vs_reach,feature,Format: Video,1,0.001358478862499331,0.17152292494736998
+Facebook,rate_vs_reach,feature,Format: Link,1,0.04763167862267715,0.17152292494736998
+Facebook,rate_vs_reach,feature,WEEKEND,1,0.0016328176326150315,0.17152292494736998
+Facebook,rate_vs_reach,feature,AFTER_11,1,0.001687659799210132,0.17152292494736998
+Facebook,rate_vs_reach,group,Reach (impressions),1,0.030578697875621307,0.17152292494736998
+Facebook,rate_vs_reach,group,ICP segment,4,0.050738924339575484,0.17152292494736998
+Facebook,rate_vs_reach,group,Content pillar,4,0.07697428607247676,0.17152292494736998
+Facebook,rate_vs_reach,group,Format,3,0.06506072957588101,0.17152292494736998
+Facebook,rate_vs_reach,group,Timing,2,0.003232512204080787,0.17152292494736998
+Instagram,rate,feature,log2_impressions,1,0.4223462046741597,0.5849131801620127
+Instagram,rate,feature,ICP: Oncology Clinic Leader,1,0.012878433355140516,0.5849131801620127
+Instagram,rate,feature,ICP: Oncology Financial Leader,1,0.022908666777463515,0.5849131801620127
+Instagram,rate,feature,ICP: Oncology Operations Leader,1,0.004983742410939849,0.5849131801620127
+Instagram,rate,feature,ICP: Oncology Technical Leader,1,0.00048191048806785523,0.5849131801620127
+Instagram,rate,feature,Pillar: Events & Partnerships,1,0.011943399245439518,0.5849131801620127
+Instagram,rate,feature,Pillar: Patient-Centered Storytelling,1,0.001500645124530555,0.5849131801620127
+Instagram,rate,feature,Pillar: Product Development & Innovations,1,0.004500860822892985,0.5849131801620127
+Instagram,rate,feature,Pillar: Team Spotlights & Company Culture,1,0.0005776931632698529,0.5849131801620127
+Instagram,rate,feature,Format: Carousel,1,0.05341336274161999,0.5849131801620127
+Instagram,rate,feature,Format: Video,1,0.006314934332144152,0.5849131801620127
+Instagram,rate,feature,WEEKEND,1,0.0009047855704807063,0.5849131801620127
+Instagram,rate,feature,AFTER_11,1,0.0008077086069932728,0.5849131801620127
+Instagram,rate,group,Reach (impressions),1,0.4223462046741597,0.5849131801620127
+Instagram,rate,group,ICP segment,4,0.06365150596456978,0.5849131801620127
+Instagram,rate,group,Content pillar,4,0.01982477833687765,0.5849131801620127
+Instagram,rate,group,Format,2,0.05446846916869811,0.5849131801620127
+Instagram,rate,group,Timing,2,0.001660420726743959,0.5849131801620127
+Instagram,rate_vs_reach,feature,log2_impressions,1,0.001486791387941655,0.16367687708182743
+Instagram,rate_vs_reach,feature,ICP: Oncology Clinic Leader,1,0.00013616537605273064,0.16367687708182743
+Instagram,rate_vs_reach,feature,ICP: Oncology Financial Leader,1,0.02477007659255673,0.16367687708182743
+Instagram,rate_vs_reach,feature,ICP: Oncology Operations Leader,1,0.027009491123390045,0.16367687708182743
+Instagram,rate_vs_reach,feature,ICP: Oncology Technical Leader,1,0.0035546762764751497,0.16367687708182743
+Instagram,rate_vs_reach,feature,Pillar: Events & Partnerships,1,0.02385736634810528,0.16367687708182743
+Instagram,rate_vs_reach,feature,Pillar: Patient-Centered Storytelling,1,2.613006705691078e-05,0.16367687708182743
+Instagram,rate_vs_reach,feature,Pillar: Product Development & Innovations,1,0.017710962359982534,0.16367687708182743
+Instagram,rate_vs_reach,feature,Pillar: Team Spotlights & Company Culture,1,7.316961021257829e-07,0.16367687708182743
+Instagram,rate_vs_reach,feature,Format: Carousel,1,0.03775011055723349,0.16367687708182743
+Instagram,rate_vs_reach,feature,Format: Video,1,0.005285531849409857,0.16367687708182743
+Instagram,rate_vs_reach,feature,WEEKEND,1,0.0018256054796736663,0.16367687708182743
+Instagram,rate_vs_reach,feature,AFTER_11,1,0.004082415058925676,0.16367687708182743
+Instagram,rate_vs_reach,group,Reach (impressions),1,0.001486791387941655,0.16367687708182743
+Instagram,rate_vs_reach,group,ICP segment,4,0.05763981378364164,0.16367687708182743
+Instagram,rate_vs_reach,group,Content pillar,4,0.037425932876624525,0.16367687708182743
+Instagram,rate_vs_reach,group,Format,2,0.0495176742462635,0.16367687708182743
+Instagram,rate_vs_reach,group,Timing,2,0.005732934105503335,0.16367687708182743
+LinkedIn,rate,feature,log2_impressions,1,0.04909786691204389,0.30702703013826815
+LinkedIn,rate,feature,ICP: Oncology Clinic Leader,1,9.488455400292816e-05,0.30702703013826815
+LinkedIn,rate,feature,ICP: Oncology Financial Leader,1,0.0017154981717672887,0.30702703013826815
+LinkedIn,rate,feature,ICP: Oncology Operations Leader,1,5.54312399397389e-06,0.30702703013826815
+LinkedIn,rate,feature,ICP: Oncology Technical Leader,1,0.00012820173711651422,0.30702703013826815
+LinkedIn,rate,feature,Pillar: Events & Partnerships,1,0.0008530515402774256,0.30702703013826815
+LinkedIn,rate,feature,Pillar: Patient-Centered Storytelling,1,5.501341103829026e-05,0.30702703013826815
+LinkedIn,rate,feature,Pillar: Product Development & Innovations,1,0.005135460633806467,0.30702703013826815
+LinkedIn,rate,feature,Pillar: Team Spotlights & Company Culture,1,0.009044415048500096,0.30702703013826815
+LinkedIn,rate,feature,Format: Link,1,9.8061179007096e-05,0.30702703013826815
+LinkedIn,rate,feature,Format: Video,1,0.0011748956565836592,0.30702703013826815
+LinkedIn,rate,feature,Format: Document,1,0.14588506715017138,0.30702703013826815
+LinkedIn,rate,feature,Format: Multi-Image,1,0.028921813327067506,0.30702703013826815
+LinkedIn,rate,feature,Format: Simple Status,1,0.012281715340303237,0.30702703013826815
+LinkedIn,rate,feature,WEEKEND,1,5.672553513985251e-06,0.30702703013826815
+LinkedIn,rate,feature,AFTER_11,1,0.0008894846972763305,0.30702703013826815
+LinkedIn,rate,feature,BOOSTED,1,0.005421482032645538,0.30702703013826815
+LinkedIn,rate,group,Reach (impressions),1,0.04909786691204389,0.30702703013826815
+LinkedIn,rate,group,ICP segment,4,0.0021204361777769905,0.30702703013826815
+LinkedIn,rate,group,Content pillar,4,0.019254399752668763,0.30702703013826815
+LinkedIn,rate,group,Format,5,0.1920901430548818,0.30702703013826815
+LinkedIn,rate,group,Timing,2,0.0008990364082082437,0.30702703013826815
+LinkedIn,rate,group,Paid boost,1,0.005421482032645538,0.30702703013826815
+LinkedIn,rate_vs_reach,feature,log2_impressions,1,0.013522107312748008,0.410281971348611
+LinkedIn,rate_vs_reach,feature,ICP: Oncology Clinic Leader,1,0.0012985274099347487,0.410281971348611
+LinkedIn,rate_vs_reach,feature,ICP: Oncology Financial Leader,1,0.010658762932246412,0.410281971348611
+LinkedIn,rate_vs_reach,feature,ICP: Oncology Operations Leader,1,0.0003103432883066446,0.410281971348611
+LinkedIn,rate_vs_reach,feature,ICP: Oncology Technical Leader,1,0.0016591143188290428,0.410281971348611
+LinkedIn,rate_vs_reach,feature,Pillar: Events & Partnerships,1,0.0011779245924492159,0.410281971348611
+LinkedIn,rate_vs_reach,feature,Pillar: Patient-Centered Storytelling,1,0.0001713539906779275,0.410281971348611
+LinkedIn,rate_vs_reach,feature,Pillar: Product Development & Innovations,1,0.00034734004490974646,0.410281971348611
+LinkedIn,rate_vs_reach,feature,Pillar: Team Spotlights & Company Culture,1,4.445423480924812e-06,0.410281971348611
+LinkedIn,rate_vs_reach,feature,Format: Link,1,0.02130937379816611,0.410281971348611
+LinkedIn,rate_vs_reach,feature,Format: Video,1,2.2772740150605684e-06,0.410281971348611
+LinkedIn,rate_vs_reach,feature,Format: Document,1,0.2949790412510409,0.410281971348611
+LinkedIn,rate_vs_reach,feature,Format: Multi-Image,1,0.05191670462482317,0.410281971348611
+LinkedIn,rate_vs_reach,feature,Format: Simple Status,1,0.004447791356575844,0.410281971348611
+LinkedIn,rate_vs_reach,feature,WEEKEND,1,0.00018801264588108363,0.410281971348611
+LinkedIn,rate_vs_reach,feature,AFTER_11,1,0.0007084815239681754,0.410281971348611
+LinkedIn,rate_vs_reach,feature,BOOSTED,1,0.0017051377578784234,0.410281971348611
+LinkedIn,rate_vs_reach,group,Reach (impressions),1,0.013522107312748008,0.410281971348611
+LinkedIn,rate_vs_reach,group,ICP segment,4,0.015668611309139158,0.410281971348611
+LinkedIn,rate_vs_reach,group,Content pillar,4,0.0015864217724178861,0.410281971348611
+LinkedIn,rate_vs_reach,group,Format,5,0.36372557664739,0.410281971348611
+LinkedIn,rate_vs_reach,group,Timing,2,0.000914110224450044,0.410281971348611
+LinkedIn,rate_vs_reach,group,Paid boost,1,0.0017051377578784234,0.410281971348611
+pooled,rate,feature,log2_impressions,1,0.08245823396551016,0.31785543931769156
+pooled,rate,feature,ICP: Oncology Clinic Leader,1,0.0010213268187097386,0.31785543931769156
+pooled,rate,feature,ICP: Oncology Financial Leader,1,0.0012411101621456694,0.31785543931769156
+pooled,rate,feature,ICP: Oncology Operations Leader,1,0.0005869141380943667,0.31785543931769156
+pooled,rate,feature,ICP: Oncology Technical Leader,1,7.910334822708762e-07,0.31785543931769156
+pooled,rate,feature,Pillar: Events & Partnerships,1,6.911374591188647e-05,0.31785543931769156
+pooled,rate,feature,Pillar: Patient-Centered Storytelling,1,3.38836231251559e-06,0.31785543931769156
+pooled,rate,feature,Pillar: Product Development & Innovations,1,1.4091715907586267e-06,0.31785543931769156
+pooled,rate,feature,Pillar: Team Spotlights & Company Culture,1,0.0012742592726167643,0.31785543931769156
+pooled,rate,feature,Format: Multi-Image,1,0.011752564456074506,0.31785543931769156
+pooled,rate,feature,Format: Video,1,0.013920708635753351,0.31785543931769156
+pooled,rate,feature,Format: Link,1,0.017161209957368036,0.31785543931769156
+pooled,rate,feature,Format: Carousel,1,0.006484932114303063,0.31785543931769156
+pooled,rate,feature,Format: Document,1,0.03230763900106853,0.31785543931769156
+pooled,rate,feature,Format: Simple Status,1,0.006773260626880649,0.31785543931769156
+pooled,rate,feature,WEEKEND,1,0.0011752254515175035,0.31785543931769156
+pooled,rate,feature,AFTER_11,1,8.706983835937208e-05,0.31785543931769156
+pooled,rate,feature,BOOSTED,1,0.0017785504963060271,0.31785543931769156
+pooled,rate,feature,Platform: Instagram,1,0.046158098415244396,0.31785543931769156
+pooled,rate,feature,Platform: LinkedIn,1,0.009451090988643603,0.31785543931769156
+pooled,rate,group,Reach (impressions),1,0.08245823396551016,0.31785543931769156
+pooled,rate,group,ICP segment,4,0.002302075123438729,0.31785543931769156
+pooled,rate,group,Content pillar,4,0.0013915639332318366,0.31785543931769156
+pooled,rate,group,Format,6,0.09213422421127639,0.31785543931769156
+pooled,rate,group,Timing,2,0.0012586634438412727,0.31785543931769156
+pooled,rate,group,Paid boost,1,0.0017785504963060271,0.31785543931769156
+pooled,rate,group,Platform,2,0.046195052428971366,0.31785543931769156
+pooled,rate_vs_reach,feature,log2_impressions,1,0.00043707937552420737,0.16988933087940683
+pooled,rate_vs_reach,feature,ICP: Oncology Clinic Leader,1,0.0005103128813913503,0.16988933087940683
+pooled,rate_vs_reach,feature,ICP: Oncology Financial Leader,1,0.0012823688175144414,0.16988933087940683
+pooled,rate_vs_reach,feature,ICP: Oncology Operations Leader,1,0.0016867077553138713,0.16988933087940683
+pooled,rate_vs_reach,feature,ICP: Oncology Technical Leader,1,0.0003043642714650801,0.16988933087940683
+pooled,rate_vs_reach,feature,Pillar: Events & Partnerships,1,0.00012953553728059448,0.16988933087940683
+pooled,rate_vs_reach,feature,Pillar: Patient-Centered Storytelling,1,7.178817748178483e-06,0.16988933087940683
+pooled,rate_vs_reach,feature,Pillar: Product Development & Innovations,1,0.006384874752777991,0.16988933087940683
+pooled,rate_vs_reach,feature,Pillar: Team Spotlights & Company Culture,1,0.00133716983433506,0.16988933087940683
+pooled,rate_vs_reach,feature,Format: Multi-Image,1,0.014653369158203854,0.16988933087940683
+pooled,rate_vs_reach,feature,Format: Video,1,0.0013882874909574594,0.16988933087940683
+pooled,rate_vs_reach,feature,Format: Link,1,0.018858529852364234,0.16988933087940683
+pooled,rate_vs_reach,feature,Format: Carousel,1,0.010084086953038538,0.16988933087940683
+pooled,rate_vs_reach,feature,Format: Document,1,0.094584309031073,0.16988933087940683
+pooled,rate_vs_reach,feature,Format: Simple Status,1,0.0027745635651886223,0.16988933087940683
+pooled,rate_vs_reach,feature,WEEKEND,1,0.0007575193922856482,0.16988933087940683
+pooled,rate_vs_reach,feature,AFTER_11,1,0.0008625247197726743,0.16988933087940683
+pooled,rate_vs_reach,feature,BOOSTED,1,0.0009717518364428257,0.16988933087940683
+pooled,rate_vs_reach,feature,Platform: Instagram,1,0.0019725308946865654,0.16988933087940683
+pooled,rate_vs_reach,feature,Platform: LinkedIn,1,2.4871464590688636e-05,0.16988933087940683
+pooled,rate_vs_reach,group,Reach (impressions),1,0.00043707937552420737,0.16988933087940683
+pooled,rate_vs_reach,group,ICP segment,4,0.002655525881190227,0.16988933087940683
+pooled,rate_vs_reach,group,Content pillar,4,0.009814774801822171,0.16988933087940683
+pooled,rate_vs_reach,group,Format,6,0.14571046309007848,0.16988933087940683
+pooled,rate_vs_reach,group,Timing,2,0.001627535438254748,0.16988933087940683
+pooled,rate_vs_reach,group,Paid boost,1,0.0009717518364428257,0.16988933087940683
+pooled,rate_vs_reach,group,Platform,2,0.0021950955777765772,0.16988933087940683

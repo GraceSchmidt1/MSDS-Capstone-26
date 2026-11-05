@@ -1,0 +1,97 @@
+group1,group2,mean_diff,p_adj,ci_lo,ci_hi,reject,platform,factor,outcome
+Events & Partnerships,Patient-Centered Storytelling,-3.6106,0.9245,-15.8414,8.6203,False,Facebook,Content pillar,rate
+Events & Partnerships,Product Development & Innovations,3.1862,0.9328,-7.979,14.3513,False,Facebook,Content pillar,rate
+Events & Partnerships,Team Spotlights & Company Culture,-1.2948,0.9908,-9.1177,6.528,False,Facebook,Content pillar,rate
+Events & Partnerships,Thought Leadership & Industry Insights,2.8921,0.8079,-4.4172,10.2014,False,Facebook,Content pillar,rate
+Patient-Centered Storytelling,Product Development & Innovations,6.7967,0.6707,-7.3262,20.9197,False,Facebook,Content pillar,rate
+Patient-Centered Storytelling,Team Spotlights & Company Culture,2.3157,0.9817,-9.3459,13.9774,False,Facebook,Content pillar,rate
+Patient-Centered Storytelling,Thought Leadership & Industry Insights,6.5026,0.5057,-4.8209,17.8262,False,Facebook,Content pillar,rate
+Product Development & Innovations,Team Spotlights & Company Culture,-4.481,0.7636,-15.0196,6.0576,False,Facebook,Content pillar,rate
+Product Development & Innovations,Thought Leadership & Industry Insights,-0.2941,1.0,-10.4573,9.8691,False,Facebook,Content pillar,rate
+Team Spotlights & Company Culture,Thought Leadership & Industry Insights,4.1869,0.3565,-2.1239,10.4978,False,Facebook,Content pillar,rate
+Events & Partnerships,Patient-Centered Storytelling,0.4978,0.9999,-10.4476,11.4431,False,Facebook,Content pillar,rate_vs_reach
+Events & Partnerships,Product Development & Innovations,9.0506,0.0954,-0.9411,19.0423,False,Facebook,Content pillar,rate_vs_reach
+Events & Partnerships,Team Spotlights & Company Culture,0.2258,1.0,-6.7748,7.2265,False,Facebook,Content pillar,rate_vs_reach
+Events & Partnerships,Thought Leadership & Industry Insights,3.5899,0.5509,-2.9512,10.131,False,Facebook,Content pillar,rate_vs_reach
+Patient-Centered Storytelling,Product Development & Innovations,8.5528,0.3362,-4.0857,21.1914,False,Facebook,Content pillar,rate_vs_reach
+Patient-Centered Storytelling,Team Spotlights & Company Culture,-0.2719,1.0,-10.7079,10.164,False,Facebook,Content pillar,rate_vs_reach
+Patient-Centered Storytelling,Thought Leadership & Industry Insights,3.0922,0.9156,-7.0412,13.2256,False,Facebook,Content pillar,rate_vs_reach
+Product Development & Innovations,Team Spotlights & Company Culture,-8.8248,0.0783,-18.2557,0.6062,False,Facebook,Content pillar,rate_vs_reach
+Product Development & Innovations,Thought Leadership & Industry Insights,-5.4607,0.4601,-14.5557,3.6343,False,Facebook,Content pillar,rate_vs_reach
+Team Spotlights & Company Culture,Thought Leadership & Industry Insights,3.3641,0.4683,-2.2834,9.0117,False,Facebook,Content pillar,rate_vs_reach
+Oncology Clinic Leader,Oncology Financial Leader,3.9709,0.8062,-7.6295,15.5713,False,Facebook,ICP segment,rate
+Oncology Clinic Leader,Oncology Operations Leader,2.7722,0.7102,-4.037,9.5814,False,Facebook,ICP segment,rate
+Oncology Clinic Leader,Oncology Technical Leader,-0.2859,0.9998,-9.7389,9.167,False,Facebook,ICP segment,rate
+Oncology Financial Leader,Oncology Operations Leader,-1.1987,0.9907,-11.7213,9.3239,False,Facebook,ICP segment,rate
+Oncology Financial Leader,Oncology Technical Leader,-4.2568,0.8047,-16.6551,8.1415,False,Facebook,ICP segment,rate
+Oncology Operations Leader,Oncology Technical Leader,-3.0581,0.7552,-11.1522,5.0359,False,Facebook,ICP segment,rate
+Oncology Clinic Leader,Oncology Financial Leader,3.7106,0.7535,-6.0807,13.5019,False,Facebook,ICP segment,rate_vs_reach
+Oncology Clinic Leader,Oncology Operations Leader,5.1167,0.0986,-0.6306,10.864,False,Facebook,ICP segment,rate_vs_reach
+Oncology Clinic Leader,Oncology Technical Leader,0.0312,1.0,-7.9475,8.01,False,Facebook,ICP segment,rate_vs_reach
+Oncology Financial Leader,Oncology Operations Leader,1.4061,0.9757,-7.4754,10.2876,False,Facebook,ICP segment,rate_vs_reach
+Oncology Financial Leader,Oncology Technical Leader,-3.6794,0.7933,-14.1441,6.7854,False,Facebook,ICP segment,rate_vs_reach
+Oncology Operations Leader,Oncology Technical Leader,-5.0855,0.2149,-11.9172,1.7463,False,Facebook,ICP segment,rate_vs_reach
+Events & Partnerships,Patient-Centered Storytelling,-2.0649,0.9808,-12.3201,8.1902,False,Instagram,Content pillar,rate
+Events & Partnerships,Product Development & Innovations,-0.8706,0.9991,-10.3541,8.6129,False,Instagram,Content pillar,rate
+Events & Partnerships,Team Spotlights & Company Culture,-4.6494,0.3397,-11.5395,2.2407,False,Instagram,Content pillar,rate
+Events & Partnerships,Thought Leadership & Industry Insights,-0.1485,1.0,-6.513,6.216,False,Instagram,Content pillar,rate
+Patient-Centered Storytelling,Product Development & Innovations,1.1943,0.9986,-10.5138,12.9025,False,Instagram,Content pillar,rate
+Patient-Centered Storytelling,Team Spotlights & Company Culture,-2.5845,0.9477,-12.3116,7.1427,False,Instagram,Content pillar,rate
+Patient-Centered Storytelling,Thought Leadership & Industry Insights,1.9164,0.9796,-7.4458,11.2787,False,Instagram,Content pillar,rate
+Product Development & Innovations,Team Spotlights & Company Culture,-3.7788,0.7658,-12.6887,5.1311,False,Instagram,Content pillar,rate
+Product Development & Innovations,Thought Leadership & Industry Insights,0.7221,0.9993,-7.7879,9.2321,False,Instagram,Content pillar,rate
+Team Spotlights & Company Culture,Thought Leadership & Industry Insights,4.5009,0.1594,-0.9724,9.9742,False,Instagram,Content pillar,rate
+Events & Partnerships,Patient-Centered Storytelling,-1.4503,0.9628,-7.4611,4.5606,False,Instagram,Content pillar,rate_vs_reach
+Events & Partnerships,Product Development & Innovations,-1.0736,0.9835,-6.6322,4.485,False,Instagram,Content pillar,rate_vs_reach
+Events & Partnerships,Team Spotlights & Company Culture,-2.7911,0.3155,-6.8296,1.2474,False,Instagram,Content pillar,rate_vs_reach
+Events & Partnerships,Thought Leadership & Industry Insights,-2.7787,0.243,-6.5092,0.9517,False,Instagram,Content pillar,rate_vs_reach
+Patient-Centered Storytelling,Product Development & Innovations,0.3767,0.9999,-6.4859,7.2392,False,Instagram,Content pillar,rate_vs_reach
+Patient-Centered Storytelling,Team Spotlights & Company Culture,-1.3408,0.9661,-7.0422,4.3606,False,Instagram,Content pillar,rate_vs_reach
+Patient-Centered Storytelling,Thought Leadership & Industry Insights,-1.3285,0.9624,-6.816,4.159,False,Instagram,Content pillar,rate_vs_reach
+Product Development & Innovations,Team Spotlights & Company Culture,-1.7175,0.8922,-6.9399,3.5049,False,Instagram,Content pillar,rate_vs_reach
+Product Development & Innovations,Thought Leadership & Industry Insights,-1.7051,0.8779,-6.6931,3.2829,False,Instagram,Content pillar,rate_vs_reach
+Team Spotlights & Company Culture,Thought Leadership & Industry Insights,0.0124,1.0,-3.1957,3.2205,False,Instagram,Content pillar,rate_vs_reach
+Oncology Clinic Leader,Oncology Financial Leader,-4.8887,0.5841,-14.9697,5.1924,False,Instagram,ICP segment,rate
+Oncology Clinic Leader,Oncology Operations Leader,-4.4088,0.2127,-10.3128,1.4953,False,Instagram,ICP segment,rate
+Oncology Clinic Leader,Oncology Technical Leader,-1.6642,0.9443,-9.486,6.1576,False,Instagram,ICP segment,rate
+Oncology Financial Leader,Oncology Operations Leader,0.4799,0.9991,-8.6559,9.6157,False,Instagram,ICP segment,rate
+Oncology Financial Leader,Oncology Technical Leader,3.2244,0.8513,-7.2534,13.7023,False,Instagram,ICP segment,rate
+Oncology Operations Leader,Oncology Technical Leader,2.7445,0.6927,-3.8141,9.3031,False,Instagram,ICP segment,rate
+Oncology Clinic Leader,Oncology Financial Leader,-2.5922,0.7441,-9.3174,4.133,False,Instagram,ICP segment,rate_vs_reach
+Oncology Clinic Leader,Oncology Operations Leader,-2.7352,0.2714,-6.6738,1.2035,False,Instagram,ICP segment,rate_vs_reach
+Oncology Clinic Leader,Oncology Technical Leader,-0.5604,0.9922,-5.7785,4.6576,False,Instagram,ICP segment,rate_vs_reach
+Oncology Financial Leader,Oncology Operations Leader,-0.143,0.9999,-6.2376,5.9516,False,Instagram,ICP segment,rate_vs_reach
+Oncology Financial Leader,Oncology Technical Leader,2.0318,0.8715,-4.9581,9.0217,False,Instagram,ICP segment,rate_vs_reach
+Oncology Operations Leader,Oncology Technical Leader,2.1747,0.564,-2.2006,6.5501,False,Instagram,ICP segment,rate_vs_reach
+Events & Partnerships,Patient-Centered Storytelling,0.591,0.9998,-8.5525,9.7346,False,LinkedIn,Content pillar,rate
+Events & Partnerships,Product Development & Innovations,-0.2255,1.0,-9.1076,8.6566,False,LinkedIn,Content pillar,rate
+Events & Partnerships,Team Spotlights & Company Culture,0.8413,0.9968,-5.8167,7.4993,False,LinkedIn,Content pillar,rate
+Events & Partnerships,Thought Leadership & Industry Insights,3.4138,0.5593,-2.8509,9.6786,False,LinkedIn,Content pillar,rate
+Patient-Centered Storytelling,Product Development & Innovations,-0.8165,0.9995,-11.228,9.595,False,LinkedIn,Content pillar,rate
+Patient-Centered Storytelling,Team Spotlights & Company Culture,0.2503,1.0,-8.3426,8.8431,False,LinkedIn,Content pillar,rate
+Patient-Centered Storytelling,Thought Leadership & Industry Insights,2.8228,0.8799,-5.469,11.1146,False,LinkedIn,Content pillar,rate
+Product Development & Innovations,Team Spotlights & Company Culture,1.0668,0.9966,-7.2473,9.3808,False,LinkedIn,Content pillar,rate
+Product Development & Innovations,Thought Leadership & Industry Insights,3.6393,0.717,-4.3633,11.6419,False,LinkedIn,Content pillar,rate
+Team Spotlights & Company Culture,Thought Leadership & Industry Insights,2.5725,0.6849,-2.857,8.002,False,LinkedIn,Content pillar,rate
+Events & Partnerships,Patient-Centered Storytelling,0.3805,0.9999,-7.1851,7.9461,False,LinkedIn,Content pillar,rate_vs_reach
+Events & Partnerships,Product Development & Innovations,-0.7012,0.9989,-8.0505,6.648,False,LinkedIn,Content pillar,rate_vs_reach
+Events & Partnerships,Team Spotlights & Company Culture,0.6875,0.9969,-4.8215,6.1965,False,LinkedIn,Content pillar,rate_vs_reach
+Events & Partnerships,Thought Leadership & Industry Insights,1.8254,0.8663,-3.3582,7.009,False,LinkedIn,Content pillar,rate_vs_reach
+Patient-Centered Storytelling,Product Development & Innovations,-1.0817,0.9968,-9.6964,7.533,False,LinkedIn,Content pillar,rate_vs_reach
+Patient-Centered Storytelling,Team Spotlights & Company Culture,0.307,1.0,-6.8029,7.4169,False,LinkedIn,Content pillar,rate_vs_reach
+Patient-Centered Storytelling,Thought Leadership & Industry Insights,1.4449,0.9774,-5.4159,8.3058,False,LinkedIn,Content pillar,rate_vs_reach
+Product Development & Innovations,Team Spotlights & Company Culture,1.3887,0.9807,-5.4905,8.268,False,LinkedIn,Content pillar,rate_vs_reach
+Product Development & Innovations,Thought Leadership & Industry Insights,2.5267,0.8286,-4.0949,9.1482,False,LinkedIn,Content pillar,rate_vs_reach
+Team Spotlights & Company Culture,Thought Leadership & Industry Insights,1.1379,0.9559,-3.3545,5.6304,False,LinkedIn,Content pillar,rate_vs_reach
+Oncology Clinic Leader,Oncology Financial Leader,7.6007,0.3508,-4.3842,19.5855,False,LinkedIn,ICP segment,rate
+Oncology Clinic Leader,Oncology Operations Leader,1.609,0.9408,-5.7809,8.999,False,LinkedIn,ICP segment,rate
+Oncology Clinic Leader,Oncology Technical Leader,0.0985,1.0,-9.533,9.7299,False,LinkedIn,ICP segment,rate
+Oncology Financial Leader,Oncology Operations Leader,-5.9916,0.4622,-16.6902,4.707,False,LinkedIn,ICP segment,rate
+Oncology Financial Leader,Oncology Technical Leader,-7.5022,0.3896,-19.8559,4.8515,False,LinkedIn,ICP segment,rate
+Oncology Operations Leader,Oncology Technical Leader,-1.5106,0.9598,-9.4848,6.4637,False,LinkedIn,ICP segment,rate
+Oncology Clinic Leader,Oncology Financial Leader,7.7861,0.1581,-1.8786,17.4507,False,LinkedIn,ICP segment,rate_vs_reach
+Oncology Clinic Leader,Oncology Operations Leader,0.7362,0.9882,-5.2231,6.6955,False,LinkedIn,ICP segment,rate_vs_reach
+Oncology Clinic Leader,Oncology Technical Leader,0.5841,0.9973,-7.1828,8.3509,False,LinkedIn,ICP segment,rate_vs_reach
+Oncology Financial Leader,Oncology Operations Leader,-7.0498,0.1487,-15.6772,1.5776,False,LinkedIn,ICP segment,rate_vs_reach
+Oncology Financial Leader,Oncology Technical Leader,-7.202,0.2386,-17.1641,2.7601,False,LinkedIn,ICP segment,rate_vs_reach
+Oncology Operations Leader,Oncology Technical Leader,-0.1522,0.9999,-6.5826,6.2783,False,LinkedIn,ICP segment,rate_vs_reach
