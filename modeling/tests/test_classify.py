@@ -294,3 +294,35 @@ def test_forest_permutation_reusing_cv_fits_matches_refitting(prepared):
     a = permutation_importance_logistic(fs, splits, MAIN, "Random forest", SMALL, feature_group)
     b = permutation_importance_logistic(fs, splits, MAIN, "Random forest", SMALL, feature_group, fitted=fits)
     assert a.equals(b)
+
+
+# ── plain logit under perfect separation ────────────────────────────────────
+def test_separating_features_on_known_case(prepared):
+    fs = build_features(prepared, "Facebook", CONFIG)
+    from modeling.classify import separating_features
+    y = np.where(fs.X["WEEKEND"] == 1, 0, np.arange(len(fs.y)) % 2)          # every weekend post is low
+    assert "WEEKEND" in separating_features(fs, y)
+    assert "log2_impressions" not in separating_features(fs, y)              # continuous: never listed
+
+
+def test_singular_logit_is_recorded_not_raised(prepared):
+    """3-knot spline label: all Facebook weekend posts are low and the plain logit is singular. fit_logit
+    returns None and the fit stats record it as not estimable, naming the separating feature."""
+    from modeling.classify import logit_fit_stats
+    config = {**CONFIG, "classification": {**CONFIG["classification"], "labels": {
+        "k3": {"type": "reach_spline", "n_knots": 3}}}}
+    fs = build_features(prepared, "Facebook", CONFIG)
+    y = make_label_rule("k3", config).fit(fs).label(fs)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        res = fit_logit(fs, y)
+    assert res is None
+    row = logit_fit_stats(res, fs, y)
+    assert not row["converged"] and np.isnan(row["pseudo_r2"]) and "WEEKEND" in row["separating_features"]
+
+
+def test_estimable_logit_reports_no_separation(prepared):
+    fs, y = _labelled(prepared, "LinkedIn")
+    from modeling.classify import logit_fit_stats
+    row = logit_fit_stats(fit_logit(fs, y), fs, y)
+    assert row["converged"] and row["separating_features"] == ""

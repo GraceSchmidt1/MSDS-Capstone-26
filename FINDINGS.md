@@ -219,4 +219,7 @@ Stable lasso effects (odds ratios) and whether they hold across knots:
 - **Plain-logit crash on perfect separation (2026-11-03):** with a 3-knot spline label, all 3 Facebook
   weekend posts are "low" and the full-data statsmodels logit raises `LinAlgError` (singular matrix),
   stopping `run_classification` before CV. The 3-knot trial used a scratchpad wrapper that skips that
-  one fit. Repo code still crashes in this case; a guard (record "not estimable" instead) is pending.
+  one fit. **Fixed 2026-11-04:** `fit_logit` returns None on a singular fit; `logistic_fit_stats.csv` records
+  it as not estimable and lists `separating_features` (now reported for every fit, e.g. the top-third FB
+  weekend case); effects / group tests are skipped for that platform and its figure panel says so. A
+  3-knot rerun with the repo code gives CV, stability and importance outputs identical to the wrapper run.

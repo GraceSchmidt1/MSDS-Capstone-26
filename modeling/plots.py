@@ -60,11 +60,15 @@ def coef_plot(coefs: pd.DataFrame, platforms: list[str], title: str, path, value
         ax.axvline(0, color=INK_MUTED, lw=1)
         ax.hlines(y, d["ci_lo"], d["ci_hi"], color=col, lw=2, alpha=0.55)
         ax.scatter(d[value], y, s=40, color=col, zorder=3, edgecolors=SURFACE, linewidths=1.2)
+        estimable = (c["platform"] == p).any()
         for yi, missing in zip(y, d[value].isna()):
-            if missing:
+            if missing and estimable:
                 ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
                             fontsize=8, color=INK_MUTED, style="italic")
-        ax.set_title(p)
+        if not estimable:
+            ax.text(0.5, 0.5, "not estimable:\nperfect separation\n(see logistic_fit_stats.csv)",
+                    transform=ax.transAxes, ha="center", va="center", fontsize=9, color=INK_MUTED, style="italic")
+        ax.set_title(p if estimable else f"{p} (not estimable)")
         ax.set_xlabel(xlabel)
         ax.grid(axis="y", visible=False)
     axes[0][0].set_yticks(np.arange(len(features)))

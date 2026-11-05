@@ -124,12 +124,30 @@ def forest_fit_predict(config: dict, record: list | None = None):
 # Logistic regression on all posts: odds ratios and probability-point effects
 # ─────────────────────────────────────────────────────────────────────────────
 def fit_logit(fs: FeatureSet, y):
-    """Logistic regression with robust (HC0) SEs, or content-piece-clustered SEs for the pooled model."""
+    """
+    Logistic regression with robust (HC0) SEs, or content-piece-clustered SEs for the pooled model.
+    Returns None when the fit is singular (perfect separation, e.g. every post with some 0/1 feature has the
+    same label): the plain logit is then not estimable; logit_fit_stats records which features separate.
+    """
     model = sm.Logit(np.asarray(y), sm.add_constant(fs.X, has_constant="add"))
-    if fs.platform == POOLED:
-        return model.fit(disp=0, maxiter=200, cov_type="cluster",
-                         cov_kwds={"groups": pd.factorize(fs.groups)[0]})
-    return model.fit(disp=0, maxiter=200, cov_type="HC0")
+    try:
+        if fs.platform == POOLED:
+            return model.fit(disp=0, maxiter=200, cov_type="cluster",
+                             cov_kwds={"groups": pd.factorize(fs.groups)[0]})
+        return model.fit(disp=0, maxiter=200, cov_type="HC0")
+    except np.linalg.LinAlgError:
+        return None
+
+
+def separating_features(fs: FeatureSet, y) -> list[str]:
+    """0/1 features whose posts are all high or all low: their plain-logit odds ratio is not estimable."""
+    y = np.asarray(y)
+    out = []
+    for c in fs.X.columns:
+        v = fs.X[c].to_numpy()
+        if set(np.unique(v)) <= {0.0, 1.0} and v.sum() > 0 and len(np.unique(y[v == 1])) == 1:
+            out.append(c)
+    return out
 
 
 def logit_effects(res, fs: FeatureSet, y) -> pd.DataFrame:
@@ -177,10 +195,16 @@ def logit_group_tests(res, fs: FeatureSet, group_of) -> pd.DataFrame:
 
 
 def logit_fit_stats(res, fs: FeatureSet, y) -> dict:
+    """Fit summary; res = None (not estimable) gives a row with converged False and empty statistics."""
+    sep = "; ".join(separating_features(fs, y))
+    if res is None:
+        return {"platform": fs.platform, "n_posts": len(y), "n_features": fs.X.shape[1],
+                "share_high": float(np.mean(y)), "pseudo_r2": np.nan, "aic": np.nan, "llr_pvalue": np.nan,
+                "converged": False, "cov_type": "not estimable (singular fit)", "separating_features": sep}
     return {"platform": fs.platform, "n_posts": int(res.nobs), "n_features": fs.X.shape[1],
             "share_high": float(np.mean(y)), "pseudo_r2": res.prsquared, "aic": res.aic,
             "llr_pvalue": res.llr_pvalue, "converged": bool(res.mle_retvals["converged"]),
-            "cov_type": res.cov_type}
+            "cov_type": res.cov_type, "separating_features": sep}
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -9,7 +9,8 @@ Writes outputs/runs/<YYYY-MM-DD>_<tag>/ containing
     run_info.json            master file + sha256, git commit, config snapshot, versions, seed, label used
     label_summary.csv        posts / high / share high per label definition and platform (all posts)
     label_rules.csv          the label rule fit on all posts (thresholds, reach line)
-    logistic_fit_stats.csv   per model: n, share high, pseudo R², AIC, converged
+    logistic_fit_stats.csv   per model: n, share high, pseudo R², AIC, converged, separating features
+                             (a singular fit is recorded as not estimable and has no effects / group tests)
     logistic_effects.csv     odds ratio (95% CI), Wald χ² and probability-point effect (95% CI) per feature
     logistic_group_tests.csv joint Wald χ² per feature group (does format / pillar / ICP matter at all?)
     tree_leaves.csv          shallow tree on all posts: rule per leaf, posts, share high
@@ -89,9 +90,10 @@ def main(argv=None):
         if p != POOLED:
             rules.append(rule.describe())
         res = fit_logit(fs, y)
-        effects.append(logit_effects(res, fs, y))
         stats_rows.append(logit_fit_stats(res, fs, y))
-        group_tests.append(logit_group_tests(res, fs, feature_group))
+        if res is not None:                  # None: singular fit, recorded as not estimable in the fit stats
+            effects.append(logit_effects(res, fs, y))
+            group_tests.append(logit_group_tests(res, fs, feature_group))
         tree = make_tree(config).fit(fs.X.to_numpy(), y)
         leaves.append(tree_leaves(tree, fs, y))
         tree_imp.append(tree_importance(tree, fs))
