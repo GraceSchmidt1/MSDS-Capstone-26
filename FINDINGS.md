@@ -247,7 +247,7 @@ CIs are unadjusted. Partial R² (share of remaining variance a group explains, i
 **Item 3: ranked drivers (`driver_ranking.csv`). Per-feature p-values mostly do not survive multiple
 testing:**
 - Within each platform (BH over its 13–17 features), only **Instagram reach** (regression) survives on a
-  single platform. **LinkedIn Document: regression p 0.030 → BH 0.52; logistic p 0.061 → BH 0.35.**
+  single platform. **LinkedIn Document: regression p 0.030 → BH 0.51; logistic p 0.061 → BH 0.35.**
 - Pooled survivors: Platform: Instagram, reach, Video, Simple Status (regression, also Holm), and
   **Link** (logistic, BH and Holm 0.035).
 - **Group-level tests do survive:** BH across feature groups on the joint Wald χ² (reach-spline

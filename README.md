@@ -64,8 +64,8 @@ Done: C1 labels, C2 logistic/tree, C3 penalized logistic with stability and
 importance, C4 label-definition check, C5 spline reach adjustment
 (`reach_spline`, now the main label), and the quantitative evaluation
 framework, items 1–7 (see "Quantitative evaluation framework" below; results in
-`FINDINGS.md`). Remaining: the classification write-up (notebook 03) and PR,
-then Stage 2 recommendations.
+`FINDINGS.md`), written up in notebook 03. Remaining: PR to `main`, then
+Stage 2 recommendations.
 
 ### Exploratory analysis (`EDA` branch)
 
@@ -140,6 +140,28 @@ log target), LinkedIn ≈0 (MAE 8% lower than the mean; 0.19 without one
 | ICP segment, pillar, day/time, paid boost, experiment period | ≈ 0 | No detectable effect at this sample size (OLS CIs, stability, importance agree) |
 
 Coefficients are associations, not causal effects.
+
+## Stage 1 classification and evaluation results (`classification` branch)
+
+**Question:** once reach is accounted for, which content features separate
+high-engaging posts from low? **Write-up:**
+[`notebooks/03_classification_evaluation.ipynb`](notebooks/03_classification_evaluation.ipynb)
+(reads the committed runs; does not refit). Label: rate above the median
+reach-expected rate (spline in log2 impressions, per platform). Full log in
+`FINDINGS.md`.
+
+| Finding | Evidence | Robust? |
+|---|---|---|
+| **Format matters** on LinkedIn and pooled | Joint Wald test survives BH (LinkedIn p = 0.037, pooled 0.001); LinkedIn Format explains 36% of rate-vs-reach variance | **Yes**: every label and knot count |
+| LinkedIn **Document** | lasso odds ratio ≈ 2.7; ≈ +14 pts over Image after reach, Hedges' g ≈ 2.2 | **Yes** as an effect size; single-feature p 0.03 → 0.51 after BH (13 posts) |
+| **Link** posts | LinkedIn OR ≈ 0.23; pooled Link survives BH (0.035) | **Yes** |
+| Instagram Carousel, Events & Partnerships, Operations / Financial Leader | OR ≈ 1.9 / 2.5 / 0.5–0.6; g ≈ ±0.5 | Suggestive: hold at 3–4 spline knots, not 5 |
+| Pillar, ICP segment | no BH-significant ANOVA / Welch / Kruskal test, no Tukey pair, ω² ≤ 0.05 | No detectable difference |
+
+Held-out AUC (best model, mean ± SD over 50 splits): FB 0.64 ± 0.11, IG 0.67 ±
+0.10, LI 0.66 ± 0.10, pooled 0.64 ± 0.05; differences under ~0.05 between
+models are noise. Use robust or clustered SEs: naive SEs are up to 1.8× too small
+(unequal variance, not repeated posts).
 
 ## Quantitative evaluation framework (added 2026-11-02; done 2026-11-04)
 
