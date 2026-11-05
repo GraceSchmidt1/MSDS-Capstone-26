@@ -1,0 +1,4 @@
+rule,platform,threshold_pct
+above_median,Facebook,12.9032
+above_median,Instagram,16.86995
+above_median,LinkedIn,7.2074

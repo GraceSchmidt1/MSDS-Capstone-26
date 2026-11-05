@@ -1,0 +1,4 @@
+rule,platform,knots_impressions,residual_threshold
+reach_spline,Facebook,1.0 13.7 22.0 637.0,-3.552713678800501e-15
+reach_spline,Instagram,5.0 19.0 29.0 1415.0,8.049116928532385e-16
+reach_spline,LinkedIn,3.0 153.0 343.7 5752.0,-3.552713678800501e-15

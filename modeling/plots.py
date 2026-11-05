@@ -42,8 +42,13 @@ def label(feature: str) -> str:
     return FEATURE_LABEL.get(feature, feature)
 
 
-def coef_plot(coefs: pd.DataFrame, platforms: list[str], title: str, path):
-    """Coefficient (pts) with 95% CI per feature, one panel per platform; intercept omitted."""
+COEF_NOTE = ("Dot = OLS coefficient; line = 95% CI (robust SEs). A CI crossing 0 means the data "
+             "can't distinguish the effect from none. Associations, not causal effects.")
+
+
+def coef_plot(coefs: pd.DataFrame, platforms: list[str], title: str, path, value: str = "coef_pts",
+              xlabel: str = "Effect on engagement rate (percentage points)", note: str = COEF_NOTE):
+    """Effect (`value`, with ci_lo / ci_hi) per feature, one panel per platform; intercept omitted."""
     c = coefs[(coefs["feature"] != "const") & coefs["platform"].isin(platforms)]
     features = list(dict.fromkeys(c["feature"]))           # union over the plotted platforms, first-seen order
     fig, axes = plt.subplots(1, len(platforms), figsize=(4.6 * len(platforms), 0.36 * len(features) + 1.6),
@@ -54,21 +59,23 @@ def coef_plot(coefs: pd.DataFrame, platforms: list[str], title: str, path):
         col = PLATFORM_COLOR[p]
         ax.axvline(0, color=INK_MUTED, lw=1)
         ax.hlines(y, d["ci_lo"], d["ci_hi"], color=col, lw=2, alpha=0.55)
-        ax.scatter(d["coef_pts"], y, s=40, color=col, zorder=3, edgecolors=SURFACE, linewidths=1.2)
-        for yi, missing in zip(y, d["coef_pts"].isna()):
-            if missing:
+        ax.scatter(d[value], y, s=40, color=col, zorder=3, edgecolors=SURFACE, linewidths=1.2)
+        estimable = (c["platform"] == p).any()
+        for yi, missing in zip(y, d[value].isna()):
+            if missing and estimable:
                 ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
                             fontsize=8, color=INK_MUTED, style="italic")
-        ax.set_title(p)
-        ax.set_xlabel("Effect on engagement rate (percentage points)")
+        if not estimable:
+            ax.text(0.5, 0.5, "not estimable:\nperfect separation\n(see logistic_fit_stats.csv)",
+                    transform=ax.transAxes, ha="center", va="center", fontsize=9, color=INK_MUTED, style="italic")
+        ax.set_title(p if estimable else f"{p} (not estimable)")
+        ax.set_xlabel(xlabel)
         ax.grid(axis="y", visible=False)
     axes[0][0].set_yticks(np.arange(len(features)))
     axes[0][0].set_yticklabels([textwrap.shorten(label(f), 44, placeholder="…") for f in features], fontsize=8.5)
     axes[0][0].invert_yaxis()
     fig.suptitle(title, x=0.01, ha="left", fontsize=12, fontweight="semibold")
-    fig.text(0.01, -0.01, "Dot = OLS coefficient; line = 95% CI (robust SEs). A CI crossing 0 means the data "
-             "can't distinguish the effect from none. Associations, not causal effects.",
-             fontsize=8, color=INK_2)
+    fig.text(0.01, -0.01, note, fontsize=8, color=INK_2)
     fig.tight_layout(w_pad=2.5)
     fig.savefig(path)
     plt.close(fig)
@@ -110,6 +117,7 @@ def diagnostics_plot(infl: pd.DataFrame, platforms: list[str], path):
 
 
 MODEL_MARKER = {"Ridge": ("D", "none"), "Lasso": ("^", "none"), "Elastic net": ("s", "full")}
+LOGISTIC_MARKER = {f"{name} logistic": m for name, m in MODEL_MARKER.items()}   # classification (step C3)
 
 
 def coef_compare_plot(ols: pd.DataFrame, reg: pd.DataFrame, platforms: list[str], title: str, path):
@@ -153,39 +161,46 @@ def coef_compare_plot(ols: pd.DataFrame, reg: pd.DataFrame, platforms: list[str]
     plt.close(fig)
 
 
-def cv_plot(cv_scores: pd.DataFrame, platforms: list[str], path):
-    """Held-out R² and MAE per model: mean across splits with ±1 SD, one panel row per metric."""
+REGRESSION_METRICS = [("r2", "Held-out R² (higher is better)", 0),
+                      ("mae", "Held-out MAE, pts (lower is better)", None)]
+
+
+def cv_plot(cv_scores: pd.DataFrame, platforms: list[str], path, metrics=REGRESSION_METRICS,
+            title: str = "Cross-validated performance (5-fold × 10 repeats; ±1 SD across splits)"):
+    """Held-out scores per model: mean across splits with ±1 SD, one panel row per (metric, label, ref line)."""
     models = list(dict.fromkeys(cv_scores["model"]))
-    fig, axes = plt.subplots(2, len(platforms), figsize=(4.4 * len(platforms), 5.6), squeeze=False)
+    fig, axes = plt.subplots(len(metrics), len(platforms), figsize=(4.4 * len(platforms), 2.8 * len(metrics)),
+                             squeeze=False)
     for j, p in enumerate(platforms):
         d = cv_scores[cv_scores["platform"] == p].groupby("model", sort=False)
-        for i, (metric, xlabel) in enumerate([("r2", "Held-out R² (higher is better)"),
-                                              ("mae", "Held-out MAE, pts (lower is better)")]):
+        for i, (metric, xlabel, ref) in enumerate(metrics):
             ax = axes[i][j]
             mean, sd = d[metric].mean().reindex(models), d[metric].std().reindex(models)
             yy = np.arange(len(models))
             ax.hlines(yy, mean - sd, mean + sd, color=PLATFORM_COLOR[p], lw=2, alpha=0.5)
             ax.scatter(mean, yy, s=40, color=PLATFORM_COLOR[p], zorder=3)
             for yi, v in zip(yy, mean):
-                ax.annotate(f"{round(v, 2) + 0.0:.2f}", (v, yi), xytext=(0, -12),   # no "-0.00" textcoords="offset points", ha="center",
+                ax.annotate(f"{round(v, 2) + 0.0:.2f}", (v, yi), xytext=(0, -12),   # + 0.0: no "-0.00"
+                            textcoords="offset points", ha="center",
                             fontsize=8, color=INK_2)
-            if metric == "r2":
-                ax.axvline(0, color=INK_MUTED, lw=1)
+            if ref is not None:
+                ax.axvline(ref, color=INK_MUTED, lw=1)
+            if i == 0:
                 ax.set_title("Pooled (check)" if p == "pooled" else p)
             ax.set_yticks(yy, models if j == 0 else [""] * len(models))
             ax.set_ylim(len(models) - 0.3, -0.6)        # inverted, with room for the labels below each dot
             ax.set_xlabel(xlabel)
             ax.grid(axis="y", visible=False)
-    fig.suptitle("Cross-validated performance (5-fold × 10 repeats; ±1 SD across splits)", x=0.01, ha="left",
-                 fontsize=12, fontweight="semibold")
+    fig.suptitle(title, x=0.01, ha="left", fontsize=12, fontweight="semibold")
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)
 
 
-def stability_plot(stab: pd.DataFrame, platforms: list[str], path):
-    """Share of 500 bootstrap refits that keep each feature (lasso, elastic net), one panel per platform."""
-    s = stab[stab["platform"].isin(platforms) & stab["model"].isin(["Lasso", "Elastic net"])]
+def stability_plot(stab: pd.DataFrame, platforms: list[str], path, models=("Lasso", "Elastic net")):
+    """Share of 500 bootstrap refits that keep each feature (`models`: lasso, elastic net), one panel per platform."""
+    lasso, enet = models
+    s = stab[stab["platform"].isin(platforms) & stab["model"].isin(models)]
     features = list(dict.fromkeys(s["feature"]))
     fig, axes = plt.subplots(1, len(platforms), figsize=(4.4 * len(platforms), 0.36 * len(features) + 1.8),
                              sharey=True, squeeze=False)
@@ -193,17 +208,17 @@ def stability_plot(stab: pd.DataFrame, platforms: list[str], path):
         y = np.arange(len(features))
         for x0 in (0.5, 0.8):
             ax.axvline(x0, color=INK_MUTED, lw=1, ls=":" if x0 == 0.5 else "--")
-        for name, off in [("Lasso", -0.13), ("Elastic net", 0.13)]:
+        for name, off in [(lasso, -0.13), (enet, 0.13)]:
             d = s[(s["platform"] == p) & (s["model"] == name)].set_index("feature").reindex(features)
-            marker, fill = MODEL_MARKER[name]
+            marker, fill = {**MODEL_MARKER, **LOGISTIC_MARKER}[name]
             ax.hlines(y + off, 0, d["selection_freq"], color=PLATFORM_COLOR[p], lw=2, alpha=0.45)
             ax.scatter(d["selection_freq"], y + off, s=30, marker=marker, zorder=3, linewidths=1.2,
                        edgecolors=INK_2, facecolors=INK_2 if fill == "full" else "none", label=name)
             for yi, missing in zip(y, d["selection_freq"].isna()):
-                if missing and name == "Lasso":
+                if missing and name == lasso:
                     ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
                                 fontsize=8, color=INK_MUTED, style="italic")
-        en_mix = s.loc[(s["platform"] == p) & (s["model"] == "Elastic net"), "l1_ratio"]
+        en_mix = s.loc[(s["platform"] == p) & (s["model"] == enet), "l1_ratio"]
         if len(en_mix) and en_mix.iloc[0] < 0.5:
             ax.annotate(f"Elastic net chose a ridge-like mix (l1 = {en_mix.iloc[0]:.1f}),\nso it keeps nearly "
                         "everything: read Lasso here", (0.98, 0.005), xycoords="axes fraction", ha="right",
@@ -228,24 +243,26 @@ def stability_plot(stab: pd.DataFrame, platforms: list[str], path):
     plt.close(fig)
 
 
-def importance_plot(imp: pd.DataFrame, platforms: list[str], level: str, title: str, path):
-    """Permutation importance: rise in held-out MAE (pts) when a feature / group is shuffled; ±95% over splits."""
+def importance_plot(imp: pd.DataFrame, platforms: list[str], level: str, title: str, path, metric: str = "mae_rise",
+                    xlabel: str = "Rise in held-out MAE when shuffled (pts)"):
+    """Permutation importance: change in a held-out score (`metric`, e.g. MAE rise) when a feature / group is
+    shuffled; ±95% over splits."""
     d_all = imp[(imp["level"] == level) & imp["platform"].isin(platforms)]
-    units = list(dict.fromkeys(d_all.sort_values("mae_rise_mean", ascending=False)["unit"]))
+    units = list(dict.fromkeys(d_all.sort_values(f"{metric}_mean", ascending=False)["unit"]))
     fig, axes = plt.subplots(1, len(platforms), figsize=(4.4 * len(platforms), 0.38 * len(units) + 1.6),
                              sharey=True, squeeze=False)
     for ax, p in zip(axes[0], platforms):
         d = d_all[d_all["platform"] == p].set_index("unit").reindex(units)
         y = np.arange(len(units))
         ax.axvline(0, color=INK_MUTED, lw=1)
-        ax.hlines(y, d["mae_rise_lo"], d["mae_rise_hi"], color=PLATFORM_COLOR[p], lw=2, alpha=0.5)
-        ax.scatter(d["mae_rise_mean"], y, s=40, color=PLATFORM_COLOR[p], zorder=3)
-        for yi, missing in zip(y, d["mae_rise_mean"].isna()):
+        ax.hlines(y, d[f"{metric}_lo"], d[f"{metric}_hi"], color=PLATFORM_COLOR[p], lw=2, alpha=0.5)
+        ax.scatter(d[f"{metric}_mean"], y, s=40, color=PLATFORM_COLOR[p], zorder=3)
+        for yi, missing in zip(y, d[f"{metric}_mean"].isna()):
             if missing:
                 ax.annotate("not in model", (0.02, yi), xycoords=("axes fraction", "data"), va="center",
                             fontsize=8, color=INK_MUTED, style="italic")
         ax.set_title("Pooled (check)" if p == "pooled" else p)
-        ax.set_xlabel("Rise in held-out MAE when shuffled (pts)")
+        ax.set_xlabel(xlabel)
         ax.grid(axis="y", visible=False)
     axes[0][0].set_yticks(np.arange(len(units)))
     axes[0][0].set_yticklabels([textwrap.shorten(label(u), 44, placeholder="…") for u in units], fontsize=8.5)
@@ -300,5 +317,40 @@ def sensitivity_plot(ols: pd.DataFrame, key_features: list[str], variants: list[
              "'no reach control' has no reach row by design. Each panel has its own x-scale.",
              fontsize=8, color=INK_2)
     fig.tight_layout(w_pad=2.0)
+    fig.savefig(path)
+    plt.close(fig)
+
+
+def tree_leaves_plot(leaves: pd.DataFrame, platforms: list[str], path):
+    """Each leaf of the shallow tree: share of its posts that are high, with a 95% Wilson interval."""
+    from statsmodels.stats.proportion import proportion_confint
+    fig, axes = plt.subplots(len(platforms), 1, squeeze=False,
+                             figsize=(9, sum(0.42 * (leaves["platform"] == p).sum() + 0.9 for p in platforms)),
+                             gridspec_kw={"height_ratios": [(leaves["platform"] == p).sum() + 1 for p in platforms]})
+    for ax, p in zip(axes[:, 0], platforms):
+        d = leaves[leaves["platform"] == p].sort_values("share_high", ascending=False)
+        lo, hi = proportion_confint(d["high"], d["posts"], method="wilson")
+        y = np.arange(len(d))
+        ax.axvline(0.5, color=INK_MUTED, lw=1, ls=":")
+        ax.hlines(y, lo, hi, color=PLATFORM_COLOR[p], lw=2, alpha=0.5)
+        ax.scatter(d["share_high"], y, s=40, color=PLATFORM_COLOR[p], zorder=3)
+        for yi, (_, r) in zip(y, d.iterrows()):
+            ax.annotate(f"{r['high']}/{r['posts']}", (1.0, yi), xycoords=("axes fraction", "data"), xytext=(4, 0),
+                        textcoords="offset points", va="center", fontsize=8, color=INK_2)
+        ax.set_yticks(y, ["\n".join(textwrap.wrap(" AND ".join(label(c.removeprefix("not ")) if not c.startswith("not ")
+                                                             else "not " + label(c[4:]) for c in r.split(" AND ")), 60))
+                          for r in d["rule"]], fontsize=8)
+        ax.set_ylim(len(d) - 0.5, -0.5)
+        ax.set_xlim(0, 1)
+        ax.xaxis.set_major_formatter(plt.matplotlib.ticker.PercentFormatter(1.0))
+        ax.set_title("Pooled (check)" if p == "pooled" else p)
+        ax.grid(axis="y", visible=False)
+    axes[-1, 0].set_xlabel("Share of the leaf's posts labelled high")
+    fig.suptitle("Shallow decision tree (all posts): the groups it splits posts into", x=0.01, ha="left",
+                 fontsize=12, fontweight="semibold")
+    fig.text(0.01, -0.01, "Dot = share high, line = 95% Wilson interval, right = high / posts. Dotted line = 50% "
+             "(the overall share). Rules describe these posts; CV scores say how well they generalize.",
+             fontsize=8, color=INK_2)
+    fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)

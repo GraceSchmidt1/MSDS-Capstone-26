@@ -8,7 +8,8 @@ Writes outputs/runs/<YYYY-MM-DD>_<tag>/ containing
     run_info.json            master file + sha256, git commit (+ uncommitted-changes flag), config
                              snapshot, package versions, seed: everything needed to reproduce the run
     fit_stats.csv            per model: n, features, R², adjusted R², AIC, residual SD
-    coefficients_ols.csv     effect sizes: coefficient (pts), 95% CI, p-value, posts with feature
+    coefficients_ols.csv     effect sizes: coefficient (pts), 95% CI, t statistic, p-value, effect per SD
+                             (pts), standardized β, posts with feature
     stability.csv            bootstrap: share of refits keeping each feature, sign agreement, 95% interval
     importance.csv           permutation importance (feature + group): rise in held-out MAE when shuffled
     coefficients_regularized.csv  ridge / lasso / elastic net: coefficient per SD (importance) and in pts,

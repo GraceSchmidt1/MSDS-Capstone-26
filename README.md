@@ -59,8 +59,13 @@ Scope decisions:
 - **The duplicated LinkedIn metrics on 2026-03-20 are left as is** (two posts
   sharing one native metrics row; flagged in the EDA, not corrected).
 
-Next: Stage 1 classification (high vs. low engagement, reusing
-`modeling/features.py`), then Stage 2 recommendations.
+Next (`classification` branch): Stage 1 classification, high vs. low engagement.
+Done: C1 labels, C2 logistic/tree, C3 penalized logistic with stability and
+importance, C4 label-definition check, C5 spline reach adjustment
+(`reach_spline`, now the main label), and the quantitative evaluation
+framework, items 1–7 (see "Quantitative evaluation framework" below; results in
+`FINDINGS.md`), written up in notebook 03. Remaining: PR to `main`, then
+Stage 2 recommendations.
 
 ### Exploratory analysis (`EDA` branch)
 
@@ -135,6 +140,66 @@ log target), LinkedIn ≈0 (MAE 8% lower than the mean; 0.19 without one
 | ICP segment, pillar, day/time, paid boost, experiment period | ≈ 0 | No detectable effect at this sample size (OLS CIs, stability, importance agree) |
 
 Coefficients are associations, not causal effects.
+
+## Stage 1 classification and evaluation results (`classification` branch)
+
+**Question:** once reach is accounted for, which content features separate
+high-engaging posts from low? **Write-up:**
+[`notebooks/03_classification_evaluation.ipynb`](notebooks/03_classification_evaluation.ipynb)
+(reads the committed runs; does not refit). Label: rate above the median
+reach-expected rate (spline in log2 impressions, per platform). Full log in
+`FINDINGS.md`.
+
+| Finding | Evidence | Robust? |
+|---|---|---|
+| **Format matters** on LinkedIn and pooled | Joint Wald test survives BH (LinkedIn p = 0.037, pooled 0.001); LinkedIn Format explains 36% of rate-vs-reach variance | **Yes**: every label and knot count |
+| LinkedIn **Document** | lasso odds ratio ≈ 2.7; ≈ +14 pts over Image after reach, Hedges' g ≈ 2.2 | **Yes** as an effect size; single-feature p 0.03 → 0.51 after BH (13 posts) |
+| **Link** posts | LinkedIn OR ≈ 0.23; pooled Link survives BH (0.035) | **Yes** |
+| Instagram Carousel, Events & Partnerships, Operations / Financial Leader | OR ≈ 1.9 / 2.5 / 0.5–0.6; g ≈ ±0.5 | Suggestive: hold at 3–4 spline knots, not 5 |
+| Pillar, ICP segment | no BH-significant ANOVA / Welch / Kruskal test, no Tukey pair, ω² ≤ 0.05 | No detectable difference |
+
+Held-out AUC (best model, mean ± SD over 50 splits): FB 0.64 ± 0.11, IG 0.67 ±
+0.10, LI 0.66 ± 0.10, pooled 0.64 ± 0.05; differences under ~0.05 between
+models are noise. Use robust or clustered SEs: naive SEs are up to 1.8× too small
+(unequal variance, not repeated posts).
+
+## Quantitative evaluation framework (added 2026-11-02; done 2026-11-04)
+
+**Status:** items 1–2 are in `run_regression` / `run_classification`; items 3–7 are
+`modeling/evaluate.py`, run with `python -m modeling.run_evaluation --tag <name>`
+(run `outputs/runs/2026-11-04_eval_framework`). Results and the reporting rule
+they imply are in `FINDINGS.md`. The table below is the original plan. Candidate
+new features (day of week, posting hour, segment count) are not yet added.
+
+**Goal:** every methodological claim gets a defined statistical test and an effect
+size, not only stability or importance checks (e.g., section 5 of notebook 02
+reports refit shares and permutation importance with no test or threshold).
+Statistical significance at α = 0.05; practical significance through effect
+sizes and confidence intervals.
+
+| # | Test | Already in place | To do |
+|---|---|---|---|
+| 1 | **Regression:** coefficient t-tests, 95% CIs, standardized β; R², adjusted R², RMSE, MAE | OLS coefficients with HC3 CIs and p-values; R² / adjusted R² (`fit_stats.csv`); CV MAE and RMSE | Add t-statistics and standardized β to the OLS table; report as "a one-unit increase in X is associated with β pts (p = …)" |
+| 2 | **High vs. low classification:** median-split label; logistic (Wald χ², odds ratios); random forest benchmark; accuracy, precision, recall, F1, ROC-AUC | `above_median` label; logistic odds ratios with CIs and p-values (C2); CV AUC, balanced accuracy, Brier, log loss | Wald χ² per feature and jointly per feature group; accuracy / precision / recall / F1 in the CV scores; random forest benchmark (+ permutation importance); report `above_median` alongside the main label (`reach_spline` since C5; `reach_adjusted` before) |
+| 3 | **Which drivers matter most:** ranked table (feature, effect size, p-value) | Pieces exist separately (OLS, regularized, importance) | One ranked table per platform: standardized β (regression), odds ratio (logistic), permutation importance (tree-based benchmark) |
+| 4 | **Do segments / pillars differ?** One-way ANOVA (F, p), Tukey HSD post-hoc | Not started | Per platform, for content pillar and ICP segment; check with Welch ANOVA or Kruskal–Wallis, since rates are skewed with unequal variances. Multi-segment posts handled as in row 5 |
+| 5 | **Multi-segment dependence:** naive vs. clustered SEs | Main models avoid the problem (one row per post, 0/1 segment columns); pooled model clusters by content piece | Build the exploded data (one row per post × ICP segment); compare naive OLS SEs with post-clustered SEs (table: model, coefficient, SE, ratio). Same comparison for cross-posted content in the pooled model |
+| 6 | **Robustness:** k-fold CV, mean ± SD | Done: 5-fold × 10 repeats on shared splits; 5 sensitivity variants | Report as "AUC = x ± y across folds"; optional 10-fold check (only ~12–14 posts per test fold per platform) |
+| 7 | **Practical significance:** Cohen's d, standardized β, odds ratios, partial R² | Odds ratios; effects in percentage points | Cohen's d for 0/1 features (e.g., Document vs. Image); partial R² per feature and feature group |
+| – | **Write-up** | – | A "Results evaluation" methods paragraph in the notebooks / report |
+
+**Candidate new features** (from row 1):
+
+- Day of week (from `DATE`; currently only a weekend flag) and posting hour
+  (from `POST_TIME`; currently only an after-11am flag). Both are complete for
+  all 391 posts.
+- Number of ICP segments per post (`ICP_SEGMENTS`, `;`-separated, 1–3 per post).
+- Post length and call-to-action presence: **blocked**. `POST_BODY` in the
+  master is truncated at 200 characters (median 199), so length can't be
+  measured and a CTA check would only see the opening. Needs full post text
+  from Loomly / native exports, or these are dropped.
+- More features means more tests at ~125 posts per platform: report new
+  features as exploratory or adjust p-values (Holm or Benjamini–Hochberg).
 
 ## Data pipeline: details
 

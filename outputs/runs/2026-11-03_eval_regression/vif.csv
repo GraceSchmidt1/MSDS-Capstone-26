@@ -1,0 +1,65 @@
+platform,feature,vif
+Facebook,log2_impressions,1.5850290005583936
+Facebook,ICP: Oncology Clinic Leader,1.8235141315865557
+Facebook,ICP: Oncology Financial Leader,1.1551594733333963
+Facebook,ICP: Oncology Operations Leader,1.8854379474685583
+Facebook,ICP: Oncology Technical Leader,1.4118907002505166
+Facebook,Pillar: Events & Partnerships,1.233777882040157
+Facebook,Pillar: Patient-Centered Storytelling,1.4809114033717503
+Facebook,Pillar: Product Development & Innovations,1.1757123050292544
+Facebook,Pillar: Team Spotlights & Company Culture,1.494901064866073
+Facebook,Format: Multi-Image,1.2625682160234577
+Facebook,Format: Video,1.3074000160149553
+Facebook,Format: Link,1.205958420030023
+Facebook,WEEKEND,1.0670285889769644
+Facebook,AFTER_11,1.1696518863487606
+Instagram,log2_impressions,1.9655012665324405
+Instagram,ICP: Oncology Clinic Leader,1.669061476614872
+Instagram,ICP: Oncology Financial Leader,1.1156913174362006
+Instagram,ICP: Oncology Operations Leader,1.7556033514685014
+Instagram,ICP: Oncology Technical Leader,1.4699337430069102
+Instagram,Pillar: Events & Partnerships,1.2230672317073847
+Instagram,Pillar: Patient-Centered Storytelling,1.2258324164930103
+Instagram,Pillar: Product Development & Innovations,1.1372724496309234
+Instagram,Pillar: Team Spotlights & Company Culture,1.3153634765705455
+Instagram,Format: Carousel,1.1768200643212496
+Instagram,Format: Video,2.0390927804419334
+Instagram,WEEKEND,1.0904648555856662
+Instagram,AFTER_11,1.094567819153919
+LinkedIn,log2_impressions,1.7033573768631507
+LinkedIn,ICP: Oncology Clinic Leader,1.7555389554452727
+LinkedIn,ICP: Oncology Financial Leader,1.1690439325799995
+LinkedIn,ICP: Oncology Operations Leader,1.7171378537401334
+LinkedIn,ICP: Oncology Technical Leader,1.522513255266267
+LinkedIn,Pillar: Events & Partnerships,1.4723027277185476
+LinkedIn,Pillar: Patient-Centered Storytelling,1.4028082303974883
+LinkedIn,Pillar: Product Development & Innovations,1.1817612506861683
+LinkedIn,Pillar: Team Spotlights & Company Culture,1.677705648082545
+LinkedIn,Format: Link,1.259052894358519
+LinkedIn,Format: Video,1.1847422540588597
+LinkedIn,Format: Document,1.4297751481889733
+LinkedIn,Format: Multi-Image,1.1541092152211763
+LinkedIn,Format: Simple Status,1.1667846297856594
+LinkedIn,WEEKEND,1.0640860708221858
+LinkedIn,AFTER_11,1.1357048384649582
+LinkedIn,BOOSTED,1.0971335141535252
+pooled,log2_impressions,3.3910552340463185
+pooled,ICP: Oncology Clinic Leader,1.722380251308151
+pooled,ICP: Oncology Financial Leader,1.132163562177622
+pooled,ICP: Oncology Operations Leader,1.7618534668255856
+pooled,ICP: Oncology Technical Leader,1.439244030943246
+pooled,Pillar: Events & Partnerships,1.2577179204414812
+pooled,Pillar: Patient-Centered Storytelling,1.3083938348185042
+pooled,Pillar: Product Development & Innovations,1.1383102032829855
+pooled,Pillar: Team Spotlights & Company Culture,1.4421336159095688
+pooled,Format: Multi-Image,1.2101845535872227
+pooled,Format: Video,1.2199620418862023
+pooled,Format: Link,1.193950429745143
+pooled,Format: Carousel,1.244083536203728
+pooled,Format: Document,1.2437588279308267
+pooled,Format: Simple Status,1.0887811589564325
+pooled,WEEKEND,1.0621579029626882
+pooled,AFTER_11,1.106383643409536
+pooled,BOOSTED,1.0631029341182596
+pooled,Platform: Instagram,1.7754761794627543
+pooled,Platform: LinkedIn,4.274839195864285

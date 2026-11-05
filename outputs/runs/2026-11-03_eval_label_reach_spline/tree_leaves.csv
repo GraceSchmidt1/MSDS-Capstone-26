@@ -1,0 +1,24 @@
+platform,leaf,rule,posts,high,share_high
+Facebook,3,not ICP: Oncology Operations Leader AND not Pillar: Events & Partnerships AND not Pillar: Team Spotlights & Company Culture,15,9,0.6
+Facebook,4,not ICP: Oncology Operations Leader AND not Pillar: Events & Partnerships AND Pillar: Team Spotlights & Company Culture,16,4,0.25
+Facebook,5,not ICP: Oncology Operations Leader AND Pillar: Events & Partnerships,10,1,0.1
+Facebook,7,ICP: Oncology Operations Leader AND impressions ≤ 7,11,3,0.2727272727272727
+Facebook,9,ICP: Oncology Operations Leader AND impressions > 7 AND not Format: Multi-Image,59,32,0.5423728813559322
+Facebook,10,ICP: Oncology Operations Leader AND impressions > 7 AND Format: Multi-Image,12,9,0.75
+Instagram,3,not Pillar: Events & Partnerships AND not ICP: Oncology Operations Leader AND impressions ≤ 24,17,12,0.7058823529411765
+Instagram,4,not Pillar: Events & Partnerships AND not ICP: Oncology Operations Leader AND impressions > 24,16,7,0.4375
+Instagram,6,not Pillar: Events & Partnerships AND ICP: Oncology Operations Leader AND not Format: Carousel,59,16,0.2711864406779661
+Instagram,7,not Pillar: Events & Partnerships AND ICP: Oncology Operations Leader AND Format: Carousel,15,9,0.6
+Instagram,9,Pillar: Events & Partnerships AND not ICP: Oncology Operations Leader,10,8,0.8
+Instagram,10,Pillar: Events & Partnerships AND ICP: Oncology Operations Leader,13,9,0.6923076923076923
+LinkedIn,3,not Format: Link AND not ICP: Oncology Financial Leader AND impressions ≤ 202,38,15,0.39473684210526316
+LinkedIn,4,not Format: Link AND not ICP: Oncology Financial Leader AND impressions > 202,60,33,0.55
+LinkedIn,6,not Format: Link AND ICP: Oncology Financial Leader AND impressions ≤ 174,11,9,0.8181818181818182
+LinkedIn,7,not Format: Link AND ICP: Oncology Financial Leader AND impressions > 174,10,6,0.6
+LinkedIn,8,Format: Link,18,2,0.1111111111111111
+pooled,3,not Format: Link AND impressions ≤ 11 AND impressions ≤ 8,17,8,0.47058823529411764
+pooled,4,not Format: Link AND impressions ≤ 11 AND impressions > 8,12,12,1.0
+pooled,6,not Format: Link AND impressions > 11 AND not Format: Carousel,308,141,0.4577922077922078
+pooled,7,not Format: Link AND impressions > 11 AND Format: Carousel,27,19,0.7037037037037037
+pooled,9,Format: Link AND impressions ≤ 161,14,3,0.21428571428571427
+pooled,10,Format: Link AND impressions > 161,12,1,0.08333333333333333

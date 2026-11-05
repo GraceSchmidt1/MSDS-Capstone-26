@@ -1,0 +1,65 @@
+platform,feature,importance
+Facebook,log2_impressions,0.9081333493385334
+Facebook,ICP: Oncology Clinic Leader,0.0
+Facebook,ICP: Oncology Financial Leader,0.0
+Facebook,ICP: Oncology Operations Leader,0.0
+Facebook,ICP: Oncology Technical Leader,0.0
+Facebook,Pillar: Events & Partnerships,0.0
+Facebook,Pillar: Patient-Centered Storytelling,0.0
+Facebook,Pillar: Product Development & Innovations,0.0
+Facebook,Pillar: Team Spotlights & Company Culture,0.09186665066146663
+Facebook,Format: Multi-Image,0.0
+Facebook,Format: Video,0.0
+Facebook,Format: Link,0.0
+Facebook,WEEKEND,0.0
+Facebook,AFTER_11,0.0
+Instagram,log2_impressions,0.8514425908717739
+Instagram,ICP: Oncology Clinic Leader,0.0
+Instagram,ICP: Oncology Financial Leader,0.0
+Instagram,ICP: Oncology Operations Leader,0.06392008659626185
+Instagram,ICP: Oncology Technical Leader,0.0
+Instagram,Pillar: Events & Partnerships,0.0
+Instagram,Pillar: Patient-Centered Storytelling,0.0
+Instagram,Pillar: Product Development & Innovations,0.0
+Instagram,Pillar: Team Spotlights & Company Culture,0.0
+Instagram,Format: Carousel,0.08463732253196425
+Instagram,Format: Video,0.0
+Instagram,WEEKEND,0.0
+Instagram,AFTER_11,0.0
+LinkedIn,log2_impressions,0.13429999975182577
+LinkedIn,ICP: Oncology Clinic Leader,0.0
+LinkedIn,ICP: Oncology Financial Leader,0.0
+LinkedIn,ICP: Oncology Operations Leader,0.0
+LinkedIn,ICP: Oncology Technical Leader,0.0
+LinkedIn,Pillar: Events & Partnerships,0.0
+LinkedIn,Pillar: Patient-Centered Storytelling,0.0
+LinkedIn,Pillar: Product Development & Innovations,0.0
+LinkedIn,Pillar: Team Spotlights & Company Culture,0.0
+LinkedIn,Format: Link,0.0
+LinkedIn,Format: Video,0.0
+LinkedIn,Format: Document,0.5163810298851128
+LinkedIn,Format: Multi-Image,0.3493189703630613
+LinkedIn,Format: Simple Status,0.0
+LinkedIn,WEEKEND,0.0
+LinkedIn,AFTER_11,0.0
+LinkedIn,BOOSTED,0.0
+pooled,log2_impressions,0.4209557087619763
+pooled,ICP: Oncology Clinic Leader,0.0
+pooled,ICP: Oncology Financial Leader,0.0
+pooled,ICP: Oncology Operations Leader,0.0
+pooled,ICP: Oncology Technical Leader,0.0
+pooled,Pillar: Events & Partnerships,0.0
+pooled,Pillar: Patient-Centered Storytelling,0.0
+pooled,Pillar: Product Development & Innovations,0.0
+pooled,Pillar: Team Spotlights & Company Culture,0.0
+pooled,Format: Multi-Image,0.0
+pooled,Format: Video,0.0
+pooled,Format: Link,0.07379032598109767
+pooled,Format: Carousel,0.0
+pooled,Format: Document,0.2615726165125837
+pooled,Format: Simple Status,0.0
+pooled,WEEKEND,0.0
+pooled,AFTER_11,0.09256113246878118
+pooled,BOOSTED,0.0
+pooled,Platform: Instagram,0.15112021627556105
+pooled,Platform: LinkedIn,0.0

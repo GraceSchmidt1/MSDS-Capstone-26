@@ -1,0 +1,193 @@
+platform,model,feature,coef_per_sd,odds_ratio,nonzero,C,C_at_grid_edge,l1_ratio
+Facebook,Ridge logistic,log2_impressions,-0.07607523730821746,0.9471306994911892,True,0.01,False,0.0
+Facebook,Ridge logistic,ICP: Oncology Clinic Leader,-0.03262849837613248,0.9283267607608058,True,0.01,False,0.0
+Facebook,Ridge logistic,ICP: Oncology Financial Leader,0.016110101786767757,1.042933031610712,True,0.01,False,0.0
+Facebook,Ridge logistic,ICP: Oncology Operations Leader,0.04732944253840691,1.1056140802094667,True,0.01,False,0.0
+Facebook,Ridge logistic,ICP: Oncology Technical Leader,-0.03572767856879416,0.9183232860506472,True,0.01,False,0.0
+Facebook,Ridge logistic,Pillar: Events & Partnerships,-0.03434396664840323,0.9156849554095492,True,0.01,False,0.0
+Facebook,Ridge logistic,Pillar: Patient-Centered Storytelling,-0.02216790329197874,0.9183976711831271,True,0.01,False,0.0
+Facebook,Ridge logistic,Pillar: Product Development & Innovations,0.02909774953025406,1.1182169540101983,True,0.01,False,0.0
+Facebook,Ridge logistic,Pillar: Team Spotlights & Company Culture,-0.07764865062511653,0.8431093720985839,True,0.01,False,0.0
+Facebook,Ridge logistic,Format: Multi-Image,0.012173905546805891,1.0322759607519958,True,0.01,False,0.0
+Facebook,Ridge logistic,Format: Video,-0.01609311978648672,0.9520098254334303,True,0.01,False,0.0
+Facebook,Ridge logistic,Format: Link,-0.060946259441535804,0.7810245805799848,True,0.01,False,0.0
+Facebook,Ridge logistic,WEEKEND,-0.05072125642348147,0.7197803902991731,True,0.01,False,0.0
+Facebook,Ridge logistic,AFTER_11,0.003539110037051341,1.0072553105435502,True,0.01,False,0.0
+Facebook,Lasso logistic,log2_impressions,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,ICP: Oncology Clinic Leader,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,ICP: Oncology Financial Leader,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,ICP: Oncology Operations Leader,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,ICP: Oncology Technical Leader,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,Pillar: Events & Partnerships,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,Pillar: Patient-Centered Storytelling,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,Pillar: Product Development & Innovations,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,Pillar: Team Spotlights & Company Culture,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,Format: Multi-Image,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,Format: Video,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,Format: Link,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,WEEKEND,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Lasso logistic,AFTER_11,0.0,1.0,False,0.00039810717055349735,False,1.0
+Facebook,Elastic net logistic,log2_impressions,-0.15697045612049565,0.893974651544193,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,ICP: Oncology Clinic Leader,-0.02105672524007067,0.9531381039964117,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,ICP: Oncology Financial Leader,0.000457130368932823,1.0011935268692915,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,ICP: Oncology Operations Leader,0.07137325415868057,1.1634683907786085,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,ICP: Oncology Technical Leader,-0.03258416183075784,0.9252337086850578,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,Pillar: Events & Partnerships,-0.043188816830636065,0.895146813013133,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,Pillar: Patient-Centered Storytelling,-0.001065756915510142,0.9959158543974072,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,Pillar: Product Development & Innovations,0.022998846775164974,1.0923328227747902,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,Pillar: Team Spotlights & Company Culture,-0.15410417775448867,0.7126998661259608,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,Format: Multi-Image,0.0,1.0,False,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,Format: Video,0.0,1.0,False,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,Format: Link,-0.12268605121037648,0.6080396184978547,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,WEEKEND,-0.08899123830231716,0.5616363178023436,True,0.039810717055349734,False,0.1
+Facebook,Elastic net logistic,AFTER_11,0.0,1.0,False,0.039810717055349734,False,0.1
+Instagram,Ridge logistic,log2_impressions,-1.9990240966360255,0.16221153354950163,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,ICP: Oncology Clinic Leader,-0.03215013766456155,0.9294556415365107,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,ICP: Oncology Financial Leader,-0.3903459496775579,0.35954730480930197,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,ICP: Oncology Operations Leader,-0.32803582223345407,0.4979669850088361,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,ICP: Oncology Technical Leader,-0.37027232650216146,0.41941569911804216,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,Pillar: Events & Partnerships,0.3806796057351609,2.7117079438173075,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,Pillar: Patient-Centered Storytelling,0.35601925422514685,3.8040290437654334,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,Pillar: Product Development & Innovations,0.3668164171861236,3.7360200612036607,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,Pillar: Team Spotlights & Company Culture,-0.1292211687262351,0.7509811540344301,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,Format: Carousel,0.34561358686353433,2.318051870447865,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,Format: Video,-0.24072388835986586,0.4599901563612138,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,WEEKEND,-0.10476863707276232,0.6286593594047576,True,0.6309573444801936,False,0.0
+Instagram,Ridge logistic,AFTER_11,0.08798807332093567,1.1924344526267656,True,0.6309573444801936,False,0.0
+Instagram,Lasso logistic,log2_impressions,-2.3546009013104765,0.11737479922692107,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,ICP: Oncology Clinic Leader,0.0,1.0,False,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,ICP: Oncology Financial Leader,-0.2878638374960647,0.470314781997704,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,ICP: Oncology Operations Leader,-0.2172883350946345,0.6301269268496758,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,ICP: Oncology Technical Leader,-0.24830383010594362,0.55840118502825,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,Pillar: Events & Partnerships,0.36781441553276184,2.621810685815477,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,Pillar: Patient-Centered Storytelling,0.33230779392268994,3.4801554515975077,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,Pillar: Product Development & Innovations,0.29030549545559015,2.838020558922964,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,Pillar: Team Spotlights & Company Culture,-0.01616074749670094,0.9648189669464833,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,Format: Carousel,0.3808841053672598,2.5257168177215843,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,Format: Video,0.0,1.0,False,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,WEEKEND,-0.051299059153372246,0.7967018634255569,True,0.6309573444801936,False,1.0
+Instagram,Lasso logistic,AFTER_11,0.025999153804990287,1.0533804430534435,True,0.6309573444801936,False,1.0
+Instagram,Elastic net logistic,log2_impressions,-2.30122733679016,0.12321555299376513,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,ICP: Oncology Clinic Leader,0.0,1.0,False,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,ICP: Oncology Financial Leader,-0.29780779592701445,0.45821745934554975,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,ICP: Oncology Operations Leader,-0.22638912756953566,0.6180553725477537,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,ICP: Oncology Technical Leader,-0.2609259832687096,0.5421041440121424,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,Pillar: Events & Partnerships,0.3679856767501365,2.6229876015236298,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,Pillar: Patient-Centered Storytelling,0.33003725065155565,3.4506275767021983,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,Pillar: Product Development & Innovations,0.2942260100878998,2.878282496948053,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,Pillar: Team Spotlights & Company Culture,-0.0317343691359495,0.9320876497059221,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,Format: Carousel,0.3751448611623657,2.490700092469526,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,Format: Video,0.0,1.0,False,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,WEEKEND,-0.05614086414479432,0.7797937486156267,True,0.6309573444801936,False,0.9
+Instagram,Elastic net logistic,AFTER_11,0.03248595061935371,1.067137245583554,True,0.6309573444801936,False,0.9
+LinkedIn,Ridge logistic,log2_impressions,-0.16621110167047545,0.8917953930667244,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,ICP: Oncology Clinic Leader,0.1005897463146149,1.2567638738448932,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,ICP: Oncology Financial Leader,0.06482220542477143,1.1827335904660756,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,ICP: Oncology Operations Leader,0.07791947977419263,1.180464093967408,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,ICP: Oncology Technical Leader,-0.04417661952461343,0.9008555865284342,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,Pillar: Events & Partnerships,-0.08658646607435967,0.79917345638266,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,Pillar: Patient-Centered Storytelling,0.04527643845781147,1.167066730841997,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,Pillar: Product Development & Innovations,-0.056895324774480074,0.8177020565840986,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,Pillar: Team Spotlights & Company Culture,0.07371979751610103,1.1774665381431946,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,Format: Link,-0.21639409153865347,0.5270000080154476,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,Format: Video,0.027997902088646213,1.1002475795285205,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,Format: Document,0.30781360817602604,2.858594948078527,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,Format: Multi-Image,0.28258251758330233,2.9633949745614223,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,Format: Simple Status,-0.07688583455149464,0.6867997699620438,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,WEEKEND,-0.014950807114702936,0.9150254881198463,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,AFTER_11,-0.12537026996597267,0.7767058742220407,True,0.039810717055349734,False,0.0
+LinkedIn,Ridge logistic,BOOSTED,0.06776462235342887,1.435293855547383,True,0.039810717055349734,False,0.0
+LinkedIn,Lasso logistic,log2_impressions,-0.02783369243411009,0.9810054498970887,True,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,ICP: Oncology Clinic Leader,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,ICP: Oncology Financial Leader,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,ICP: Oncology Operations Leader,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,ICP: Oncology Technical Leader,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,Pillar: Events & Partnerships,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,Pillar: Patient-Centered Storytelling,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,Pillar: Product Development & Innovations,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,Pillar: Team Spotlights & Company Culture,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,Format: Link,-0.12231442575308618,0.6962359674651846,True,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,Format: Video,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,Format: Document,0.4034768713270377,3.962024360760385,True,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,Format: Multi-Image,0.2680086849899047,2.801932036275799,True,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,Format: Simple Status,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,WEEKEND,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,AFTER_11,-0.04392588046261199,0.9152701309707695,True,0.15848931924611143,False,1.0
+LinkedIn,Lasso logistic,BOOSTED,0.0,1.0,False,0.15848931924611143,False,1.0
+LinkedIn,Elastic net logistic,log2_impressions,-0.046432634878613974,0.9685144899456803,True,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,ICP: Oncology Clinic Leader,0.006944726679573867,1.015903566732872,True,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,ICP: Oncology Financial Leader,0.0,1.0,False,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,ICP: Oncology Operations Leader,0.0,1.0,False,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,ICP: Oncology Technical Leader,0.0,1.0,False,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,Pillar: Events & Partnerships,-0.018757410661036842,0.9525963724985711,True,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,Pillar: Patient-Centered Storytelling,0.0,1.0,False,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,Pillar: Product Development & Innovations,0.0,1.0,False,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,Pillar: Team Spotlights & Company Culture,0.0,1.0,False,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,Format: Link,-0.1479644435119208,0.6453296302242464,True,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,Format: Video,0.0,1.0,False,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,Format: Document,0.40943042516145295,4.043335540781694,True,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,Format: Multi-Image,0.2876431585573527,3.0216113489115797,True,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,Format: Simple Status,0.0,1.0,False,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,WEEKEND,0.0,1.0,False,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,AFTER_11,-0.06753247682692337,0.8727405462715528,True,0.15848931924611143,False,0.9
+LinkedIn,Elastic net logistic,BOOSTED,0.0,1.0,False,0.15848931924611143,False,0.9
+pooled,Ridge logistic,log2_impressions,-0.2648647468044971,0.8823091651736825,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,ICP: Oncology Clinic Leader,0.05514845708833187,1.1337013830159721,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,ICP: Oncology Financial Leader,-0.026637380636370125,0.9329425930545413,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,ICP: Oncology Operations Leader,0.02668615747774789,1.0583593343467976,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,ICP: Oncology Technical Leader,-0.09115354886770194,0.8061244198859072,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Pillar: Events & Partnerships,-0.027546518965763392,0.9311033709049794,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Pillar: Patient-Centered Storytelling,0.06026078139150821,1.2455472428132728,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Pillar: Product Development & Innovations,0.03349997645675493,1.129827998926727,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Pillar: Team Spotlights & Company Culture,-0.12789657854954808,0.7537624042153173,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Format: Multi-Image,0.12278318498440333,1.564225398815257,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Format: Video,-0.0695661536660146,0.7989849532294508,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Format: Link,-0.21635318978330623,0.4200664638771289,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Format: Carousel,0.07402854087849853,1.3321149580764406,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Format: Document,0.21349080959298558,3.2848711996963265,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Format: Simple Status,-0.05959810831857062,0.6161686132543395,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,WEEKEND,-0.07307615055081702,0.6751571415032552,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,AFTER_11,-0.05619455482283205,0.8931641044527375,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,BOOSTED,0.05948160089070161,1.6967717701980523,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Platform: Instagram,-0.04559329225576944,0.907811992632616,True,0.025118864315095822,False,0.0
+pooled,Ridge logistic,Platform: LinkedIn,0.146721496056647,1.3598212398493463,True,0.025118864315095822,False,0.0
+pooled,Lasso logistic,log2_impressions,-0.6325402150912331,0.7415382856589067,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,ICP: Oncology Clinic Leader,0.028443818633222262,1.066863070958967,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,ICP: Oncology Financial Leader,0.0,1.0,False,0.25118864315095824,False,1.0
+pooled,Lasso logistic,ICP: Oncology Operations Leader,0.0,1.0,False,0.25118864315095824,False,1.0
+pooled,Lasso logistic,ICP: Oncology Technical Leader,-0.08898071375929739,0.8102763801888803,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Pillar: Events & Partnerships,0.0,1.0,False,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Pillar: Patient-Centered Storytelling,0.06944942427591994,1.2879554869542114,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Pillar: Product Development & Innovations,0.007046335323800681,1.026007500031921,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Pillar: Team Spotlights & Company Culture,-0.10673552409405686,0.7898535447920945,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Format: Multi-Image,0.13810537058127087,1.6540402020990335,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Format: Video,0.0,1.0,False,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Format: Link,-0.33110587398691893,0.26517202668814177,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Format: Carousel,0.06954704974855082,1.3091887994041014,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Format: Document,0.20839411485476994,3.192915562963529,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Format: Simple Status,-0.05948316205802006,0.6167443455701838,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,WEEKEND,-0.0631546613136806,0.7121417176723344,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,AFTER_11,-0.01903235050170041,0.9624564088515125,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,BOOSTED,0.06574568373543258,1.793929471684296,True,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Platform: Instagram,0.0,1.0,False,0.25118864315095824,False,1.0
+pooled,Lasso logistic,Platform: LinkedIn,0.4895099067665328,2.788291070968905,True,0.25118864315095824,False,1.0
+pooled,Elastic net logistic,log2_impressions,-0.6470939025952327,0.7364539068879338,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,ICP: Oncology Clinic Leader,0.03410488846253236,1.0806947740785602,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,ICP: Oncology Financial Leader,0.0,1.0,False,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,ICP: Oncology Operations Leader,0.0,1.0,False,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,ICP: Oncology Technical Leader,-0.0920503291976507,0.8044170165126285,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Pillar: Events & Partnerships,0.0,1.0,False,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Pillar: Patient-Centered Storytelling,0.07448722558114362,1.3118161301661102,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Pillar: Product Development & Innovations,0.013543934520603882,1.0505886837763607,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Pillar: Team Spotlights & Company Culture,-0.10992487080396673,0.7843053499427914,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Format: Multi-Image,0.14251348035666128,1.6808219588611841,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Format: Video,-0.0035170917426357055,0.9887183489332524,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Format: Link,-0.3413531977243649,0.2544993000426629,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Format: Carousel,0.0756852722212759,1.3406916427534077,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Format: Document,0.21003514032358017,3.2222387834987436,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Format: Simple Status,-0.06464601533583693,0.5914081595784829,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,WEEKEND,-0.06833438929578269,0.692587156316,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,AFTER_11,-0.024729403478977993,0.951494839448134,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,BOOSTED,0.07138331050818582,1.886118268294043,True,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Platform: Instagram,0.0,1.0,False,0.25118864315095824,False,0.9
+pooled,Elastic net logistic,Platform: LinkedIn,0.5047344405012812,2.878649763364883,True,0.25118864315095824,False,0.9
