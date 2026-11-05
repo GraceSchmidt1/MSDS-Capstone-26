@@ -127,5 +127,13 @@ classification:
     model: Elastic net logistic # scored on the shared outer splits (labels and penalty refit per split)
     n_repeats: 10               # shuffles per feature per split
 
+# Evaluation framework items 3–7 (modeling/evaluate.py, run_evaluation.py)
+evaluation:
+  sources:                      # committed runs that items 3 and 6 read (nothing is refit)
+    regression: outputs/runs/2026-11-03_eval_regression
+    classification: outputs/runs/2026-11-03_eval_label_reach_spline
+  min_group_posts: 5            # pillars / ICP segments with fewer single-tag posts are left out of item 4
+  stable: {selection_freq: 0.8, sign_agreement: 0.95}   # "stable" lasso feature, as in FINDINGS.md
+
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs

@@ -73,6 +73,19 @@ class LabelRule:
             out[m] = self._label_platform(self.params[p], y[m], None if reach is None else reach[m])
         return out
 
+    def expected_rate(self, fs: FeatureSet, idx=None) -> np.ndarray:
+        """Expected (median) rate for each post's reach, from the fitted rule (reach-adjusted rules only)."""
+        if not self.params:
+            raise RuntimeError("fit() the rule before using it")
+        idx = np.arange(len(fs.y)) if idx is None else np.asarray(idx)
+        plats = row_platforms(fs, self.config)[idx]
+        reach = fs.X["log2_impressions"].to_numpy()[idx]
+        out = np.zeros(len(idx))
+        for p in np.unique(plats):
+            m = plats == p
+            out[m] = self._expected_platform(self.params[p], reach[m])
+        return out
+
     def describe(self) -> pd.DataFrame:
         # Keys starting with "_" hold fitted objects used by label(), not reportable values.
         return pd.DataFrame([{"rule": self.name, "platform": p, **{k: x for k, x in v.items() if not k.startswith("_")}}
@@ -113,8 +126,11 @@ class ReachAdjustedRule(LabelRule):
         return {"intercept": intercept, "slope_per_doubling": slope,
                 "residual_threshold": float(np.median(resid))}
 
+    def _expected_platform(self, params, reach):
+        return params["intercept"] + params["slope_per_doubling"] * reach
+
     def _label_platform(self, params, y, reach):
-        expected = params["intercept"] + params["slope_per_doubling"] * reach
+        expected = self._expected_platform(params, reach)
         return ((y - expected) - params["residual_threshold"] > self.TIE_TOL).astype(int)
 
 
@@ -140,8 +156,11 @@ class ReachSplineRule(LabelRule):
         return {"knots_impressions": " ".join(f"{k:.1f}" for k in knots),
                 "residual_threshold": float(np.median(resid)), "_spline": spline, "_fit": fit}
 
+    def _expected_platform(self, params, reach):
+        return params["_fit"].predict(params["_spline"].transform(reach.reshape(-1, 1)))
+
     def _label_platform(self, params, y, reach):
-        expected = params["_fit"].predict(params["_spline"].transform(reach.reshape(-1, 1)))
+        expected = self._expected_platform(params, reach)
         return ((y - expected) - params["residual_threshold"] > self.TIE_TOL).astype(int)
 
 
