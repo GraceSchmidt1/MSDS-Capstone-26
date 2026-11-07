@@ -250,3 +250,64 @@ def test_model_quality_fields(prepared):
     assert q["posts"] == 137 and 0.5 < q["auc_mean"] < 1
     rel = CONFIG["recommend"]["reliable"]
     assert (q["reliability"] == "usable") == (q["lift_r2_mean"] >= rel["r2"] or q["auc_mean"] >= rel["auc"])
+
+
+# ── R3: recent check ────────────────────────────────────────────────────────
+from modeling.recommend import recent_check, recent_window  # noqa: E402
+
+
+@pytest.fixture(scope="module")
+def recent(prepared, recs):
+    return {p: recent_check(prepared, build_features(prepared, p, CONFIG), recs[p][0], CONFIG)
+            for p in CONFIG["platforms"]}
+
+
+def test_recent_window(prepared):
+    start, end = recent_window(prepared, CONFIG)
+    assert end == prepared["DATE_TS"].max()
+    assert (end - start).days == CONFIG["recommend"]["recent_days"] - 1
+
+
+@pytest.mark.parametrize("platform", CONFIG["platforms"])
+def test_recent_posts_are_the_window(prepared, recent, platform):
+    posts, opts = recent[platform]
+    fs = build_features(prepared, platform, CONFIG)
+    start, end = recent_window(prepared, CONFIG)
+    rows = prepared.set_index("MASTER_ROW").loc[fs.X.index]
+    assert len(posts) == rows["DATE_TS"].between(start, end).sum()
+    assert posts["date"].is_monotonic_decreasing
+    perf = performance(fs, CONFIG).loc[posts["master_row"]]
+    np.testing.assert_allclose(posts["lift"], perf["lift"])
+    assert ((posts["result"] == "Beat its reach") == (perf["beat"].to_numpy() == 1)).all()
+    lo, hi = np.quantile(performance(fs, CONFIG)["lift"], [0.1, 0.9])
+    assert (posts.loc[posts["standout"] == "Top post", "lift"] >= hi).all()
+    assert (posts.loc[posts["standout"] == "", "lift"].between(lo, hi, inclusive="neither")).all()
+    first = opts.iloc[0]
+    assert first["factor"] == "All posts" and first["recent_posts"] == len(posts)
+    assert first["recent_posts"] + first["older_posts"] == len(fs.y)
+
+
+def test_gap_change_is_difference_in_differences(prepared, recent):
+    """The OLS interaction of a saturated 2×2 model equals the difference-in-differences of cell means."""
+    fs = build_features(prepared, "LinkedIn", CONFIG)
+    lift = performance(fs, CONFIG)["lift"].to_numpy()
+    rows = prepared.set_index("MASTER_ROW").loc[fs.X.index]
+    start, end = recent_window(prepared, CONFIG)
+    rec = rows["DATE_TS"].between(start, end).to_numpy()
+    m = rows["FORMAT"].eq("Image").to_numpy()
+    did = (lift[m & rec].mean() - lift[~m & rec].mean()) - (lift[m & ~rec].mean() - lift[~m & ~rec].mean())
+    opts = recent["LinkedIn"][1].set_index(["factor", "option"])
+    assert opts.loc[("Format", "Image"), "gap_change"] == pytest.approx(did)
+
+
+def test_trend_rules(recent):
+    r = CONFIG["recommend"]
+    for _, opts in recent.values():
+        o = opts.iloc[1:]
+        few = o["recent_posts"] < r["recent_min_posts"]
+        assert (o.loc[few, "trend"] == "Too few recent posts").all()
+        t = o[o["p_value"].notna()]
+        np.testing.assert_allclose(t["p_bh"], multipletests(t["p_value"], method="fdr_bh")[1])
+        flagged = t["trend"].isin(["Pulling ahead recently", "Falling behind recently"])
+        assert (flagged == (t["p_bh"] < r["alpha"])).all()
+        assert ((t.loc[flagged, "gap_change"] > 0) == (t.loc[flagged, "trend"] == "Pulling ahead recently")).all()

@@ -43,6 +43,10 @@ Planned posts (a content calendar CSV, see plan_template.csv):
     score_plan      typical rate for the reach, expected lift and rate, chance to beat its reach, and the
                     verdicts that apply to its choices
     model_quality   held-out lift R² and AUC per platform, and whether the scores are usable or rough guides
+
+Recent check (recent_check): the last `recent_days` up to the newest post. Each recent post vs. its reach, and
+the platform overall recent vs. older, and per option whether its gap to the platform's other posts changed
+(flagged only when clear: BH-adjusted p < alpha).
 """
 from __future__ import annotations
 
@@ -435,3 +439,83 @@ def score_plan(specs: pd.DataFrame, scorers: dict, options: dict, config: dict) 
                         "chance_beat_hi": np.quantile(bb, 0.975), "notes": _option_notes(r["spec"], options[r["platform"]])})
         rows.append(out)
     return pd.DataFrame(rows).assign(notes=lambda d: d.get("notes", pd.Series("", index=d.index)).fillna(""))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# R3: recent check (has anything changed lately?)
+# ─────────────────────────────────────────────────────────────────────────────
+def recent_window(prepared: pd.DataFrame, config: dict) -> tuple[pd.Timestamp, pd.Timestamp]:
+    """(start, end) of the last `recent_days`, ending at the newest post in the master."""
+    end = prepared["DATE_TS"].max()
+    return end - pd.Timedelta(days=config["recommend"]["recent_days"] - 1), end
+
+
+def recent_check(prepared: pd.DataFrame, fs: FeatureSet, options: pd.DataFrame, config: dict,
+                 perf: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    recent_posts    every post in the window: rate, typical rate for its reach, lift, whether it beat its
+                    reach, and `standout` = among the platform's top / bottom `standout_share` of lifts ever
+    recent_options  first row "All posts": recent vs. older lift for the whole platform (Welch t-test), i.e.
+                    is the platform doing better or worse than usual lately. Then per option: recent posts,
+                    recent and older share beat and mean lift, and `gap_change` = how much its gap to the
+                    platform's other posts changed (recent gap − older gap), tested as the interaction in
+                    OLS lift ~ option × recent (HC3), BH-adjusted over the platform's options. So an option is
+                    flagged only if it moved differently from the rest of the platform: "Pulling ahead recently"
+                    / "Falling behind recently" (p_bh < alpha);
+                    "Too few recent posts" below `recent_min_posts`; else "In line"
+    Verdicts use all posts equally; this only flags changes for a closer look.
+    """
+    r = config["recommend"]
+    perf = performance(fs, config) if perf is None else perf
+    rows = prepared.set_index("MASTER_ROW").loc[fs.X.index]
+    start, end = recent_window(prepared, config)
+    recent = rows["DATE_TS"].between(start, end).to_numpy()
+    lift, beat = perf["lift"].to_numpy(), perf["beat"].to_numpy()
+    lo, hi = np.quantile(lift, [r["standout_share"], 1 - r["standout_share"]])
+    posts = rows.loc[recent, ["DATE_TS", "POST_TITLE", "FORMAT", "CONTENT_PILLAR", "ICP_SEGMENTS", "IMPRESSIONS"]]
+    posts = posts.assign(**perf.loc[recent, ["rate", "expected_rate", "lift"]],
+                         result=np.where(beat[recent] == 1, "Beat its reach", "Below its reach"),
+                         standout=np.select([lift[recent] >= hi, lift[recent] <= lo],
+                                            ["Top post", "Bottom post"], ""))
+    posts = (posts.rename(columns={"DATE_TS": "date", "POST_TITLE": "title", "FORMAT": "format",
+                                   "CONTENT_PILLAR": "pillars", "ICP_SEGMENTS": "icp_segments",
+                                   "IMPRESSIONS": "impressions", "expected_rate": "typical_rate"})
+             .reset_index().rename(columns={"MASTER_ROW": "master_row"})
+             .assign(platform=fs.platform).sort_values("date", ascending=False))
+
+    verdict_of = options.set_index(["factor", "option"])["verdict"]
+    old_all = ~recent
+    out = [{"platform": fs.platform, "factor": "All posts", "option": "All posts", "verdict": "",
+            "recent_posts": int(recent.sum()), "recent_share_beat": beat[recent].mean(),
+            "recent_mean_lift": lift[recent].mean(), "older_posts": int(old_all.sum()),
+            "older_share_beat": beat[old_all].mean(), "older_mean_lift": lift[old_all].mean(), "gap_change": np.nan,
+            "p_value": stats.ttest_ind(lift[recent], lift[old_all], equal_var=False).pvalue}]
+    out[0]["trend"] = ("In line" if out[0]["p_value"] >= r["alpha"] else
+                       "Platform doing better recently" if out[0]["recent_mean_lift"] > out[0]["older_mean_lift"]
+                       else "Platform doing worse recently")
+    for factor, option, m, _, _ in option_masks(prepared, fs, config):
+        new, old = m & recent, m & ~recent
+        row = {"platform": fs.platform, "factor": factor, "option": option,
+               "verdict": verdict_of.get((factor, option), ""), "recent_posts": int(new.sum()),
+               "recent_share_beat": beat[new].mean() if new.any() else np.nan,
+               "recent_mean_lift": lift[new].mean() if new.any() else np.nan, "older_posts": int(old.sum()),
+               "older_share_beat": beat[old].mean() if old.any() else np.nan,
+               "older_mean_lift": lift[old].mean() if old.any() else np.nan, "gap_change": np.nan, "p_value": np.nan}
+        cells = [new, old, ~m & recent, ~m & ~recent]
+        if new.sum() < r["recent_min_posts"] or min(c.sum() for c in cells[1:]) < 2:
+            row["trend"] = "Too few recent posts"
+        else:
+            X = sm.add_constant(np.column_stack([m, recent, m & recent]).astype(float))
+            res = sm.OLS(lift, X).fit(cov_type="HC3")
+            row["gap_change"], row["p_value"] = float(res.params[3]), float(res.pvalues[3])
+        out.append(row)
+    out = pd.DataFrame(out)
+    tested = out.index[1:][out["p_value"].iloc[1:].notna()]          # option rows, BH within the platform
+    out["p_bh"] = np.nan
+    out.loc[0, "p_bh"] = out.loc[0, "p_value"]
+    if len(tested):
+        out.loc[tested, "p_bh"] = multipletests(out.loc[tested, "p_value"], method="fdr_bh")[1]
+        out.loc[tested, "trend"] = np.where(out.loc[tested, "p_bh"] >= r["alpha"], "In line",
+                                            np.where(out.loc[tested, "gap_change"] > 0, "Pulling ahead recently",
+                                                     "Falling behind recently"))
+    return posts.reset_index(drop=True), out
