@@ -1,0 +1,4 @@
+platform,posts,lift_model,lift_r2_mean,lift_r2_sd,beat_model,auc_mean,auc_sd,reliability
+Facebook,123,Elastic net,0.0080405401397109,0.05835900800661829,Ridge logistic,0.599484088891916,0.09516440045298856,weak: treat scores as rough guides
+Instagram,130,Elastic net,0.016692349454275744,0.059667219894601234,Ridge logistic,0.6564815590161208,0.11390250996256394,usable
+LinkedIn,137,Elastic net,0.11770636136826859,0.25732667818405247,Ridge logistic,0.6565230965240825,0.0958367923253499,usable
