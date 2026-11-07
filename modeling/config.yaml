@@ -135,5 +135,20 @@ evaluation:
   min_group_posts: 5            # pillars / ICP segments with fewer single-tag posts are left out of item 4
   stable: {selection_freq: 0.8, sign_agreement: 0.95}   # "stable" lasso feature, as in FINDINGS.md
 
+# Stage 2 recommendations (modeling/recommend.py). Each option is compared with the platform's other
+# posts after reach (lift = rate − expected rate for its reach, from classification.main_label).
+recommend:
+  min_posts: 10                 # fewer posts with (or without) an option → "Not enough posts yet"
+  alpha: 0.05                   # tests and Benjamini–Hochberg adjustment
+  n_boot: 2000                  # bootstrap resamples for the lift CIs
+  power: 0.8                    # for "posts needed to settle it"
+  max_posts_needed: 200         # above this, reported as "200+" (effect too small to settle soon)
+  knot_check: [3, 5]            # a Do more / Do less must also hold with these spline knot counts
+  plan_boot: 300                # refits (posts resampled, penalty fixed) for the range around planned-post scores
+  reliable: {r2: 0.1, auc: 0.6} # a platform's scores are "usable" if held-out R² or AUC reaches this
+  recent_days: 90               # recent check: the last 90 days up to the newest post
+  recent_min_posts: 5           # fewer recent posts with an option → "Too few recent posts"
+  standout_share: 0.1           # recent posts in the top / bottom 10% of the platform's lifts are flagged
+
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs

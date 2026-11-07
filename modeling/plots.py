@@ -354,3 +354,38 @@ def tree_leaves_plot(leaves: pd.DataFrame, platforms: list[str], path):
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)
+
+
+FACTOR_PREFIX = {"Content pillar": "Pillar", "ICP segment": "ICP"}
+
+
+def options_plot(options: pd.DataFrame, platform: str, path):
+    """
+    Stage 2: each option's lift vs. its baseline (pts, 95% bootstrap CI) for one platform. Options with a
+    verdict other than "No clear difference" / "Not enough posts yet" are drawn in the platform color, the rest
+    in gray; the verdict is written beside each row so identity never rests on color alone.
+    """
+    d = options[(options["platform"] == platform) & (options["compared_with"] != "–")].copy()
+    d = d.iloc[::-1]
+    shown = ~d["verdict"].isin(["No clear difference", "Not enough posts yet"])
+    y = np.arange(len(d))
+    col = np.where(shown, PLATFORM_COLOR[platform], INK_MUTED)
+    fig, ax = plt.subplots(figsize=(9.2, 0.34 * len(d) + 1.4))
+    ax.axvline(0, color=INK_MUTED, lw=1)
+    ax.hlines(y, d["diff_ci_lo"], d["diff_ci_hi"], color=col, lw=2, alpha=0.55)
+    ax.scatter(d["diff_vs_baseline"], y, s=40, color=col, zorder=3, edgecolors=SURFACE, linewidths=1.2)
+    names = [f"{o} (vs {c})" if f in ("Format", "Timing", "Paid boost") else f"{FACTOR_PREFIX[f]}: {o}"
+             for f, o, c in zip(d["factor"], d["option"], d["compared_with"])]
+    ax.set_yticks(y)
+    ax.set_yticklabels([textwrap.shorten(n, 52, placeholder="…") for n in names], fontsize=8.5)
+    for yi, v, s in zip(y, d["verdict"], shown):
+        ax.annotate(v, (1.01, yi), xycoords=("axes fraction", "data"), va="center", fontsize=8.5,
+                    color=INK if s else INK_MUTED, fontweight="semibold" if s else "normal")
+    ax.set_xlabel("Difference in engagement rate vs. baseline, after reach (percentage points)")
+    ax.grid(axis="y", visible=False)
+    ax.set_title(f"{platform}: how each choice compares, after accounting for reach")
+    fig.text(0.01, -0.02, "Dot = average difference; line = 95% bootstrap interval. Formats vs. Image, timing and "
+             "boost vs. the other option, pillars and segments vs. posts without them.", fontsize=8, color=INK_2)
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
