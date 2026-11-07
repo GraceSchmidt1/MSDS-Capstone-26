@@ -114,7 +114,9 @@ def main(argv=None):
     run_info = {
         "tag": args.tag, "created": dt.datetime.now().isoformat(timespec="seconds"),
         "master": config["master"], "master_sha256": master_sha,
-        "plan": None if plan_path is None else {"file": str(plan_path), "sha256": file_sha256(plan_path)},
+        "plan": None if plan_path is None else {
+            "file": str(plan_path.relative_to(REPO_ROOT) if plan_path.is_relative_to(REPO_ROOT) else plan_path),
+            "sha256": file_sha256(plan_path)},
         "git": git_info(), "packages": package_versions(), "seed": config["seed"], "config": config,
     }
     (out / "run_info.json").write_text(json.dumps(run_info, indent=2, default=str))
