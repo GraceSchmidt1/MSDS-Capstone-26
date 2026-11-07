@@ -1,6 +1,6 @@
 {
   "tag": "recommendations",
-  "created": "2026-11-07T14:25:03",
+  "created": "2026-11-07T14:27:04",
   "master": "data/Hidalga_Master_Data_v3.xlsx",
   "master_sha256": "dacd1d2e7274d0138b9fbaac78a498b02fa40ed0f7a5b4ecb2d6724de4f2b44a",
   "plan": {
@@ -8,9 +8,9 @@
     "sha256": "2fd58ce39d35504a3b2ae8ad1a89f13da2ecd48a42b3cc4b1b2064c44acc3be6"
   },
   "git": {
-    "commit": "012e1b366fb1cb360b774c03dea781f89d88c786",
+    "commit": "64bcdb418e6b23c7dd34eaa73d5393ad560bfa9b",
     "branch": "recommendations",
-    "uncommitted_changes": true
+    "uncommitted_changes": false
   },
   "packages": {
     "python": "3.13.5",
