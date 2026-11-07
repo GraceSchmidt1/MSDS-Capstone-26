@@ -59,13 +59,12 @@ Scope decisions:
 - **The duplicated LinkedIn metrics on 2026-03-20 are left as is** (two posts
   sharing one native metrics row; flagged in the EDA, not corrected).
 
-Next (`classification` branch): Stage 1 classification, high vs. low engagement.
-Done: C1 labels, C2 logistic/tree, C3 penalized logistic with stability and
-importance, C4 label-definition check, C5 spline reach adjustment
-(`reach_spline`, now the main label), and the quantitative evaluation
-framework, items 1–7 (see "Quantitative evaluation framework" below; results in
-`FINDINGS.md`), written up in notebook 03. Remaining: PR to `main`, then
-Stage 2 recommendations.
+Stage 1 classification (`classification` branch, merged in PR #3): C1–C5 and
+the quantitative evaluation framework, items 1–7, written up in notebook 03.
+
+Stage 2 (`recommendations` branch): a recommendation tool for the marketing
+team, built on how past posts performed (no LLM). See "Using the recommendation
+tool" below; results in `FINDINGS.md`. Remaining: PR to `main`.
 
 ### Exploratory analysis (`EDA` branch)
 
@@ -162,6 +161,73 @@ Held-out AUC (best model, mean ± SD over 50 splits): FB 0.64 ± 0.11, IG 0.67 �
 0.10, LI 0.66 ± 0.10, pooled 0.64 ± 0.05; differences under ~0.05 between
 models are noise. Use robust or clustered SEs: naive SEs are up to 1.8× too small
 (unequal variance, not repeated posts).
+
+## Using the recommendation tool (Stage 2, `recommendations` branch)
+
+**What it does:** reads the master workbook and reports, for each platform,
+which choices (format, content pillar, ICP segment, timing, LinkedIn boost) have
+done better or worse than usual, what changed in the last 90 days, and, if you
+give it a content plan, how each planned post is likely to do. It runs on past
+performance only; no LLM or internet access is needed. A run takes about 30
+seconds.
+
+**After each data update:**
+
+```bash
+# 1. add the new export to the next master version (see "Adding new data" below)
+# 2. point modeling/config.yaml at it:     master: data/Hidalga_Master_Data_v4.xlsx
+# 3. run (from the repo root), with or without a plan:
+python -m modeling.run_recommend --tag <name>
+python -m modeling.run_recommend --tag <name> --plan my_plan.csv
+```
+
+Then open `outputs/runs/<date>_<name>/recommendations.html` in a browser (it
+works offline and can be emailed), or `recommendations.xlsx` for every table.
+
+**Planning posts:** copy `modeling/plan_template.csv`, one row per planned post:
+
+| Column | Example | Notes |
+|---|---|---|
+| `post_id` | LI-1 | optional; your own label |
+| `platform` | LinkedIn | Facebook, Instagram or LinkedIn |
+| `date` | 2026-11-17 | YYYY-MM-DD (weekend is read from it) |
+| `time` | 9:30 AM | or 14:00 |
+| `format` | Document | must be a format used on that platform |
+| `pillars` | Thought Leadership & Industry Insights | several separated by `;` |
+| `icp_segments` | Oncology Operations Leader; Oncology Financial Leader | several separated by `;` |
+| `impressions` | | optional; blank = typical for that platform and format |
+| `boosted` | no | LinkedIn only; yes / no |
+
+Rows with a problem (unknown format, misspelled pillar, bad date) are listed
+with the reason; the rest are still scored.
+
+**Reading the report:**
+
+- Every post is compared with the **typical rate for its reach** on its
+  platform, because small-audience posts naturally have higher engagement
+  rates. **Lift** = rate − that typical rate.
+- **Do more / Do less:** the choice clearly beats (or trails) its baseline,
+  after correcting for the number of comparisons, and the result holds however
+  reach is modelled. **Promising / Watch:** leaning one way, keep testing.
+  **No clear difference:** choose on strategy. **Not enough posts yet:** fewer
+  than 10.
+- **What to test next** lists unsettled choices with roughly how many more
+  posts would settle each.
+- **Planned posts** get an expected rate and a chance to beat their reach,
+  with ranges. Each platform's scores are marked usable or rough
+  (Facebook's are rough: its engagement is hard to predict).
+- These are associations in past posts, not proof of cause.
+
+**Current results (v3 master, run `2026-11-07_recommendations`):** LinkedIn
+**Document: do more** (+14 pts vs. Image) and **Link: do less** (−3 pts);
+LinkedIn Multi-Image and Instagram Carousel / Events & Partnerships are
+promising; Instagram Video is one to watch. Facebook and LinkedIn posts beat
+their reach far more often in the last 90 days (71% / 67% vs. ~40% before).
+
+Settings (thresholds, 90-day window, how many refits) are in the `recommend:`
+section of `modeling/config.yaml`. Code: `modeling/recommend.py` (verdicts,
+plan scoring, recent check), `modeling/report.py` (Excel / HTML),
+`modeling/run_recommend.py` (the command). Tests: `python -m pytest modeling/tests -q`.
 
 ## Quantitative evaluation framework (added 2026-11-02; done 2026-11-04)
 

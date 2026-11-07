@@ -259,6 +259,60 @@ testing:**
   sizes, stable across labels) rather than single-feature p-values. Present single features with effect
   sizes, CIs and stability, flagged as exploratory where their adjusted p ≥ 0.05.
 
+## Stage 2: recommendation tool (run `2026-11-07_recommendations`, commits `853e7b7`, `00c2e40`, `47c1d5a`, `a65a9d4` code; `91f953b`, `eb92eff` run)
+
+`python -m modeling.run_recommend` (`modeling/recommend.py`, `report.py`): verdicts per choice from past posts,
+planned-post scores, a 90-day check, and Excel + HTML reports for the marketing team. No LLM. Lift = rate −
+typical rate for the post's reach (the `reach_spline` rule fit on all of the platform's posts), i.e. Stage 1's
+rate vs. reach.
+
+**Verdicts on v3** (formats vs. Image; pillars / segments vs. posts without them):
+
+| Platform | Do more / Do less | Promising / Watch |
+|---|---|---|
+| LinkedIn | **Document** +14.1 pts (13 posts, 77% beat their reach); **Link** −2.9 pts (18, 11%) | Multi-Image +5.2 (promising); Technical Leader −2.0 (watch) |
+| Instagram | – | Carousel +2.6, Events & Partnerships +2.5 (promising); Video −2.0, Operations Leader −2.3 (watch) |
+| Facebook | – | Operations Leader +3.8 (promising) |
+
+Pillar, segment, timing and boost otherwise show no clear difference; weekend posts, boosts, FB Link, LI Simple
+Status and two FB pillars have < 10 posts. Matches Stage 1 (robust: LI Document / Link; suggestive: IG content).
+
+**Design findings (each changed the tool):**
+- **Compare with a baseline, not with "all other posts".** Option vs. the rest flagged LinkedIn Image as
+  underperforming (−2.7 pts, CI excludes 0) only because Documents lift the rest. Now formats vs. Image, as in
+  Stage 1's effect sizes (diffs and Hedges' g reproduce `cohens_d_table` exactly; tested).
+- **Correct within a factor, gated by the factor test.** BH across all ~20 options of a platform left LinkedIn
+  Document at BH p 0.078 ("Promising"). With the format Wald test first (LI p < 0.001) and BH within the 5 format
+  comparisons, Document is p 0.008 → 0.020: "Do more". Same logic as Stage 1's "format matters" rule.
+- **Knot check reproduces Stage 1's knot sensitivity.** IG Carousel / Video are "Do more" / "Do less" at 3 and
+  4 knots but "Promising" / "Watch" at 5; LinkedIn verdicts identical at 3 / 4 / 5. Firm verdicts must hold at
+  every checked knot count, otherwise downgraded with a note.
+- **Welch vs. Stage 1's g interval:** IG Video vs. Image on lift has Welch p 0.017 (video lifts vary little),
+  while Stage 1's normal-approximation g CI (−0.39) crossed 0. The knot check downgrades it to "Watch" anyway.
+- **Planned posts: typical rate + predicted lift, not a direct rate model.** An elastic net of rate (linear in
+  reach) put a planned LinkedIn Link post at 8.5% vs. a typical 7.1% for its reach, contradicting "Do less" and
+  its 26% chance to beat its reach. Predicting lift from the content choices and adding the spline's typical
+  rate keeps scores and verdicts consistent (Link now 5.6%).
+- **Recent check needs a platform row and a difference-in-differences.** Comparing each option's recent posts
+  with its own older posts flagged almost every Facebook option, because the whole platform rose.
+
+**Planned-post score quality** (held-out, spline refit per split): lift R² FB 0.01, IG 0.02, LI 0.12; ridge
+AUC FB 0.60, IG 0.66, LI 0.66. Content choices predict *how much* a post beats its reach only on LinkedIn;
+IG scores are usable through the chance to beat its reach; FB scores are flagged as rough guides.
+
+**Last 90 days (Jul 2 – Sep 29, 2026):**
+- **Facebook and LinkedIn did better than usual for their reach:** 71% / 67% of recent posts beat their reach
+  vs. 38% / 41% before (mean lift +7.2 / +6.0 pts vs. −0.6 / +0.1; Welch p < 0.001 / 0.008). Instagram in line
+  (41% vs. 49%).
+- **LinkedIn:** the 13 Documents (all in this window) explain most of the mean lift (non-Document recent lift
+  +1.1 pts), but not all of the share beating reach (non-Document 61% vs. 41%). Recent LinkedIn posts also had
+  far lower reach (median 87 vs. 316 impressions).
+- **Facebook:** no format explains it (Multi-Image 15, Image 15, Video 5 recent posts). The whole window falls
+  in the Q2–Q3 experiment period. Open question: the Stage 1 regression found the experiment flag ≈ 0 on raw
+  rate with a linear reach term; on spline lift the period looks positive for FB. Worth a direct check.
+- After BH, only FB **Video** (gap to other FB posts −13.7 pts) and FB **Team Spotlights** (−9.5) fell behind,
+  on 5–6 recent posts each: worth a look, not firm.
+
 ## Methodological and code findings
 
 - **saga all-zero intercept (2026-11-02):** when every coefficient is zero, scikit-learn's saga stops after
@@ -290,3 +344,7 @@ testing:**
   it as not estimable and lists `separating_features` (now reported for every fit, e.g. the top-third FB
   weekend case); effects / group tests are skipped for that platform and its figure panel says so. A
   3-knot rerun with the repo code gives CV, stability and importance outputs identical to the wrapper run.
+- **openpyxl stamps the save time** into `docProps/core.xml` and the zip entries, so a rerun changed the workbook
+  and `run_info` then flagged the tree dirty (git status was read after writing). Fixed 2026-11-07 (`64bcdb4`):
+  timestamps pinned to the newest post's date, and `run_recommend` reads git status before writing. A
+  verification rerun changes only `run_info.json` (created time, commit).
