@@ -297,11 +297,11 @@ def plan_specs(plan: pd.DataFrame, prepared: pd.DataFrame, config: dict) -> pd.D
         if platform not in config["platforms"]:
             errors.append(f"unknown platform '{r['platform']}'")
         elif r["format"] not in config["formats"][platform]:
-            errors.append(f"format '{r['format']}' not used on {platform} (one of {config['formats'][platform]})")
+            errors.append(f"format '{r['format']}' not used on {platform} (one of: {', '.join(config['formats'][platform])})")
         pillars, icp = split_tags(r["pillars"]), split_tags(r["icp_segments"])
         bad = [t for t in pillars if t not in config["pillars"]] + [t for t in icp if t not in config["icp_segments"]]
         if bad:
-            errors.append(f"unknown pillar / segment {bad}")
+            errors.append(f"unknown pillar / segment: {', '.join(bad)}")
         if not pillars or not icp:
             errors.append("needs at least one pillar and one ICP segment")
         date = pd.to_datetime(r["date"], errors="coerce")
