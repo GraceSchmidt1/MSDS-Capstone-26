@@ -5,7 +5,7 @@ import pytest
 from statsmodels.stats.multitest import multipletests
 
 from modeling.evaluate import cohens_d_table, outcomes
-from modeling.features import build_features, load_config, load_master, prepare_posts
+from modeling.features import FeatureSet, build_features, load_config, load_master, prepare_posts
 from modeling.recommend import (DOWNGRADE, VERDICTS, factor_tests, option_masks, option_table, performance,
                                 posts_needed, recommendations, verdict)
 from modeling.targets import make_label_rule
@@ -142,3 +142,111 @@ def test_factor_tests_shape(prepared):
     assert list(f["factor"]) == ["ICP segment", "Content pillar", "Format", "Timing", "Paid boost"]
     assert (f["p_bh"] >= f["p_value"] - 1e-12).all()
     assert f.set_index("factor").loc["Format", "df"] == len(CONFIG["formats"]["LinkedIn"]) - 1
+
+
+# ── R2: planned posts ───────────────────────────────────────────────────────
+from modeling.features import REPO_ROOT  # noqa: E402
+from modeling.recommend import (fit_scorers, model_quality, plan_specs, read_plan, score_plan,  # noqa: E402
+                                typical_impressions)
+
+TEMPLATE = REPO_ROOT / "modeling" / "plan_template.csv"
+
+
+@pytest.fixture(scope="module")
+def scorers(prepared):
+    return {p: fit_scorers(build_features(prepared, p, CONFIG), CONFIG) for p in CONFIG["platforms"]}
+
+
+def _plan(tmp_path, rows):
+    cols = ["post_id", "platform", "date", "time", "format", "pillars", "icp_segments", "impressions", "boosted"]
+    path = tmp_path / "plan.csv"
+    pd.DataFrame(rows, columns=cols).to_csv(path, index=False)
+    return read_plan(path)
+
+
+def test_read_plan_requires_columns(tmp_path):
+    path = tmp_path / "plan.csv"
+    path.write_text("platform,date,format\nLinkedIn,2026-11-17,Image\n")
+    with pytest.raises(ValueError, match="missing columns"):
+        read_plan(path)
+    path.write_text("Platform,Date,Time,Format,Pillars,ICP_Segments\n"
+                    "LinkedIn,2026-11-17,9:00 AM,Image,Events & Partnerships,Oncology Clinic Leader\n")
+    plan = read_plan(path)                                                # case-insensitive, optional added
+    assert plan.loc[0, "post_id"] == "row 2" and plan.loc[0, "impressions"] == ""
+
+
+def test_plan_errors_are_reported_per_row(tmp_path, prepared):
+    ok = ["A", "LinkedIn", "2026-11-21", "2:00 PM", "Image", "Events & Partnerships", "Oncology Clinic Leader", "", ""]
+    rows = [ok,
+            ["B", "TikTok"] + ok[2:],
+            ok[:4] + ["Carousel"] + ok[5:],                               # Carousel is Instagram-only
+            ok[:5] + ["Nope"] + ok[6:],
+            ok[:2] + ["2026-13-40"] + ok[3:],
+            ok[:3] + ["25:00"] + ok[4:],
+            ok[:7] + ["-5", ""],
+            ["H", "Facebook", "2026-11-21", "2:00 PM", "Image", "Events & Partnerships", "Oncology Clinic Leader", "", "yes"],
+            ok[:6] + ["", "", ""]]
+    specs = plan_specs(_plan(tmp_path, rows), prepared, CONFIG)
+    expected = ["", "unknown platform", "not used on LinkedIn", "unknown pillar", "unreadable date",
+                "unreadable time", "positive number", "LinkedIn posts only", "at least one pillar"]
+    for (_, r), e in zip(specs.iterrows(), expected):
+        assert (r["error"] == "") if e == "" else (e in r["error"]), (r["post_id"], r["error"])
+        assert (r["spec"] is None) == (e != "")
+
+
+def test_plan_spec_fields(tmp_path, prepared):
+    rows = [["A", "linkedin", "2026-11-21", "14:30", "Document", "Events & Partnerships",
+             "Oncology Clinic Leader; Oncology Financial Leader", "", "Yes"],
+            ["B", "Instagram", "2026-11-17", "9 AM", "Video", "Events & Partnerships", "Oncology Clinic Leader", "500", ""]]
+    a, b = plan_specs(_plan(tmp_path, rows), prepared, CONFIG)["spec"]
+    assert a["weekend"] and a["hour"] == 14 and a["boosted"] and len(a["icp"]) == 2   # 2026-11-21 is a Saturday
+    assert not b["weekend"] and b["hour"] == 9 and b["impressions"] == 500
+
+
+def test_typical_impressions(prepared):
+    li = prepared[(prepared["PLATFORM"] == "LinkedIn") & (prepared["IMPRESSIONS"] > 0)]
+    v, src = typical_impressions(prepared, "LinkedIn", "Document", CONFIG)          # 13 posts: own median
+    assert v == li.loc[li["FORMAT"] == "Document", "IMPRESSIONS"].median() and "Document" in src
+    v, src = typical_impressions(prepared, "LinkedIn", "Simple Status", CONFIG)     # 6 posts: platform median
+    assert v == li["IMPRESSIONS"].median() and "all" in src
+
+
+def test_plan_of_real_posts_scores_like_their_real_encoding(tmp_path, prepared, scorers):
+    """Real LinkedIn posts written as a plan get exactly the scores of their own encoded rows."""
+    fs = build_features(prepared, "LinkedIn", CONFIG)
+    real = prepared.set_index("MASTER_ROW").loc[fs.X.index].iloc[:12]
+    rows = [[str(i), "LinkedIn", r["DATE_TS"].strftime("%Y-%m-%d"), f"{int(r['HOUR'])}:00", r["FORMAT"],
+             r["CONTENT_PILLAR"], r["ICP_SEGMENTS"], str(r["IMPRESSIONS"]), "yes" if r["BOOSTED"] else "no"]
+            for i, r in real.iterrows()]
+    opts = {"LinkedIn": recommendations(prepared, fs, CONFIG)[0]}
+    out = score_plan(plan_specs(_plan(tmp_path, rows), prepared, CONFIG), scorers, opts, CONFIG)
+    s = scorers["LinkedIn"]
+    X = fs.X.loc[real.index]
+    sub = FeatureSet("LinkedIn", X, fs.y.loc[real.index], fs.groups.loc[real.index])
+    np.testing.assert_allclose(out["typical_rate"], s["rule"].expected_rate(sub))
+    np.testing.assert_allclose(out["expected_lift"], s["lift"].predict(X[s["content_columns"]].to_numpy()))
+    np.testing.assert_allclose(out["chance_beat"], s["beat"].predict_proba(X.to_numpy())[:, 1])
+
+
+def test_template_scores_cleanly(prepared, scorers, recs):
+    out = score_plan(plan_specs(read_plan(TEMPLATE), prepared, CONFIG), scorers,
+                     {p: o for p, (o, _) in recs.items()}, CONFIG)
+    assert (out["error"] == "").all()
+    np.testing.assert_allclose(out["expected_rate"], np.maximum(out["typical_rate"] + out["expected_lift"], 0))
+    assert (out["expected_lift_lo"] <= out["expected_lift_hi"]).all()
+    assert out["chance_beat"].between(0, 1).all()
+    assert "Document: Do more" in out.set_index("post_id").loc["LI-1", "notes"]
+
+
+def test_scorers_are_deterministic(prepared):
+    fs = build_features(prepared, "Facebook", CONFIG)
+    a, b = fit_scorers(fs, CONFIG), fit_scorers(fs, CONFIG)
+    np.testing.assert_array_equal(a["lift"][-1].coef_, b["lift"][-1].coef_)
+    np.testing.assert_array_equal(a["boots"][5][1][-1].coef_, b["boots"][5][1][-1].coef_)
+
+
+def test_model_quality_fields(prepared):
+    q = model_quality(build_features(prepared, "LinkedIn", CONFIG), CONFIG)
+    assert q["posts"] == 137 and 0.5 < q["auc_mean"] < 1
+    rel = CONFIG["recommend"]["reliable"]
+    assert (q["reliability"] == "usable") == (q["lift_r2_mean"] >= rel["r2"] or q["auc_mean"] >= rel["auc"])

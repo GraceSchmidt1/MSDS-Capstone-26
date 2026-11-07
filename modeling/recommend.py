@@ -34,10 +34,20 @@ Knot check: a "Do more" / "Do less" stands only if the verdict is the same when 
 (Stage 1 found Instagram content effects held at 3–4 knots, not 5).
 The comparisons are descriptive (after reach, but other choices made on the same posts are not held fixed).
 Stage 1 (notebooks 02–03) has the adjusted models.
+
+Planned posts (a content calendar CSV, see plan_template.csv):
+    plan_specs      validate each row (unknown platform / format / tag, bad date or time, …) into a spec or an
+                    error message; blank impressions → the median of past posts in that platform and format
+    fit_scorers     per platform: elastic net of lift on the content choices, ridge logistic of "beat its
+                    reach", and bootstrap refits for a range
+    score_plan      typical rate for the reach, expected lift and rate, chance to beat its reach, and the
+                    verdicts that apply to its choices
+    model_quality   held-out lift R² and AUC per platform, and whether the scores are usable or rough guides
 """
 from __future__ import annotations
 
 import copy
+import datetime as dt
 import warnings
 
 import numpy as np
@@ -228,3 +238,200 @@ def recommendations(prepared: pd.DataFrame, fs: FeatureSet, config: dict) -> tup
                                      f"{', '.join(map(str, failed))}: depends on how reach is modelled")
             options.at[i, "verdict"] = DOWNGRADE[options.at[i, "verdict"]]
     return options, factors
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# R2: scoring planned posts (a content calendar)
+# ─────────────────────────────────────────────────────────────────────────────
+# Plan CSV, one row per planned post. Required: platform, date, time, format, pillars, icp_segments.
+# Optional: post_id, impressions (blank → typical for the platform and format), boosted (LinkedIn; yes/no).
+# Several pillars / segments are separated by ";", as in the master.
+PLAN_REQUIRED = ["platform", "date", "time", "format", "pillars", "icp_segments"]
+PLAN_OPTIONAL = ["post_id", "impressions", "boosted"]
+TIME_FORMATS = ["%I:%M %p", "%I:%M%p", "%I %p", "%I%p", "%H:%M"]
+RATE_MODEL, BEAT_MODEL = "Elastic net", "Ridge logistic"
+
+
+def read_plan(path) -> pd.DataFrame:
+    plan = pd.read_csv(path, dtype=str, keep_default_na=False)
+    plan.columns = [c.strip().lower() for c in plan.columns]
+    missing = [c for c in PLAN_REQUIRED if c not in plan.columns]
+    if missing:
+        raise ValueError(f"Plan file is missing columns: {missing} (required: {PLAN_REQUIRED})")
+    for c in PLAN_OPTIONAL:
+        if c not in plan.columns:
+            plan[c] = ""
+    plan = plan.map(str.strip)
+    plan["post_id"] = [v or f"row {i + 2}" for i, v in enumerate(plan["post_id"])]   # CSV row number
+    return plan
+
+
+def _parse_time(value: str):
+    for fmt in TIME_FORMATS:
+        try:
+            return dt.datetime.strptime(value.upper().replace(".", ""), fmt).hour
+        except ValueError:
+            pass
+    return None
+
+
+def typical_impressions(prepared: pd.DataFrame, platform: str, fmt: str, config: dict) -> tuple[float, str]:
+    """Median impressions of the platform's posts in that format, or of all its posts if the format is rare."""
+    rows = prepared[(prepared["PLATFORM"] == platform) & (prepared["IMPRESSIONS"] > 0)]
+    same = rows.loc[rows["FORMAT"] == fmt, "IMPRESSIONS"]
+    if len(same) >= config["recommend"]["min_posts"]:
+        return float(same.median()), f"median of {len(same)} past {platform} {fmt} posts"
+    return float(rows["IMPRESSIONS"].median()), f"median of all {len(rows)} past {platform} posts"
+
+
+def plan_specs(plan: pd.DataFrame, prepared: pd.DataFrame, config: dict) -> pd.DataFrame:
+    """Validate each planned post; returns the plan with `spec` (dict for features_from_spec) or `error`."""
+    out = []
+    for _, r in plan.iterrows():
+        errors, spec, source = [], None, ""
+        platform = r["platform"].strip().title().replace("Linkedin", "LinkedIn")
+        if platform not in config["platforms"]:
+            errors.append(f"unknown platform '{r['platform']}'")
+        elif r["format"] not in config["formats"][platform]:
+            errors.append(f"format '{r['format']}' not used on {platform} (one of {config['formats'][platform]})")
+        pillars, icp = split_tags(r["pillars"]), split_tags(r["icp_segments"])
+        bad = [t for t in pillars if t not in config["pillars"]] + [t for t in icp if t not in config["icp_segments"]]
+        if bad:
+            errors.append(f"unknown pillar / segment {bad}")
+        if not pillars or not icp:
+            errors.append("needs at least one pillar and one ICP segment")
+        date = pd.to_datetime(r["date"], errors="coerce")
+        if pd.isna(date):
+            errors.append(f"unreadable date '{r['date']}' (use YYYY-MM-DD)")
+        hour = _parse_time(r["time"])
+        if hour is None:
+            errors.append(f"unreadable time '{r['time']}' (e.g. 9:30 AM or 14:00)")
+        impressions = pd.to_numeric(r["impressions"], errors="coerce") if r["impressions"] else np.nan
+        if r["impressions"] and not (impressions > 0):
+            errors.append(f"impressions must be a positive number, got '{r['impressions']}'")
+        boosted = r["boosted"].lower() in ("yes", "y", "true", "1")
+        if boosted and platform != "LinkedIn":
+            errors.append("boosted applies to LinkedIn posts only")
+        if not errors:
+            if np.isnan(impressions):
+                impressions, source = typical_impressions(prepared, platform, r["format"], config)
+            else:
+                source = "given in plan"
+            spec = {"icp": icp, "pillars": pillars, "format": r["format"], "impressions": impressions,
+                    "weekend": date.dayofweek >= 5, "hour": hour, "boosted": boosted}
+        out.append({**r.to_dict(), "platform": platform if platform in config["platforms"] else r["platform"], "spec": spec, "impressions_used": spec and impressions,
+                    "impressions_source": source, "error": "; ".join(errors)})
+    return pd.DataFrame(out)
+
+
+def _content(fs: FeatureSet, config: dict) -> pd.DataFrame:
+    """Feature columns without reach (reach is handled by the spline, i.e. the typical rate)."""
+    return fs.X.drop(columns=config["features"]["reach"])
+
+
+def fit_scorers(fs: FeatureSet, config: dict) -> dict:
+    """
+    Final models on all of the platform's posts (penalty tuned on the shared CV splits, as in Stage 1):
+      lift model    elastic net of lift (rate − typical rate for the reach) on the content choices, so
+                    expected rate = typical rate for the reach + predicted lift
+      beat model    ridge logistic of "beat its reach" (the Stage 1 label) on all features
+    plus `plan_boot` refits on resampled posts with the penalty fixed, for a range around each score.
+    """
+    from modeling.classify import _fit, _fixed_penalty_logistic, fit_penalized
+    from modeling.models import _fixed_penalty_model, cv_splits, make_regularized
+
+    splits = cv_splits(fs, config["cv"]["n_splits"], config["cv"]["n_repeats"], config["seed"])
+    rule = make_label_rule(config["classification"]["main_label"], config).fit(fs)
+    beat, lift = rule.label(fs), fs.y.to_numpy() - rule.expected_rate(fs)
+    Xc, X = _content(fs, config).to_numpy(), fs.X.to_numpy()
+    lift_model = make_regularized(RATE_MODEL, splits, config).fit(Xc, lift)
+    clf = fit_penalized(fs, beat, BEAT_MODEL, config, splits)
+    rng = np.random.default_rng(config["seed"])
+    boots = []
+    for _ in range(config["recommend"]["plan_boot"]):
+        idx = rng.integers(0, len(lift), len(lift))
+        if beat[idx].min() == beat[idx].max():
+            continue
+        boots.append((_fixed_penalty_model(RATE_MODEL, lift_model, config).fit(Xc[idx], lift[idx]),
+                      _fit(_fixed_penalty_logistic(BEAT_MODEL, clf, config), X[idx], beat[idx])))
+    return {"rule": rule, "lift": lift_model, "beat": clf, "boots": boots, "columns": list(fs.X.columns),
+            "content_columns": list(_content(fs, config).columns)}
+
+
+def model_quality(fs: FeatureSet, config: dict) -> dict:
+    """
+    Held-out quality of the two scoring models on the shared CV splits (nested tuning, as in Stage 1). For the
+    lift model the reach spline is refit on each split's training posts, so held-out posts never shape their
+    own target. lift_r2 > 0: the content choices predict lift better than the training-mean lift does.
+    """
+    from modeling.classify import cv_score_classifier, penalized_fit_predict
+    from modeling.models import cv_splits, regularized_fit_predict
+
+    splits = cv_splits(fs, config["cv"]["n_splits"], config["cv"]["n_repeats"], config["seed"])
+    Xc, y, groups = _content(fs, config).to_numpy(), fs.y.to_numpy(), fs.groups.to_numpy()
+    fit_predict = regularized_fit_predict(RATE_MODEL, config)
+    r2 = []
+    for tr, te in splits:
+        rule = make_label_rule(config["classification"]["main_label"], config).fit(fs, tr)
+        lift_tr, lift_te = y[tr] - rule.expected_rate(fs, tr), y[te] - rule.expected_rate(fs, te)
+        pred = fit_predict(Xc[tr], lift_tr, Xc[te], groups[tr])
+        r2.append(1 - ((lift_te - pred) ** 2).sum() / ((lift_te - lift_tr.mean()) ** 2).sum())
+    r2 = np.array(r2)
+    auc = cv_score_classifier(fs, splits, config["classification"]["main_label"], config,
+                              penalized_fit_predict(BEAT_MODEL, config))["auc"]
+    q = config["recommend"]["reliable"]
+    reliable = r2.mean() >= q["r2"] or auc.mean() >= q["auc"]
+    return {"platform": fs.platform, "posts": len(y), "lift_model": RATE_MODEL, "lift_r2_mean": r2.mean(),
+            "lift_r2_sd": r2.std(), "beat_model": BEAT_MODEL, "auc_mean": auc.mean(), "auc_sd": auc.std(),
+            "reliability": "usable" if reliable else "weak: treat scores as rough guides"}
+
+
+def _option_notes(spec: dict, options: pd.DataFrame) -> str:
+    """The verdicts that apply to a planned post, skipping baselines and 'No clear difference'."""
+    v = options.set_index(["factor", "option"])["verdict"]
+    picks = [("Format", spec["format"])] + [("Content pillar", t) for t in spec["pillars"]]
+    picks += [("ICP segment", t) for t in spec["icp"]]
+    picks += [("Timing", "Weekend" if spec["weekend"] else "Weekday")]
+    picks += [("Timing", "11am or later" if spec["hour"] >= 11 else "Before 11am")]
+    if ("Paid boost", "Boosted") in v.index:
+        picks += [("Paid boost", "Boosted" if spec["boosted"] else "Not boosted")]
+    keep = [f"{o}: {v[(f, o)]}" for f, o in picks
+            if (f, o) in v.index and v[(f, o)] not in ("Baseline", "No clear difference")]
+    return "; ".join(keep)
+
+
+def score_plan(specs: pd.DataFrame, scorers: dict, options: dict, config: dict) -> pd.DataFrame:
+    """
+    Per valid planned post:
+      typical_rate          the usual rate for a post with that reach on the platform (the reach spline)
+      expected_lift         predicted lift from its content choices (elastic net), lo / hi = 2.5 / 97.5% over
+                            the bootstrap refits (uncertainty of the estimate, not the spread of single posts,
+                            which is much wider)
+      expected_rate         typical_rate + expected_lift (pts, floored at 0), lo / hi likewise
+      chance_beat           ridge-logistic probability that it beats the typical rate for its reach, lo / hi
+      notes                 verdicts that apply to its choices (see option tables)
+    """
+    from modeling.features import features_from_spec
+
+    rows = []
+    for _, r in specs.iterrows():
+        out = {k: r[k] for k in ["post_id", "platform", "date", "time", "format", "pillars", "icp_segments",
+                                 "boosted", "impressions_used", "impressions_source", "error"]}
+        if r["spec"] is not None:
+            s = scorers[r["platform"]]
+            x = features_from_spec(r["spec"], r["platform"], config)[s["columns"]].to_numpy()
+            reach = FeatureSet(r["platform"], pd.DataFrame(x, columns=s["columns"]), pd.Series([0.0]), pd.Series(["plan"]))
+            typical = float(s["rule"].expected_rate(reach)[0])
+            xc = pd.DataFrame(x, columns=s["columns"])[s["content_columns"]].to_numpy()
+            lift = float(s["lift"].predict(xc)[0])
+            beat = float(s["beat"].predict_proba(x)[0, 1])
+            bl = np.array([m.predict(xc)[0] for m, _ in s["boots"]])
+            bb = np.array([c.predict_proba(x)[0, 1] for _, c in s["boots"]])
+            lo, hi = np.quantile(bl, [0.025, 0.975])
+            out.update({"typical_rate": typical, "expected_lift": lift, "expected_lift_lo": lo,
+                        "expected_lift_hi": hi, "expected_rate": max(typical + lift, 0.0),
+                        "expected_rate_lo": max(typical + lo, 0.0), "expected_rate_hi": max(typical + hi, 0.0),
+                        "chance_beat": beat, "chance_beat_lo": np.quantile(bb, 0.025),
+                        "chance_beat_hi": np.quantile(bb, 0.975), "notes": _option_notes(r["spec"], options[r["platform"]])})
+        rows.append(out)
+    return pd.DataFrame(rows).assign(notes=lambda d: d.get("notes", pd.Series("", index=d.index)).fillna(""))

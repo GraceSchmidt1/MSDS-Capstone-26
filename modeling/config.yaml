@@ -144,6 +144,8 @@ recommend:
   power: 0.8                    # for "posts needed to settle it"
   max_posts_needed: 200         # above this, reported as "200+" (effect too small to settle soon)
   knot_check: [3, 5]            # a Do more / Do less must also hold with these spline knot counts
+  plan_boot: 300                # refits (posts resampled, penalty fixed) for the range around planned-post scores
+  reliable: {r2: 0.1, auc: 0.6} # a platform's scores are "usable" if held-out R² or AUC reaches this
 
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs
