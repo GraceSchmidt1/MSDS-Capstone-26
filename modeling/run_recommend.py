@@ -58,6 +58,7 @@ def main(argv=None):
         sys.exit(f"{out} already exists; use a new --tag or pass --overwrite.")
     (out / "figures").mkdir(parents=True, exist_ok=True)
 
+    git = git_info()                      # before anything is written, so this run's own files never count
     posts, li_detail, master_sha = load_master(config)
     prepared = prepare_posts(posts, li_detail, config)
 
@@ -106,7 +107,7 @@ def main(argv=None):
         "Recent changes": report.recent_changes_sheet(recent_opts),
         "Planned posts": report.plan_sheet(scores),
         "Model check": [q_sheet, f_sheet],
-    })
+    }, stamp=end)
     report.write_html(out / "recommendations.html", title="Social content recommendations", meta=meta,
                       options=opts, recent_opts=recent_opts, quality=quality, figures=figures, scores=scores,
                       platforms=config["platforms"])
@@ -117,7 +118,7 @@ def main(argv=None):
         "plan": None if plan_path is None else {
             "file": str(plan_path.relative_to(REPO_ROOT) if plan_path.is_relative_to(REPO_ROOT) else plan_path),
             "sha256": file_sha256(plan_path)},
-        "git": git_info(), "packages": package_versions(), "seed": config["seed"], "config": config,
+        "git": git, "packages": package_versions(), "seed": config["seed"], "config": config,
     }
     (out / "run_info.json").write_text(json.dumps(run_info, indent=2, default=str))
     if file_sha256(REPO_ROOT / config["master"]) != master_sha:

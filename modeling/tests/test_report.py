@@ -102,3 +102,13 @@ def test_number_formats():
 
 def test_plan_sheet_without_plan():
     assert "--plan" in report.plan_sheet(None).iloc[0, 0]
+
+
+def test_workbook_is_byte_identical_for_the_same_data(tmp_path):
+    df = pd.DataFrame({"a": [1.0, 2.0], "Share beat": [0.5, 0.25]})
+    stamp = pd.Timestamp("2026-09-29")
+    a, b = tmp_path / "a.xlsx", tmp_path / "b.xlsx"
+    report.write_excel(a, {"S": df}, stamp)
+    report.write_excel(b, {"S": df}, stamp)
+    assert a.read_bytes() == b.read_bytes()
+    assert openpyxl.load_workbook(a).properties.created == stamp.to_pydatetime()

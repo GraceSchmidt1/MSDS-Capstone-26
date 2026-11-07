@@ -200,7 +200,28 @@ def _column_widths(ws, frames: list[pd.DataFrame]):
         ws.column_dimensions[get_column_letter(j)].width = min(max(max(map(len, texts)) + 2, 9), 60)
 
 
-def write_excel(path: Path, sheets: dict[str, pd.DataFrame | list[pd.DataFrame]]):
+def _pin_timestamps(path: Path, stamp: pd.Timestamp):
+    """
+    openpyxl stamps the save time into docProps/core.xml and the zip entries; replace both with `stamp` so the
+    same data gives a byte-identical workbook.
+    """
+    import re
+    import zipfile
+
+    iso = stamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+    with zipfile.ZipFile(path) as z:
+        members = [(i, z.read(i.filename)) for i in z.infolist()]
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+        for info, data in members:
+            if info.filename == "docProps/core.xml":
+                data = re.sub(rb"(<dcterms:(?:created|modified)[^>]*>)[^<]*", rb"\g<1>" + iso.encode(), data)
+            pinned = zipfile.ZipInfo(info.filename, date_time=stamp.timetuple()[:6])
+            pinned.compress_type = zipfile.ZIP_DEFLATED
+            z.writestr(pinned, data)
+
+
+def write_excel(path: Path, sheets: dict[str, pd.DataFrame | list[pd.DataFrame]], stamp: pd.Timestamp):
+    """Write the sheets (a list = several tables stacked on one sheet); file timestamps pinned to `stamp`."""
     with pd.ExcelWriter(path, engine="openpyxl") as xw:
         for name, frames in sheets.items():
             frames = frames if isinstance(frames, list) else [frames]
@@ -211,6 +232,7 @@ def write_excel(path: Path, sheets: dict[str, pd.DataFrame | list[pd.DataFrame]]
                 start += len(df) + 3
             _column_widths(xw.sheets[name], frames)
             xw.sheets[name].freeze_panes = "A2"
+    _pin_timestamps(path, stamp)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
