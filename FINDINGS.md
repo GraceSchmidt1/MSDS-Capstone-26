@@ -312,7 +312,7 @@ IG scores are usable through the chance to beat its reach; FB scores are flagged
 - After BH, only FB **Video** (gap to other FB posts −13.7 pts) and FB **Team Spotlights** (−9.5) fell behind,
   on 5–6 recent posts each: worth a look, not firm.
 
-### Facebook check: experiment period and quarterly swings (2026-11-17, analysis in the scratchpad; report note `fb-period-check` branch)
+### Facebook check: experiment period and quarterly swings (2026-11-17; analysis in the scratchpad, not committed; report note commit `19efd1b`, run `2026-11-17_recommendations`, `8d7c4a0`, `a5139a2`)
 
 Answers the open question above. Lift = rate − spline-typical rate for the reach (fit on all posts), as in
 the tool; OLS with HC3 SEs; content = format, pillar, ICP and timing columns.
