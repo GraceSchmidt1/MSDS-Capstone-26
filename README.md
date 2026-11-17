@@ -171,6 +171,8 @@ give it a content plan, how each planned post is likely to do. It runs on past
 performance only; no LLM or internet access is needed. A run takes about 30
 seconds.
 
+**One-time setup:** Python 3.13, then `python -m pip install -r requirements.txt` from the repo root.
+
 **After each data update:**
 
 ```bash

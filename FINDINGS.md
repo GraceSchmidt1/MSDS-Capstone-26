@@ -353,8 +353,9 @@ the tool; OLS with HC3 SEs; content = format, pillar, ICP and timing columns.
 - **Regression reproduces byte-identically** after the C3 refactor of shared plot/importance code
   (step 4 and step 5 CSVs). A marker-dict bug introduced during the refactor was caught by this check.
 - **Committed `step4_importance/figures/cv_performance.png` has broken value labels** (a stray comment
-  swallowed `textcoords`; fixed in commit `8fa1bd2`). Notebook 02 displays the broken figure; regenerate
-  if the figure is used.
+  swallowed `textcoords`; fixed in commit `8fa1bd2`). Notebook 02 displayed the broken figure until
+  2026-11-17; **fixed:** the notebook now redraws the chart from the run's own `cv_scores.csv` with the fixed code (`notebooks/figures/nb02_cv_performance.png`); the
+  run folder is left as committed. All other notebook outputs are unchanged on re-execution.
 - **`run_info` "uncommitted_changes" counts untracked files,** including the new run folder itself, so a
   first run is always flagged. Pattern: commit the run folder, rerun with `--overwrite`, commit
   `run_info.json` ("reran outputs post … commits"). The C2 run `2026-10-25_c2_logistic_tree` is still
