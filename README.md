@@ -218,11 +218,15 @@ with the reason; the rest are still scored.
   (Facebook's are rough: its engagement is hard to predict).
 - These are associations in past posts, not proof of cause.
 
-**Current results (v3 master, run `2026-11-07_recommendations`):** LinkedIn
+**Current results (v3 master, run `2026-11-17_recommendations`):** LinkedIn
 **Document: do more** (+14 pts vs. Image) and **Link: do less** (−3 pts);
 LinkedIn Multi-Image and Instagram Carousel / Events & Partnerships are
 promising; Instagram Video is one to watch. Facebook and LinkedIn posts beat
 their reach far more often in the last 90 days (71% / 67% vs. ~40% before).
+On LinkedIn that is mostly the Document posts. On Facebook it is part of a
+quarter-to-quarter swing on a very small audience, not the Q2–Q3 experiment
+period (see `FINDINGS.md`); the report carries a caution note for Facebook,
+set in `recommend: platform_notes` in the config.
 
 Settings (thresholds, 90-day window, how many refits) are in the `recommend:`
 section of `modeling/config.yaml`. Code: `modeling/recommend.py` (verdicts,

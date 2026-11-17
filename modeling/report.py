@@ -64,11 +64,15 @@ def finding_line(r) -> str:
             f"({r['posts']} posts, {r['share_beat']:.0%} beat their reach)")
 
 
-def summary_table(options: pd.DataFrame, recent_opts: pd.DataFrame, quality: pd.DataFrame) -> pd.DataFrame:
+def summary_table(options: pd.DataFrame, recent_opts: pd.DataFrame, quality: pd.DataFrame,
+                  notes: dict[str, str] | None = None) -> pd.DataFrame:
+    """Key findings per platform; `notes` (config recommend.platform_notes) come first as a "Note" row."""
     rows = []
     for p, g in options.groupby("platform", sort=False):
         q = quality.set_index("platform").loc[p]
         allp = recent_opts[(recent_opts["platform"] == p) & (recent_opts["factor"] == "All posts")].iloc[0]
+        if (notes or {}).get(p):
+            rows.append({"Platform": p, "Type": "Note", "Finding": notes[p], "Detail": ""})
         rows.append({"Platform": p, "Type": "Scores", "Finding": f"Planned-post scores are {q['reliability']}",
                      "Detail": f"held-out AUC {q['auc_mean']:.2f}, lift R² {q['lift_r2_mean']:.2f}"})
         rows.append({"Platform": p, "Type": "Last 90 days", "Finding": allp["trend"],
@@ -254,7 +258,7 @@ h3{font-size:15px;margin:20px 0 8px;color:var(--ink2)}.meta{color:var(--ink2);fo
 ul.find{list-style:none;padding:0;margin:0}ul.find li{padding:8px 0;border-bottom:1px solid var(--line)}
 .tag{display:inline-block;min-width:220px;margin-right:10px;font-weight:600;font-size:13px}
 .tag.good{color:var(--good)}.tag.bad{color:var(--bad)}.tag.lean{color:var(--lean)}
-.note{color:var(--muted);font-size:13px}ul.find .note{margin-left:230px}
+.note{color:var(--muted);font-size:13px}.platform-note{border-left:3px solid var(--lean);padding:6px 12px;margin:8px 0 4px;color:var(--ink2);font-size:14px}ul.find .note{margin-left:230px}
 figure{margin:16px 0;background:#fcfcfb;border:1px solid var(--line);border-radius:10px;padding:8px;overflow-x:auto}
 figure img{width:100%;min-width:640px;height:auto;display:block}
 .tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
@@ -298,14 +302,18 @@ def _plan_html(scores: pd.DataFrame) -> str:
 
 
 def write_html(path: Path, *, title: str, meta: str, options: pd.DataFrame, recent_opts: pd.DataFrame,
-               quality: pd.DataFrame, figures: dict[str, Path], scores: pd.DataFrame | None, platforms: list[str]):
+               quality: pd.DataFrame, figures: dict[str, Path], scores: pd.DataFrame | None, platforms: list[str],
+               notes: dict[str, str] | None = None):
     q = quality.set_index("platform")
     parts = [f"<title>{_e(title)}</title><style>{CSS}</style><main>",
              f"<h1>{_e(title)}</h1><p class='meta'>{_e(meta)}</p>"]
     for p in platforms:
         g = options[options["platform"] == p]
         allp = recent_opts[(recent_opts["platform"] == p) & (recent_opts["factor"] == "All posts")].iloc[0]
-        parts.append(f"<h2>{_e(p)}</h2><div class='tiles'>"
+        parts.append(f"<h2>{_e(p)}</h2>")
+        if (notes or {}).get(p):
+            parts.append(f"<p class='platform-note'>{_e(notes[p])}</p>")
+        parts.append("<div class='tiles'>"
                      f"<div class='tile'><div class='n'>{allp['recent_share_beat']:.0%}</div><div class='l'>of the "
                      f"last 90 days' {allp['recent_posts']} posts beat their reach (before: "
                      f"{allp['older_share_beat']:.0%}). {_e(allp['trend'])}.</div></div>"
