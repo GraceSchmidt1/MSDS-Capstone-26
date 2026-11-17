@@ -112,3 +112,15 @@ def test_workbook_is_byte_identical_for_the_same_data(tmp_path):
     report.write_excel(b, {"S": df}, stamp)
     assert a.read_bytes() == b.read_bytes()
     assert openpyxl.load_workbook(a).properties.created == stamp.to_pydatetime()
+
+
+def test_platform_notes_appear_in_summary_and_html(run):
+    notes = CONFIG["recommend"]["platform_notes"]
+    assert set(notes) <= set(CONFIG["platforms"])
+    summary = pd.read_excel(run / "recommendations.xlsx", sheet_name="Summary")
+    got = summary[summary["Type"] == "Note"].set_index("Platform")["Finding"].to_dict()
+    assert got == notes
+    page = (run / "recommendations.html").read_text()
+    for p, text in notes.items():
+        assert f"<h2>{p}</h2><p class='platform-note'>{report.html.escape(text)}</p>" in page
+    assert page.count("platform-note'>") == len(notes)

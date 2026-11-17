@@ -93,6 +93,7 @@ def main(argv=None):
         shutil.copyfile(plan_path, out / "plan_input.csv")
         scores.to_csv(out / "plan_scores.csv", index=False)
 
+    notes = config["recommend"].get("platform_notes") or {}
     start, end = recent_window(prepared, config)
     n = {p: len(build_features(prepared, p, config).y) for p in config["platforms"]}
     meta = (f"Data: {config['master']} · {sum(n.values())} posts ("
@@ -100,7 +101,7 @@ def main(argv=None):
             f"Last 90 days = {start:%b %d} – {end:%b %d, %Y}. Run {dt.date.today():%b %d, %Y}.")
     q_sheet, f_sheet = report.model_sheet(quality, factors)
     report.write_excel(out / "recommendations.xlsx", {
-        "Summary": report.summary_table(opts, recent_opts, quality),
+        "Summary": report.summary_table(opts, recent_opts, quality, notes),
         "What's working": report.options_sheet(opts),
         "What to test next": report.test_next_sheet(opts),
         "Recent posts": report.recent_posts_sheet(recent_posts),
@@ -110,7 +111,7 @@ def main(argv=None):
     }, stamp=end)
     report.write_html(out / "recommendations.html", title="Social content recommendations", meta=meta,
                       options=opts, recent_opts=recent_opts, quality=quality, figures=figures, scores=scores,
-                      platforms=config["platforms"])
+                      platforms=config["platforms"], notes=notes)
 
     run_info = {
         "tag": args.tag, "created": dt.datetime.now().isoformat(timespec="seconds"),
@@ -126,7 +127,7 @@ def main(argv=None):
 
     print(f"Wrote {out}")
     print(f"Open {out / 'recommendations.html'}")
-    print(report.summary_table(opts, recent_opts, quality).to_string(index=False))
+    print(report.summary_table(opts, recent_opts, quality, notes).to_string(index=False))
 
 
 if __name__ == "__main__":

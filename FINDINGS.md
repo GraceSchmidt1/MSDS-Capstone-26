@@ -307,11 +307,40 @@ IG scores are usable through the chance to beat its reach; FB scores are flagged
 - **LinkedIn:** the 13 Documents (all in this window) explain most of the mean lift (non-Document recent lift
   +1.1 pts), but not all of the share beating reach (non-Document 61% vs. 41%). Recent LinkedIn posts also had
   far lower reach (median 87 vs. 316 impressions).
-- **Facebook:** no format explains it (Multi-Image 15, Image 15, Video 5 recent posts). The whole window falls
-  in the Q2–Q3 experiment period. Open question: the Stage 1 regression found the experiment flag ≈ 0 on raw
-  rate with a linear reach term; on spline lift the period looks positive for FB. Worth a direct check.
+- **Facebook:** no format explains it (Multi-Image 15, Image 15, Video 5 recent posts). Not the experiment
+  period either, and it is a quarterly swing, not a lasting change: see "Facebook check" below (2026-11-17).
 - After BH, only FB **Video** (gap to other FB posts −13.7 pts) and FB **Team Spotlights** (−9.5) fell behind,
   on 5–6 recent posts each: worth a look, not firm.
+
+### Facebook check: experiment period and quarterly swings (2026-11-17, analysis in the scratchpad; report note `fb-period-check` branch)
+
+Answers the open question above. Lift = rate − spline-typical rate for the reach (fit on all posts), as in
+the tool; OLS with HC3 SEs; content = format, pillar, ICP and timing columns.
+
+- **The experiment period (Apr 1 – Sep 29, 2026, i.e. Q2–Q3) has no effect on lift on any platform**, at 3, 4
+  or 5 knots, with or without content: FB +0.9 pts (p 0.60; with content −1.3, p 0.50), IG +1.0 (p 0.30),
+  LI +3.6 (p 0.002) but 0.0 with content (p 1.0: the Documents). Agrees with Stage 1 (flag ≈ 0 on raw rate).
+  The earlier note that the period "looks positive for FB" was wrong: the 90-day window is only Q3.
+- **Facebook lift swings by quarter:**
+
+  | Quarter | 2025 Q4 | 2026 Q1 | Q2 | Q3 |
+  |---|---|---|---|---|
+  | Posts | 17 | 33 | 37 | 36 |
+  | Share beat their reach | 18% | 61% | 27% | 69% |
+  | Mean lift (pts) | −1.5 | +2.4 | −2.8 | +6.9 |
+  | Median impressions | 5 | 14 | 22 | 21 |
+
+  Quarter differences are clear (joint Wald p < 0.001 at 3 / 4 / 5 knots; still p ≤ 0.0002 with content in the
+  model; Kruskal–Wallis p < 0.001). **Instagram:** none once content is in (p 0.23–0.43). **LinkedIn:** p 0.01–0.04
+  alone, 0.16–0.20 with content (the Q3 Documents).
+- **Not audience growth:** Facebook followers (master "Follower Counts", monthly Jan–Sep 2026) rose steadily
+  6 → 18, while lift went up, down and up again.
+- **Reading:** on a median of 17 impressions per post (middle half 12–24), one or two interactions move a rate
+  by 5–15 pts, and nothing in the data explains which quarters run high. Facebook's "doing better recently" is
+  part of this swing, not a change the team made; the next quarter may swing back.
+- **Tool change:** `recommend.platform_notes` in config adds a fixed caution at the top of the Facebook
+  section of the HTML report and the Excel Summary. Possible later: make it data-driven (a quarterly-swing test
+  per platform) so it updates with new data.
 
 ## Methodological and code findings
 

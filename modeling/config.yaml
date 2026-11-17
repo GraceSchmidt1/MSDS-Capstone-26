@@ -149,6 +149,11 @@ recommend:
   recent_days: 90               # recent check: the last 90 days up to the newest post
   recent_min_posts: 5           # fewer recent posts with an option → "Too few recent posts"
   standout_share: 0.1           # recent posts in the top / bottom 10% of the platform's lifts are flagged
+  platform_notes:               # shown at the top of the platform's section in the reports (FINDINGS.md, 2026-11-17)
+    Facebook: >-
+      Facebook results swing from quarter to quarter on a very small audience (6–18 followers, median 17
+      impressions per post), and the swings are not explained by format, pillar, segment, timing or follower
+      growth. Read recent changes with caution.
 
 # Where run folders are written: outputs/runs/<YYYY-MM-DD>_<tag>/
 output_dir: outputs/runs
