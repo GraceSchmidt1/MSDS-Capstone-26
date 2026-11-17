@@ -9,10 +9,12 @@ recent) source per record rather than concatenating everything. The full
 reasoning behind every source-selection decision is in
 [`DATA_CLEANING_PLAN.md`](DATA_CLEANING_PLAN.md).
 
-### Project status (2026-10-25)
+### Project status (2026-11-17)
 
-Data preparation, exploratory analysis, and the **Stage 1 engagement-rate
-regression** are complete. **Current master: `data/Hidalga_Master_Data_v3.xlsx`**:
+Data preparation, exploratory analysis, **Stage 1** (engagement-rate regression
+and high- vs. low-engagement classification) and **Stage 2** (the recommendation
+tool for the marketing team) are complete and merged to `main` (PRs #1–#6;
+210 tests pass). **Current master: `data/Hidalga_Master_Data_v3.xlsx`**:
 391 posts (124 Facebook, 130 Instagram, 137 LinkedIn), Sep 23 2025 – Sep 29 2026.
 
 Done so far:
@@ -40,8 +42,23 @@ Done so far:
    `main` via PR #1 (see below).
 8. **Stage 1 regression on engagement rate.** Per-platform models with a pooled
    check, built in `modeling/` with tests and versioned run outputs, written up
-   in `notebooks/02_regression_engagement_rate.ipynb` (`modeling` branch; see
+   in `notebooks/02_regression_engagement_rate.ipynb` (PR #2; see
    "Stage 1 modeling" below).
+9. **Stage 1 classification and evaluation framework.** High vs. low
+   engagement after reach (main label: `reach_spline`), penalized logistic,
+   tree and random-forest benchmarks, label and knot sensitivity, and the
+   seven-part quantitative evaluation framework, written up in
+   `notebooks/03_classification_evaluation.ipynb` (PR #3; see "Stage 1
+   classification and evaluation results" below).
+10. **Stage 2 recommendation tool.** `python -m modeling.run_recommend`: plain
+    verdicts per choice (format, pillar, ICP segment, timing, boost), planned-
+    post scores, a 90-day check, and Excel + HTML reports; no LLM (PR #4; see
+    "Using the recommendation tool" below).
+11. **Facebook check.** The Q2–Q3 experiment period has no effect after reach;
+    Facebook's recent rise is part of a quarter-to-quarter swing on a very small
+    audience, and the reports now carry a caution note for Facebook (PR #5).
+12. **Housekeeping.** `requirements.txt` with pinned versions; notebook 02's
+    cross-validation chart redrawn with the fixed plotting code (PR #6).
 
 Scope decisions:
 
@@ -59,12 +76,19 @@ Scope decisions:
 - **The duplicated LinkedIn metrics on 2026-03-20 are left as is** (two posts
   sharing one native metrics row; flagged in the EDA, not corrected).
 
-Stage 1 classification (`classification` branch, merged in PR #3): C1–C5 and
-the quantitative evaluation framework, items 1–7, written up in notebook 03.
+Every result, with the run and commit that produced it, is logged in
+[`FINDINGS.md`](FINDINGS.md).
 
-Stage 2 (`recommendations` branch): a recommendation tool for the marketing
-team, built on how past posts performed (no LLM). See "Using the recommendation
-tool" below; results in `FINDINGS.md`. Remaining: PR to `main`.
+Remaining:
+
+- Final capstone report / presentation.
+- Optional: candidate features (day of week, posting hour, number of
+  segments), a data-driven version of the Facebook note, Loomly click
+  attribution (planned below, not built).
+- Blocked: post length and call-to-action features need full post text
+  (`POST_BODY` is cut at 200 characters).
+- Ongoing: after each new export, merge it into the next master version and
+  rerun the recommendation tool.
 
 ### Exploratory analysis (`EDA` branch)
 
@@ -107,7 +131,7 @@ with a post's engagement rate, and how well can it be predicted?
 - `models.py`: CV splits, OLS, regularized models, VIF / influence, bootstrap
   stability, permutation importance. `sensitivity.py`: one-change variants.
 - `run_regression.py` / `run_sensitivity.py`: CLIs that write a run folder.
-- `tests/`: 53 tests (no silent drops, one row per post, encoding matches tags,
+- `tests/`: 210 tests across all of `modeling/` (53 when the regression was written; regression checks: no silent drops, one row per post, encoding matches tags,
   determinism, spec round-trip, nested CV uses training posts only, …).
 
 ```bash
