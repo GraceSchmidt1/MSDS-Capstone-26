@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social content recommendations</title>
+<meta name="description" content="Upload the latest master workbook to see which formats, pillars, segments and timing are working, and score planned posts.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="site/style.css">
+</head>
+<body>
+<main>
+  <header>
+    <h1>Social content recommendations</h1>
+    <p class="lede">Add the latest master workbook to see what is working on LinkedIn, Instagram and Facebook, and
+      optionally score next month's planned posts.</p>
+    <p class="privacy">Your files stay on this computer: the analysis runs inside your browser and nothing is uploaded.</p>
+  </header>
+
+  <section class="inputs" aria-label="Files">
+    <div class="drop" id="master-drop">
+      <input type="file" id="master-file" accept=".xlsx" hidden>
+      <div class="drop-head"><span class="step">1</span> Master workbook <span class="req">required</span></div>
+      <p class="drop-hint">Drop <b>Hidalga_Master_Data_vN.xlsx</b> here, or
+        <button type="button" class="link" data-pick="master-file">choose a file</button>.</p>
+      <p class="chosen" id="master-chosen" hidden></p>
+      <p class="drop-alt"><button type="button" class="link" id="use-repo" disabled>Use the master saved in the
+        repo</button> <span id="repo-name"></span></p>
+    </div>
+    <div class="drop" id="plan-drop">
+      <input type="file" id="plan-file" accept=".csv" hidden>
+      <div class="drop-head"><span class="step">2</span> Planned posts <span class="opt">optional</span></div>
+      <p class="drop-hint">Drop a plan <b>.csv</b> here, or
+        <button type="button" class="link" data-pick="plan-file">choose a file</button>.</p>
+      <p class="chosen" id="plan-chosen" hidden></p>
+      <p class="drop-alt"><a href="modeling/plan_template.csv" download="plan_template.csv">Download the plan
+        template</a> (one row per post)</p>
+    </div>
+  </section>
+
+  <div class="run-row">
+    <button type="button" id="run" class="primary" disabled>Make recommendations</button>
+    <p id="status" class="status" role="status" aria-live="polite">Getting Python ready…</p>
+  </div>
+  <p id="error" class="error" role="alert" hidden></p>
+
+  <section id="results" hidden aria-label="Results">
+    <p class="meta" id="meta"></p>
+    <div class="downloads">
+      <a id="dl-xlsx" class="btn">Download Excel</a>
+      <a id="dl-html" class="btn">Download report (HTML)</a>
+      <a id="dl-zip" class="btn">Download all files (.zip)</a>
+      <button type="button" id="open-report" class="btn">Open full report in a new tab</button>
+    </div>
+    <div role="tablist" id="tabs" aria-label="Result sections"></div>
+    <div id="panels"></div>
+  </section>
+
+  <footer>
+    <p>Each run uses all posts in the workbook. Results are patterns in past posts, not proof of cause; see
+      “How to read this” after a run. Source and documentation:
+      <a href="https://github.com/GraceSchmidt1/MSDS-Capstone-26">GitHub repository</a>.</p>
+  </footer>
+</main>
+<script src="site/app.js"></script>
+</body>
+</html>

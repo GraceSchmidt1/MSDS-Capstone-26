@@ -39,9 +39,10 @@ def file_sha256(path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def load_master(config: dict):
-    """Read the posts sheet and LinkedIn detail sheet (read-only). Returns (posts, li_detail, sha256)."""
-    path = REPO_ROOT / config["master"]
+def load_master(config: dict, path=None):
+    """Read the posts sheet and LinkedIn detail sheet (read-only). Returns (posts, li_detail, sha256).
+    `path` defaults to config["master"], relative to the repo root."""
+    path = REPO_ROOT / config["master"] if path is None else Path(path)
     posts = pd.read_excel(path, sheet_name=config["posts_sheet"])
     li_detail = pd.read_excel(path, sheet_name=config["linkedin_detail_sheet"])
     return posts, li_detail, file_sha256(path)
