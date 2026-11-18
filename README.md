@@ -1,5 +1,10 @@
 # MSDS-Capstone-26
 
+**Recommendation tool: https://graceschmidt1.github.io/MSDS-Capstone-26/**
+Drop in the latest master workbook (and, optionally, a plan of upcoming posts)
+to see what is working on each platform. It runs in your browser; nothing is
+uploaded. See "Using the recommendation tool" below.
+
 ## Data pipeline
 
 Raw marketing exports live in `data/`. They arrive as repeated, overlapping
@@ -9,12 +14,12 @@ recent) source per record rather than concatenating everything. The full
 reasoning behind every source-selection decision is in
 [`DATA_CLEANING_PLAN.md`](DATA_CLEANING_PLAN.md).
 
-### Project status (2026-11-17)
+### Project status (2026-11-18)
 
 Data preparation, exploratory analysis, **Stage 1** (engagement-rate regression
 and high- vs. low-engagement classification) and **Stage 2** (the recommendation
-tool for the marketing team) are complete and merged to `main` (PRs #1–#6;
-210 tests pass). **Current master: `data/Hidalga_Master_Data_v3.xlsx`**:
+tool for the marketing team) are complete and merged to `main` (PRs #1–#6),
+and the tool has a web page (`github-page` branch; 222 tests pass). **Current master: `data/Hidalga_Master_Data_v3.xlsx`**:
 391 posts (124 Facebook, 130 Instagram, 137 LinkedIn), Sep 23 2025 – Sep 29 2026.
 
 Done so far:
@@ -59,6 +64,10 @@ Done so far:
     audience, and the reports now carry a caution note for Facebook (PR #5).
 12. **Housekeeping.** `requirements.txt` with pinned versions; notebook 02's
     cross-validation chart redrawn with the fixed plotting code (PR #6).
+13. **Web page.** The recommendation tool runs in the browser on GitHub Pages
+    (Pyodide), with the same results as the command line; upload a master and
+    optional plan, read the results in tabs, download the Excel / HTML / all
+    files (`github-page` branch; see "Using the recommendation tool" below).
 
 Scope decisions:
 
@@ -82,6 +91,9 @@ Every result, with the run and commit that produced it, is logged in
 Remaining:
 
 - Final capstone report / presentation.
+- Web page, phase 2: drop in the raw Loomly / LinkedIn exports plus the current
+  master and get the next master version (clean + merge in the browser, with a
+  check for posts missing tags).
 - Optional: candidate features (day of week, posting hour, number of
   segments), a data-driven version of the Facebook note, Loomly click
   attribution (planned below, not built).
@@ -131,7 +143,7 @@ with a post's engagement rate, and how well can it be predicted?
 - `models.py`: CV splits, OLS, regularized models, VIF / influence, bootstrap
   stability, permutation importance. `sensitivity.py`: one-change variants.
 - `run_regression.py` / `run_sensitivity.py`: CLIs that write a run folder.
-- `tests/`: 210 tests across all of `modeling/` (53 when the regression was written; regression checks: no silent drops, one row per post, encoding matches tags,
+- `tests/`: 222 tests across all of `modeling/` (53 when the regression was written; regression checks: no silent drops, one row per post, encoding matches tags,
   determinism, spec round-trip, nested CV uses training posts only, …).
 
 ```bash
@@ -186,15 +198,33 @@ Held-out AUC (best model, mean ± SD over 50 splits): FB 0.64 ± 0.11, IG 0.67 �
 models are noise. Use robust or clustered SEs: naive SEs are up to 1.8× too small
 (unequal variance, not repeated posts).
 
-## Using the recommendation tool (Stage 2, `recommendations` branch)
+## Using the recommendation tool (Stage 2, `recommendations` branch; web page on `github-page`)
 
 **What it does:** reads the master workbook and reports, for each platform,
 which choices (format, content pillar, ICP segment, timing, LinkedIn boost) have
 done better or worse than usual, what changed in the last 90 days, and, if you
 give it a content plan, how each planned post is likely to do. It runs on past
-performance only; no LLM or internet access is needed. A run takes about 30
-seconds.
+performance only; no LLM is needed.
 
+**Easiest: the web page,** https://graceschmidt1.github.io/MSDS-Capstone-26/
+
+1. Drop the latest `Hidalga_Master_Data_vN.xlsx` into box 1 (or use the master
+   saved in the repo), and optionally a plan `.csv` into box 2 (the page links
+   the template).
+2. Click **Make recommendations**. The first visit downloads Python into the
+   browser (about a minute; later visits reuse it); the analysis then takes
+   about 45 seconds.
+3. Read the tabs (Overview, one per platform, Planned posts, How to read this)
+   and download the Excel workbook, the one-page HTML report, or all files as a
+   zip. Keep these: the page doesn't save anything.
+
+The page runs the same code as the command line (`modeling/pipeline.py`, in
+the browser via [Pyodide](https://pyodide.org) 0.29.5), so results match; files
+never leave the computer. It needs an internet connection to load Python. A new
+master still has to be built with the scripts in `data/` first (see "Adding new
+data" below).
+
+**Command line** (same results, plus a versioned run folder; about 30 seconds).
 **One-time setup:** Python 3.13, then `python -m pip install -r requirements.txt` from the repo root.
 
 **After each data update:**
@@ -255,9 +285,14 @@ period (see `FINDINGS.md`); the report carries a caution note for Facebook,
 set in `recommend: platform_notes` in the config.
 
 Settings (thresholds, 90-day window, how many refits) are in the `recommend:`
-section of `modeling/config.yaml`. Code: `modeling/recommend.py` (verdicts,
-plan scoring, recent check), `modeling/report.py` (Excel / HTML),
-`modeling/run_recommend.py` (the command). Tests: `python -m pytest modeling/tests -q`.
+section of `modeling/config.yaml`; the web page reads the same file. Code:
+`modeling/recommend.py` (verdicts, plan scoring, recent check),
+`modeling/report.py` (Excel / HTML), `modeling/pipeline.py` (one run, shared by
+both), `modeling/run_recommend.py` (the command), `modeling/web.py` (the page's
+entry point); the page itself is `index.html` and `site/` (served from `main`,
+repo root; `.nojekyll` keeps `modeling/__init__.py` published). Tests:
+`python -m pytest modeling/tests -q`. To try the page locally:
+`python -m http.server` from the repo root, then open http://localhost:8000.
 
 ## Quantitative evaluation framework (added 2026-11-02; done 2026-11-04)
 

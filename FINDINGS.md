@@ -348,6 +348,21 @@ the tool; OLS with HC3 SEs; content = format, pillar, ICP and timing columns.
 - **Time:** 39 s for the analysis (≈ 30 s natively), plus ≈ 45 s first-visit download of Python and packages (cached by the browser afterward). No need to reduce the bootstrap.
 - scikit-learn 1.7 warns that `n_alphas` (`models.py` L161, L164) is deprecated (removal in 1.9); harmless while Pyodide pins 1.7.0.
 
+## Web page (branch `github-page`, commits `405f0e4` pipeline, `0ee45e7` page, `0f0e84a` Pages; 2026-11-18)
+- **Same results in the browser:** the page (served under `/MSDS-Capstone-26/` from the committed files only, headless
+  Chrome) on master v3 + `plan_template.csv` vs. run `2026-11-17_recommendations`: every verdict identical; all six CSVs
+  agree to ≤ 1e-13; every workbook cell agrees to 1e-9; the HTML differs only in the master's name (file name vs.
+  `data/…` path) and run date. Chart PNGs differ at the byte level (matplotlib 3.8.4 in Pyodide vs. 3.10.7).
+- **Refactor kept the CLI byte-identical:** `run_recommend` before and after moving the run into `pipeline.py` gave
+  byte-identical CSVs, figures, workbook and HTML (only `run_info.json` time / dirty flag / output folder differ).
+- **Time (headless Chrome, empty cache):** Python and packages ready in ≈ 50–70 s; analysis 43–44 s.
+- **Function-level imports need care:** `recommend.py` imports `modeling.classify` inside the scoring functions, so the
+  worker's first module list missed it and the first page run failed. A test now runs `web.run` with a plan in a fresh
+  interpreter and checks the worker list equals the modules actually imported.
+- **GitHub Pages specifics:** Jekyll drops files starting with `_` (`modeling/__init__.py`), fixed by `.nojekyll`; Pages
+  is case-sensitive and serves only committed files, so a test checks every path the page and worker fetch against
+  `git ls-files`.
+
 ## Methodological and code findings
 
 - **saga all-zero intercept (2026-11-02):** when every coefficient is zero, scikit-learn's saga stops after
