@@ -301,16 +301,17 @@ def _plan_html(scores: pd.DataFrame) -> str:
             "<th>What applies</th></tr></thead><tbody>" + "".join(rows) + "</tbody></table></div>")
 
 
-def write_html(path: Path, *, title: str, meta: str, options: pd.DataFrame, recent_opts: pd.DataFrame,
-               quality: pd.DataFrame, figures: dict[str, Path], scores: pd.DataFrame | None, platforms: list[str],
-               notes: dict[str, str] | None = None):
+def html_sections(*, options: pd.DataFrame, recent_opts: pd.DataFrame, quality: pd.DataFrame,
+                  figures: dict[str, Path], scores: pd.DataFrame | None, platforms: list[str],
+                  notes: dict[str, str] | None = None) -> list[tuple[str, str]]:
+    """The report body as (heading, html) pieces: one per platform, Planned posts (with a plan), How to read this.
+    write_html joins them into the full page; the web page shows each as a tab."""
     q = quality.set_index("platform")
-    parts = [f"<title>{_e(title)}</title><style>{CSS}</style><main>",
-             f"<h1>{_e(title)}</h1><p class='meta'>{_e(meta)}</p>"]
+    sections = []
     for p in platforms:
         g = options[options["platform"] == p]
         allp = recent_opts[(recent_opts["platform"] == p) & (recent_opts["factor"] == "All posts")].iloc[0]
-        parts.append(f"<h2>{_e(p)}</h2>")
+        parts = [f"<h2>{_e(p)}</h2>"]
         if (notes or {}).get(p):
             parts.append(f"<p class='platform-note'>{_e(notes[p])}</p>")
         parts.append("<div class='tiles'>"
@@ -334,11 +335,20 @@ def write_html(path: Path, *, title: str, meta: str, options: pd.DataFrame, rece
                      + "</ul>")
         parts.append(f"<figure><img alt='{_e(p)}: difference vs. baseline for each choice, with 95% intervals and "
                      f"verdicts' src='{_img(figures[p])}'></figure>")
+        sections.append((p, "".join(parts)))
     if scores is not None:
-        parts.append("<h2>Planned posts</h2>" + _plan_html(scores)
-                     + "<p class='note'>Ranges show the uncertainty of the estimate; single posts vary much more.</p>")
-    parts.append("<h2>How to read this</h2><dl>"
-                 + "".join(f"<dt>{_e(k)}</dt><dd>{_e(v)}</dd>" for k, v in HOW_TO_READ) + "</dl>")
+        sections.append(("Planned posts", "<h2>Planned posts</h2>" + _plan_html(scores)
+                         + "<p class='note'>Ranges show the uncertainty of the estimate; single posts vary much more.</p>"))
+    sections.append(("How to read this", "<h2>How to read this</h2><dl>"
+                     + "".join(f"<dt>{_e(k)}</dt><dd>{_e(v)}</dd>" for k, v in HOW_TO_READ) + "</dl>"))
+    return sections
+
+
+def write_html(path: Path, *, title: str, meta: str, **sections):
+    """One offline page: title, meta line, then every html_sections() piece (keyword arguments as there)."""
+    parts = [f"<title>{_e(title)}</title><style>{CSS}</style><main>",
+             f"<h1>{_e(title)}</h1><p class='meta'>{_e(meta)}</p>"]
+    parts += [h for _, h in html_sections(**sections)]
     parts.append("<p class='note'>Full tables: recommendations.xlsx and the CSVs in this folder.</p></main>")
     path.write_text("<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width, "
                     "initial-scale=1'>" + "".join(parts), encoding="utf-8")
