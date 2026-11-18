@@ -17,6 +17,11 @@ TEMPLATE = REPO_ROOT / "modeling" / "plan_template.csv"
 WORKER = (REPO_ROOT / "site" / "worker.js").read_text()
 
 
+def worker_modules() -> list[str]:
+    listed = re.search(r"const MODULES = \[(.*?)\];", WORKER, re.S).group(1)
+    return [m.strip().strip('"') for m in listed.split(",")]
+
+
 @pytest.fixture(scope="module")
 def result(tmp_path_factory):
     return web.run(MASTER, "my_master.xlsx", TEMPLATE, "next_month.csv", out=tmp_path_factory.mktemp("web"),
@@ -59,8 +64,7 @@ def test_bad_plan(tmp_path):
 
 def test_worker_loads_every_module_a_run_needs(tmp_path):
     """The worker fetches a fixed list of modules; a run (with a plan, so scoring imports run too) must need no others."""
-    listed = re.search(r"const MODULES = \[(.*?)\];", WORKER, re.S).group(1)
-    listed = {m.strip().strip('"') for m in listed.split(",")}
+    listed = set(worker_modules())
     code = ("import sys; from modeling import web; "
             f"web.run({str(MASTER)!r}, 'm.xlsx', {str(TEMPLATE)!r}, 'p.csv', out={str(tmp_path)!r}, log=lambda m: None); "
             "print(' '.join(m.split('.', 1)[1] for m in sys.modules if m.startswith('modeling.')))")
@@ -68,11 +72,16 @@ def test_worker_loads_every_module_a_run_needs(tmp_path):
     assert set(used.stdout.split()) | {"__init__"} == listed
 
 
-def test_page_files_exist():
+def test_page_files_are_committed():
+    """GitHub Pages serves the committed files of main, with case-sensitive paths: everything the page and the worker
+    fetch must be tracked under exactly that name (a local server or macOS would hide a mistake in either)."""
+    tracked = set(subprocess.run(["git", "ls-files"], cwd=REPO_ROOT, capture_output=True, text=True,
+                                 check=True).stdout.splitlines())
     page = (REPO_ROOT / "index.html").read_text()
-    for ref in re.findall(r'(?:href|src)="((?!https?:|data:|#)[^"]+)"', page):
-        assert (REPO_ROOT / ref).is_file(), ref
-    assert (REPO_ROOT / CONFIG["master"]).is_file()                       # "use the master saved in the repo"
+    refs = re.findall(r'(?:href|src)="((?!https?:|data:|#)[^"]+)"', page) + ["site/worker.js"]
+    refs += [f"modeling/{m}.py" for m in worker_modules()]
+    refs += ["modeling/config.yaml", CONFIG["master"], ".nojekyll"]   # .nojekyll: keeps modeling/__init__.py
+    assert [r for r in refs if r not in tracked] == []
 
 
 def test_page_colours_match_the_report():
