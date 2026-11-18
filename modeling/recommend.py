@@ -261,7 +261,7 @@ def read_plan(path) -> pd.DataFrame:
     plan.columns = [c.strip().lower() for c in plan.columns]
     missing = [c for c in PLAN_REQUIRED if c not in plan.columns]
     if missing:
-        raise ValueError(f"Plan file is missing columns: {missing} (required: {PLAN_REQUIRED})")
+        raise ValueError(f"Plan file is missing columns: {', '.join(missing)} (required: {', '.join(PLAN_REQUIRED)})")
     for c in PLAN_OPTIONAL:
         if c not in plan.columns:
             plan[c] = ""
