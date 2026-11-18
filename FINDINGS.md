@@ -342,6 +342,12 @@ the tool; OLS with HC3 SEs; content = format, pillar, ICP and timing columns.
   section of the HTML report and the Excel Summary. Possible later: make it data-driven (a quarterly-swing test
   per platform) so it updates with new data.
 
+## Web page feasibility: the tool in the browser (2026-11-18, branch `github-page`; scratchpad trial, not committed)
+- `run_recommend` runs unchanged in **Pyodide 0.29.5** (Python 3.13.2 in WebAssembly: numpy 2.2.5, pandas 2.3.3, scipy 1.14.1, statsmodels 0.14.4, scikit-learn 1.7.0, matplotlib 3.8.4, PyYAML 6.0.2; openpyxl 3.1.5 from PyPI). Trial: master v3 + `plan_template.csv`, under Node with `git_info` stubbed.
+- **Same results as `2026-11-17_recommendations`:** every verdict identical; all numbers in the six CSVs agree to ≥ 6 decimals (differences are last-digit floating point, e.g. 7e-15 vs 0), so files are not byte-identical. This holds despite older numpy/scipy and newer scikit-learn.
+- **Time:** 39 s for the analysis (≈ 30 s natively), plus ≈ 45 s first-visit download of Python and packages (cached by the browser afterward). No need to reduce the bootstrap.
+- scikit-learn 1.7 warns that `n_alphas` (`models.py` L161, L164) is deprecated (removal in 1.9); harmless while Pyodide pins 1.7.0.
+
 ## Methodological and code findings
 
 - **saga all-zero intercept (2026-11-02):** when every coefficient is zero, scikit-learn's saga stops after
