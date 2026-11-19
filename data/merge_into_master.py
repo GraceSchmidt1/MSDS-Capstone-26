@@ -69,6 +69,10 @@ LOG_COLS = ["MERGED_AT", "SOURCE_PULL_DATE", "INCOMING_FILE", "SHEET", "KEY", "C
 IGNORE_IN_DIFF = {"SOURCE_FILE"}
 
 
+class MergeError(Exception):
+    """The merge can't go ahead safely (unknown sheet or column) or failed its verification."""
+
+
 def norm(v):
     """Comparable string form of a cell value (keys and change detection)."""
     if v is None or v is pd.NaT or (isinstance(v, float) and np.isnan(v)):
@@ -137,7 +141,7 @@ def merge(master_path, incoming_path, out_path, pull_date):
 
     unknown = [s for s in incoming if s not in SHEET_KEYS]
     if unknown:
-        sys.exit(f"Incoming sheets with no merge key defined: {unknown}. Add them to SHEET_KEYS first.")
+        raise MergeError(f"Incoming sheets with no merge key defined: {unknown}. Add them to SHEET_KEYS first.")
 
     merged_at = dt.datetime.now().replace(microsecond=0)
     appends, log_rows, summary = {}, [], []
@@ -147,7 +151,7 @@ def merge(master_path, incoming_path, out_path, pull_date):
         base = master.get(sheet, pd.DataFrame(columns=inc.columns))
         extra = [c for c in inc.columns if c not in base.columns]
         if extra:
-            sys.exit(f"{sheet}: incoming columns not in master: {extra}. Refusing to guess a mapping.")
+            raise MergeError(f"{sheet}: incoming columns not in master: {extra}. Refusing to guess a mapping.")
 
         keys = SHEET_KEYS[sheet]
         existing = {row_key(r, keys): r for _, r in base.iterrows()}
@@ -214,6 +218,20 @@ def verify(master, out_path, appends, n_logged):
     return problems
 
 
+def update_master(master_path, incoming_path, out_path, pull_date):
+    """merge() + verify(); the output is removed and MergeError raised if any original row changed or the master
+    was touched. Returns (summary rows: sheet, master rows, incoming rows, appended, kept; number of values logged)."""
+    master_hash = sha256(master_path)
+    master, appends, log_rows, summary = merge(master_path, incoming_path, out_path, pull_date)
+    problems = verify(master, out_path, appends, len(log_rows))
+    if sha256(master_path) != master_hash:
+        problems.append("master file changed on disk during the merge")
+    if problems:
+        os.remove(out_path)
+        raise MergeError("VERIFY FAILED, output removed:\n  " + "\n  ".join(problems))
+    return summary, len(log_rows)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Append-only merge of a cleaned export into the master workbook.")
     ap.add_argument("--master", required=True, help="Current master, e.g. Hidalga_Master_Data_v1.xlsx")
@@ -230,15 +248,10 @@ def main(argv=None):
     if os.path.exists(out_path):
         sys.exit(f"{out_path} already exists; refusing to overwrite it.")
 
-    master_hash = sha256(master_path)
-    master, appends, log_rows, summary = merge(master_path, args.incoming, out_path, args.pull_date)
-
-    problems = verify(master, out_path, appends, len(log_rows))
-    if sha256(master_path) != master_hash:
-        problems.append("master file changed on disk during the merge")
-    if problems:
-        os.remove(out_path)
-        sys.exit("VERIFY FAILED, output removed:\n  " + "\n  ".join(problems))
+    try:
+        summary, n_logged = update_master(master_path, args.incoming, out_path, args.pull_date)
+    except MergeError as e:
+        sys.exit(str(e))
 
     log_csv = os.path.join(os.path.dirname(master_path), "merge_decisions.csv")
     pd.DataFrame([{"CATEGORY": "append_only_merge", "KEY": sheet,
@@ -251,7 +264,7 @@ def main(argv=None):
     print(f"{'sheet':32} {'master':>7} {'incoming':>9} {'appended':>9} {'kept':>6}")
     for sheet, n_base, n_in, n_new, n_dup in summary:
         print(f"{sheet:32} {n_base:7} {n_in:9} {n_new:9} {n_dup:6}")
-    print(f"\n{len(log_rows)} differing values logged to '{LOG_SHEET}' (master values kept).")
+    print(f"\n{n_logged} differing values logged to '{LOG_SHEET}' (master values kept).")
     print(f"Verified: all original rows unchanged; master untouched.\nWrote {out_path}")
 
 

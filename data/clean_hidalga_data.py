@@ -172,7 +172,9 @@ def sheet_names(path):
 
 
 def classify_files(paths):
-    """Return dict role->path for: social_xlsx, li_content, li_visitors."""
+    """Return dict role->path for: social_xlsx, li_content, li_visitors, li_followers (recognised, not used).
+    The followers export shares its demographic sheets with the visitors export, so "New followers" is checked
+    first."""
     roles = {}
     for p in paths:
         names = {n.lower() for n in sheet_names(p)}
@@ -180,9 +182,53 @@ def classify_files(paths):
             roles["social_xlsx"] = p
         elif {"metrics", "all posts"} <= names:
             roles["li_content"] = p
+        elif "new followers" in names:
+            roles["li_followers"] = p
         elif "visitor metrics" in names or {"seniority", "job function"} & names:
             roles["li_visitors"] = p
     return roles
+
+
+ROLES = ["social_xlsx", "li_content", "li_visitors"]     # the exports clean() uses
+SHEET_ORDER = ["Social Posts (unified)", "LinkedIn Posts (detail)", "LinkedIn Daily Metrics",
+               "Visitor Daily Metrics", "Visitor Demographics", "Follower Counts", "Loomly Clicks"]
+
+
+def clean(paths):
+    """Clean whichever exports are among `paths`. Returns (sheets in canonical order, roles, counts, warnings);
+    sheets is empty if none of the three known exports was found."""
+    roles = classify_files(paths)
+    warnings = []
+    global records_out
+    records_out = []
+
+    sheets, counts = {}, {}
+
+    if "social_xlsx" in roles:
+        social_posts = build_social_posts(roles["social_xlsx"], warnings)
+        sheets["Social Posts (unified)"] = social_posts
+        sheets["Follower Counts"] = build_followers(roles["social_xlsx"])
+        sheets["Loomly Clicks"] = build_loomly(roles["social_xlsx"])
+        counts["social posts"] = len(social_posts)
+        if not social_posts.empty:
+            counts["by platform"] = social_posts["PLATFORM"].value_counts().to_dict()
+
+    if "li_content" in roles:
+        li_posts, li_metrics = build_li_content(roles["li_content"])
+        sheets["LinkedIn Posts (detail)"] = li_posts
+        sheets["LinkedIn Daily Metrics"] = li_metrics
+        counts["LI posts"] = len(li_posts)
+        counts["LI daily rows"] = len(li_metrics)
+
+    if "li_visitors" in roles:
+        vis_daily, demographics = build_visitors(roles["li_visitors"])
+        sheets["Visitor Daily Metrics"] = vis_daily
+        sheets["Visitor Demographics"] = demographics
+        counts["visitor daily rows"] = len(vis_daily)
+        counts["demographic rows"] = len(demographics)
+
+    sheets = {k: sheets[k] for k in SHEET_ORDER if k in sheets}
+    return sheets, roles, counts, warnings
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -466,48 +512,14 @@ def main(argv=None):
     if not paths:
         ap.error("No input files. Pass files or --input-dir.")
 
-    roles = classify_files(paths)
-    missing = {"social_xlsx", "li_content", "li_visitors"} - set(roles)
+    sheets, roles, counts, warnings = clean(paths)
+    missing = set(ROLES) - set(roles)
     if missing:
         print("WARNING: could not identify these roles:", ", ".join(sorted(missing)), file=sys.stderr)
         print("Detected:", {k: os.path.basename(v) for k, v in roles.items()}, file=sys.stderr)
 
-    warnings = []
-    global records_out
-    records_out = []
-
-    sheets, counts = {}, {}
-
-    if "social_xlsx" in roles:
-        social_posts = build_social_posts(roles["social_xlsx"], warnings)
-        sheets["Social Posts (unified)"] = social_posts
-        sheets["Follower Counts"] = build_followers(roles["social_xlsx"])
-        sheets["Loomly Clicks"] = build_loomly(roles["social_xlsx"])
-        counts["social posts"] = len(social_posts)
-        if not social_posts.empty:
-            counts["by platform"] = social_posts["PLATFORM"].value_counts().to_dict()
-
-    if "li_content" in roles:
-        li_posts, li_metrics = build_li_content(roles["li_content"])
-        sheets["LinkedIn Posts (detail)"] = li_posts
-        sheets["LinkedIn Daily Metrics"] = li_metrics
-        counts["LI posts"] = len(li_posts)
-        counts["LI daily rows"] = len(li_metrics)
-
-    if "li_visitors" in roles:
-        vis_daily, demographics = build_visitors(roles["li_visitors"])
-        sheets["Visitor Daily Metrics"] = vis_daily
-        sheets["Visitor Demographics"] = demographics
-        counts["visitor daily rows"] = len(vis_daily)
-        counts["demographic rows"] = len(demographics)
-
     if not sheets:
         ap.error("None of the three known file types were found among the inputs.")
-
-    # canonical sheet order
-    order = ["Social Posts (unified)", "LinkedIn Posts (detail)", "LinkedIn Daily Metrics",
-             "Visitor Daily Metrics", "Visitor Demographics", "Follower Counts", "Loomly Clicks"]
-    sheets = {k: sheets[k] for k in order if k in sheets}
 
     # output path
     out = args.output
@@ -523,7 +535,7 @@ def main(argv=None):
     # report
     print("Detected files:")
     for role, p in roles.items():
-        print(f"  {role:12s} -> {os.path.basename(p)}")
+        print(f"  {role:12s} -> {os.path.basename(p)}" + ("" if role in ROLES else "  (recognised, not used)"))
     print("\nRow counts:")
     for k, v in counts.items():
         print(f"  {k}: {v}")
