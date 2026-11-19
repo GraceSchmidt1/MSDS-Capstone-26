@@ -17,9 +17,13 @@ TEMPLATE = REPO_ROOT / "modeling" / "plan_template.csv"
 WORKER = (REPO_ROOT / "site" / "worker.js").read_text()
 
 
-def worker_modules() -> list[str]:
-    listed = re.search(r"const MODULES = \[(.*?)\];", WORKER, re.S).group(1)
+def worker_list(name: str) -> list[str]:
+    listed = re.search(rf"const {name} = \[(.*?)\];", WORKER, re.S).group(1)
     return [m.strip().strip('"') for m in listed.split(",")]
+
+
+def worker_modules() -> list[str]:
+    return worker_list("MODULES")
 
 
 @pytest.fixture(scope="module")
@@ -63,13 +67,34 @@ def test_bad_plan(tmp_path):
 
 
 def test_worker_loads_every_module_a_run_needs(tmp_path):
-    """The worker fetches a fixed list of modules; a run (with a plan, so scoring imports run too) must need no others."""
-    listed = set(worker_modules())
+    """The worker fetches fixed lists of modeling/ modules and data/ scripts. A run that uses everything (a plan, and
+    exports including an .xls, so scoring and the master update run too) must import no others."""
+    data = REPO_ROOT / "data"
+    exports = [(str(data / f), f) for f in ["092026-Social-Media-Data.xlsx",
+                                            "hidalga-technologies_content_1788892250539.xls"]]
     code = ("import sys; from modeling import web; "
-            f"web.run({str(MASTER)!r}, 'm.xlsx', {str(TEMPLATE)!r}, 'p.csv', out={str(tmp_path)!r}, log=lambda m: None); "
-            "print(' '.join(m.split('.', 1)[1] for m in sys.modules if m.startswith('modeling.')))")
+            f"web.run({str(data / 'Hidalga_Master_Data_v1.xlsx')!r}, 'm_v1.xlsx', {str(TEMPLATE)!r}, 'p.csv', "
+            f"exports={exports!r}, out={str(tmp_path)!r}, log=lambda m: None); "
+            "print(' '.join(m.split('.', 1)[1] for m in sys.modules if m.startswith('modeling.'))); "
+            f"print(' '.join(n for n, m in list(sys.modules.items()) "
+            f"if (getattr(m, '__file__', None) or '').startswith({str(data)!r})))")
     used = subprocess.run([sys.executable, "-c", code], cwd=REPO_ROOT, capture_output=True, text=True, check=True)
-    assert set(used.stdout.split()) | {"__init__"} == listed
+    modeling, scripts = used.stdout.strip().splitlines()[-2:]
+    assert set(modeling.split()) | {"__init__"} == set(worker_modules())
+    assert set(scripts.split()) == set(worker_list("DATA_SCRIPTS"))
+
+
+def test_worker_loads_every_package_the_code_imports():
+    """Every third-party package imported by the files the worker fetches is loaded by it (Pyodide or PyPI)."""
+    pyodide = set(worker_list("PACKAGES")) | {re.sub(r"==.*", "", p) for p in worker_list("PYPI")}
+    distribution = {"sklearn": "scikit-learn", "yaml": "pyyaml"}
+    local = set(worker_modules()) | set(worker_list("DATA_SCRIPTS")) | {"modeling"}
+    files = [REPO_ROOT / "modeling" / f"{m}.py" for m in worker_modules()]
+    files += [REPO_ROOT / "data" / f"{m}.py" for m in worker_list("DATA_SCRIPTS")]
+    imported = {m for f in files for m in re.findall(r"^\s*(?:import|from) (\w+)", f.read_text(), re.M)}
+    third_party = imported - set(sys.stdlib_module_names) - local - {"__future__"}
+    assert {distribution.get(m, m) for m in third_party} <= pyodide
+    assert "xlrd" in pyodide                       # pandas reads the LinkedIn .xls exports with it
 
 
 def test_page_files_are_committed():
@@ -80,6 +105,7 @@ def test_page_files_are_committed():
     page = (REPO_ROOT / "index.html").read_text()
     refs = re.findall(r'(?:href|src)="((?!https?:|data:|#)[^"]+)"', page) + ["site/worker.js"]
     refs += [f"modeling/{m}.py" for m in worker_modules()]
+    refs += [f"data/{m}.py" for m in worker_list("DATA_SCRIPTS")]
     refs += ["modeling/config.yaml", CONFIG["master"], ".nojekyll"]   # .nojekyll: keeps modeling/__init__.py
     assert [r for r in refs if r not in tracked] == []
 
