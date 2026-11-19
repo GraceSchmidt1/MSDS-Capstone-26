@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Social content recommendations</title>
-<meta name="description" content="Upload the latest master workbook to see which formats, pillars, segments and timing are working, and score planned posts.">
+<meta name="description" content="Upload the latest master workbook, and any new exports, to see which formats, pillars, segments and timing are working, and score planned posts.">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="site/style.css">
 </head>
@@ -12,8 +12,8 @@
 <main>
   <header>
     <h1>Social content recommendations</h1>
-    <p class="lede">Add the latest master workbook to see what is working on LinkedIn, Instagram and Facebook, and
-      optionally score next month's planned posts.</p>
+    <p class="lede">Add the latest master workbook to see what is working on LinkedIn, Instagram and Facebook. New
+      exports, if you have them, are added to the master first; planned posts can be scored too.</p>
     <p class="privacy">Your files stay on this computer: the analysis runs inside your browser and nothing is uploaded.</p>
   </header>
 
@@ -27,9 +27,21 @@
       <p class="drop-alt"><button type="button" class="link" id="use-repo" disabled>Use the master saved in the
         repo</button> <span id="repo-name"></span></p>
     </div>
+    <div class="drop" id="exports-drop">
+      <input type="file" id="exports-file" accept=".xlsx,.xls" multiple hidden>
+      <div class="drop-head"><span class="step">2</span> New exports <span class="opt">optional</span></div>
+      <p class="drop-hint">Have fresh exports? Drop any of them here, or
+        <button type="button" class="link" data-pick="exports-file">choose files</button>, to add them to the
+        master first.</p>
+      <ul class="chosen-list" id="exports-chosen" hidden></ul>
+      <p class="drop-alt">Any of: the Loomly social media workbook (.xlsx), the LinkedIn content export (.xls), the
+        LinkedIn visitors export (.xls).</p>
+      <p class="drop-alt" id="pull-row" hidden><label for="pull-date">Exports pulled on</label>
+        <input type="date" id="pull-date"></p>
+    </div>
     <div class="drop" id="plan-drop">
       <input type="file" id="plan-file" accept=".csv" hidden>
-      <div class="drop-head"><span class="step">2</span> Planned posts <span class="opt">optional</span></div>
+      <div class="drop-head"><span class="step">3</span> Planned posts <span class="opt">optional</span></div>
       <p class="drop-hint">Drop a plan <b>.csv</b> here, or
         <button type="button" class="link" data-pick="plan-file">choose a file</button>.</p>
       <p class="chosen" id="plan-chosen" hidden></p>
@@ -47,6 +59,7 @@
   <section id="results" hidden aria-label="Results">
     <p class="meta" id="meta"></p>
     <div class="downloads">
+      <a id="dl-master" class="btn btn-key" hidden>Download new master</a>
       <a id="dl-xlsx" class="btn">Download Excel</a>
       <a id="dl-html" class="btn">Download report (HTML)</a>
       <a id="dl-zip" class="btn">Download all files (.zip)</a>

@@ -13,7 +13,7 @@ a{color:inherit}
 .lede{margin:4px 0;color:var(--ink2);max-width:70ch}
 .privacy{margin:4px 0 0;color:var(--muted);font-size:13px}
 
-.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:12px;margin:24px 0 16px}
+.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px;margin:24px 0 16px}
 .drop{background:var(--card);border:1.5px dashed var(--line);border-radius:10px;padding:16px 18px;
 transition:border-color .15s,background .15s}
 .drop.over{border-color:var(--ink2);border-style:solid}
@@ -26,6 +26,11 @@ font-size:12px;color:var(--ink2)}
 .drop-alt{font-size:13px}
 .chosen{color:var(--ink);font-weight:600;word-break:break-word}
 .chosen button{margin-left:8px}
+.chosen-list{list-style:none;padding:0;margin:8px 0 0;font-size:14px}
+.chosen-list li{font-weight:600;word-break:break-word;padding:2px 0}
+.chosen-list li button{margin-left:8px;font-weight:400}
+input[type=date]{font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);
+border-radius:6px;padding:2px 6px;margin-left:6px}
 button{font:inherit;color:inherit}
 button.link{background:none;border:0;padding:0;text-decoration:underline;cursor:pointer;color:var(--ink)}
 button.link:disabled{color:var(--muted);cursor:default;text-decoration:none}
@@ -42,6 +47,8 @@ button.link:disabled{color:var(--muted);cursor:default;text-decoration:none}
 .btn{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 12px;
 font-size:14px;text-decoration:none;cursor:pointer}
 .btn:hover,button.link:hover:not(:disabled){border-color:var(--ink2)}
+.btn-key{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:600}
+.btn-key:hover{opacity:.9}
 
 [role=tablist]{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:thin}
 [role=tab]{background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px;cursor:pointer;
@@ -53,6 +60,12 @@ color:var(--ink2);white-space:nowrap;font-weight:600}
 .overview td.type{white-space:nowrap;font-weight:600}
 .overview td.good{color:var(--good)}.overview td.bad{color:var(--bad)}.overview td.lean{color:var(--lean)}
 .overview tr.platform-row td{padding-top:16px;font-weight:600;font-size:15px;border-bottom:1px solid var(--ink2)}
+
+.warn{list-style:none;padding:0;margin:12px 0}
+.warn li{border-left:3px solid var(--lean);padding:6px 12px;margin:6px 0;color:var(--ink2);font-size:14px}
+.update-lead{font-size:16px;margin:8px 0}
+.update td.missing{color:var(--lean);font-weight:600}
+.update th.num{text-align:right}.update td.nowrap{white-space:nowrap}
 
 footer{margin-top:48px;color:var(--muted);font-size:13px}
 
@@ -66,4 +79,9 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 .overview td.type,.overview td:first-child{white-space:normal}
 .overview tr.platform-row{border-bottom:1px solid var(--ink2)}
 .overview tr.platform-row td{border-bottom:0}
+.update thead{display:none}
+.update tr,.update td{display:block}
+.update tr{border-bottom:1px solid var(--line);padding:6px 0}
+.update td,.update td.num{border:0;padding:1px 0;text-align:left;white-space:normal}
+.update td::before{content:attr(data-label) ": ";color:var(--muted);font-size:12px}
 }
