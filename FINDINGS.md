@@ -363,6 +363,23 @@ the tool; OLS with HC3 SEs; content = format, pillar, ICP and timing columns.
   is case-sensitive and serves only committed files, so a test checks every path the page and worker fetch against
   `git ls-files`.
 
+## Web page: new exports (on `main`, commits `8edfae1` data scripts, `c5c0956` web.py, `5899451` page, `c50175c` tests; 2026-11-19)
+- **Refactor kept the data scripts' output:** cleaning the September exports (all three; Loomly only; LinkedIn only)
+  and merging v1 + September and v3 + September gave the same sheets and `merge_decisions.csv` before and after
+  moving the work into `clean()` / `update_master()` (scratchpad copies; `data/` untouched).
+- **v1 + the September Loomly workbook rebuilds the committed v2** cell for cell (17 posts, 3 follower months, 6 Loomly
+  clicks, as logged; only the log sheet's merge time and cleaned-file name differ), both in Python and from the page in
+  headless Chrome. The page first wrote its own `0_` file-name prefix into `SOURCE_FILE`; fixed by keeping each
+  upload's original name.
+- **v3 + the September exports adds nothing** (the merge would still write a v4 with 1,509 logged differences); the page
+  reports "nothing new" and offers no new master.
+- **The cleaner mistook the LinkedIn followers export for the visitors export** (both have Job function / Seniority
+  sheets), replacing the real visitors file and crashing. Fixed: recognised by its "New followers" sheet and skipped.
+- **Partial exports are normal:** v2 was built from the Loomly workbook alone, so 10 LinkedIn posts in v3 carry Loomly's
+  numbers. With the user's choice (a), the page adds new LinkedIn posts with Loomly's numbers when the LinkedIn content
+  export is missing and warns that they keep them (append-only).
+- **Time (headless Chrome):** update + analysis 38–40 s; without exports unchanged (≈ 45 s).
+
 ## Methodological and code findings
 
 - **saga all-zero intercept (2026-11-02):** when every coefficient is zero, scikit-learn's saga stops after

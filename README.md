@@ -1,9 +1,11 @@
 # MSDS-Capstone-26
 
 **Recommendation tool: https://graceschmidt1.github.io/MSDS-Capstone-26/**
-Drop in the latest master workbook (and, optionally, a plan of upcoming posts)
-to see what is working on each platform. It runs in your browser; nothing is
-uploaded. See "Using the recommendation tool" below.
+Drop in the latest master workbook (and, optionally, any new Loomly / LinkedIn
+exports and a plan of upcoming posts) to see what is working on each platform;
+new exports are added to the master first and the next master version is
+offered for download. It runs in your browser; nothing is uploaded. See "Using
+the recommendation tool" below.
 
 ## Data pipeline
 
@@ -14,12 +16,13 @@ recent) source per record rather than concatenating everything. The full
 reasoning behind every source-selection decision is in
 [`DATA_CLEANING_PLAN.md`](DATA_CLEANING_PLAN.md).
 
-### Project status (2026-11-18)
+### Project status (2026-11-19)
 
 Data preparation, exploratory analysis, **Stage 1** (engagement-rate regression
 and high- vs. low-engagement classification) and **Stage 2** (the recommendation
-tool for the marketing team) are complete and merged to `main` (PRs #1–#6),
-and the tool has a web page (`github-page` branch; 222 tests pass). **Current master: `data/Hidalga_Master_Data_v3.xlsx`**:
+tool for the marketing team) are complete and merged to `main` (PRs #1–#7),
+and the tool has a web page that can also add new exports to the master (232
+tests pass). **Current master: `data/Hidalga_Master_Data_v3.xlsx`**:
 391 posts (124 Facebook, 130 Instagram, 137 LinkedIn), Sep 23 2025 – Sep 29 2026.
 
 Done so far:
@@ -67,7 +70,14 @@ Done so far:
 13. **Web page.** The recommendation tool runs in the browser on GitHub Pages
     (Pyodide), with the same results as the command line; upload a master and
     optional plan, read the results in tabs, download the Excel / HTML / all
-    files (`github-page` branch; see "Using the recommendation tool" below).
+    files (PR #7; see "Using the recommendation tool" below).
+14. **New exports on the web page.** Optional: drop in any of the Loomly /
+    LinkedIn exports and the page cleans and merges them into the next master
+    version (same scripts as `data/`, append-only and verified), lists the new
+    posts with warnings (missing tags, unknown formats, LinkedIn posts on
+    Loomly's numbers), runs the recommendations on it and offers it for
+    download. The cleaner now recognises the LinkedIn followers export instead
+    of mistaking it for the visitors export.
 
 Scope decisions:
 
@@ -91,9 +101,6 @@ Every result, with the run and commit that produced it, is logged in
 Remaining:
 
 - Final capstone report / presentation.
-- Web page, phase 2: drop in the raw Loomly / LinkedIn exports plus the current
-  master and get the next master version (clean + merge in the browser, with a
-  check for posts missing tags).
 - Optional: candidate features (day of week, posting hour, number of
   segments), a data-driven version of the Facebook note, Loomly click
   attribution (planned below, not built).
@@ -143,7 +150,7 @@ with a post's engagement rate, and how well can it be predicted?
 - `models.py`: CV splits, OLS, regularized models, VIF / influence, bootstrap
   stability, permutation importance. `sensitivity.py`: one-change variants.
 - `run_regression.py` / `run_sensitivity.py`: CLIs that write a run folder.
-- `tests/`: 222 tests across all of `modeling/` (53 when the regression was written; regression checks: no silent drops, one row per post, encoding matches tags,
+- `tests/`: 232 tests across all of `modeling/` (53 when the regression was written; regression checks: no silent drops, one row per post, encoding matches tags,
   determinism, spec round-trip, nested CV uses training posts only, …).
 
 ```bash
@@ -209,20 +216,44 @@ performance only; no LLM is needed.
 **Easiest: the web page,** https://graceschmidt1.github.io/MSDS-Capstone-26/
 
 1. Drop the latest `Hidalga_Master_Data_vN.xlsx` into box 1 (or use the master
-   saved in the repo), and optionally a plan `.csv` into box 2 (the page links
-   the template).
-2. Click **Make recommendations**. The first visit downloads Python into the
+   saved in the repo).
+2. **Optional, when you have fresh exports:** drop any of them into box 2 (the
+   Loomly social media workbook `.xlsx`, the LinkedIn content export `.xls`,
+   the LinkedIn visitors export `.xls`; whichever you have, in any order) and
+   set the date they were pulled.
+3. **Optional:** drop a plan `.csv` into box 3 (the page links the template).
+4. Click **Make recommendations**. The first visit downloads Python into the
    browser (about a minute; later visits reuse it); the analysis then takes
    about 45 seconds.
-3. Read the tabs (Overview, one per platform, Planned posts, How to read this)
-   and download the Excel workbook, the one-page HTML report, or all files as a
-   zip. Keep these: the page doesn't save anything.
+5. Read the tabs (Data update when exports were given, Overview, one per
+   platform, Planned posts, How to read this) and download the Excel workbook,
+   the one-page HTML report, or all files as a zip. Keep these: the page
+   doesn't save anything.
 
-The page runs the same code as the command line (`modeling/pipeline.py`, in
-the browser via [Pyodide](https://pyodide.org) 0.29.5), so results match; files
-never leave the computer. It needs an internet connection to load Python. A new
-master still has to be built with the scripts in `data/` first (see "Adding new
-data" below).
+**With new exports,** the page builds the next master version first (v3 → v4)
+with the same append-only, verified merge as the scripts in `data/`, and the
+results use it. The Data update tab shows which file was which export (and
+which weren't provided), the rows added per sheet, and the new posts, with
+warnings for:
+
+- new posts with no pillar or ICP segment in Loomly (fix the labels in Loomly,
+  or add corrections with `apply_master_corrections.py`);
+- a format the tool doesn't know yet (add it to `formats` in
+  `modeling/config.yaml`; the new master can still be downloaded);
+- new LinkedIn posts on Loomly's numbers. Without the LinkedIn content export,
+  new LinkedIn posts are added with Loomly's numbers and keep them (the master
+  never overwrites rows), so include that export when you have it.
+
+**Download the new master and keep it:** next time, drop it into box 1. To make
+it the master saved in the repo, add it to `data/` and set `master:` in
+`modeling/config.yaml`. If the exports hold nothing new, no new master is made
+and the results use the one you gave. The LinkedIn followers export is
+recognised but not used.
+
+The page runs the same code as the command line (`modeling/pipeline.py` and
+the `data/` scripts, in the browser via [Pyodide](https://pyodide.org) 0.29.5),
+so results match; files never leave the computer. It needs an internet
+connection to load Python.
 
 **Command line** (same results, plus a versioned run folder; about 30 seconds).
 **One-time setup:** Python 3.13, then `python -m pip install -r requirements.txt` from the repo root.
@@ -289,7 +320,8 @@ section of `modeling/config.yaml`; the web page reads the same file. Code:
 `modeling/recommend.py` (verdicts, plan scoring, recent check),
 `modeling/report.py` (Excel / HTML), `modeling/pipeline.py` (one run, shared by
 both), `modeling/run_recommend.py` (the command), `modeling/web.py` (the page's
-entry point); the page itself is `index.html` and `site/` (served from `main`,
+entry point, including the master update through `data/clean_hidalga_data.py`
+and `data/merge_into_master.py`); the page itself is `index.html` and `site/` (served from `main`,
 repo root; `.nojekyll` keeps `modeling/__init__.py` published). Tests:
 `python -m pytest modeling/tests -q`. To try the page locally:
 `python -m http.server` from the repo root, then open http://localhost:8000.
@@ -387,6 +419,11 @@ python3 merge_into_master.py --master Hidalga_Master_Data_v3.xlsx \
 # 3. if new posts need tag fixes, add them to apply_master_corrections.py and run
 python3 apply_master_corrections.py --master Hidalga_Master_Data_v4.xlsx
 ```
+
+Steps 1–2 can also be done on the web page (box 2, "New exports"): it runs the
+same `clean()` and `update_master()` functions and offers the new version for
+download. The LinkedIn followers export is recognised and skipped (before
+2026-11-19 the cleaner mistook it for the visitors export and crashed).
 
 Export a fresh workbook from Loomly for each update. If you append new posts
 to last month's workbook instead, its older posts carry stale metrics, which
