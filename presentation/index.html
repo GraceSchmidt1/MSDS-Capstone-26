@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Posts Work?</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#fcfcfb;--card:#ffffff;--ink:#0b0b0b;--ink2:#52514e;--muted:#6b6a65;--line:#e6e5e0;
+--good:#1d7a4f;--bad:#b3261e;--lean:#8a5a00;--fb:#2a78d6;--ig:#eb6834;--li:#1baf7a;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#e9e8e3;overflow:hidden}
+body{font:400 26px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
+/* 1600×900 slides, scaled to fit the window (see the script) */
+.deck{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--bg);padding:64px 88px 56px;display:flex;flex-direction:column;
+  box-shadow:0 2px 24px rgba(0,0,0,.08);visibility:hidden}
+.slide.on{visibility:visible}
+.kicker{font-size:18px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+h1{font-size:64px;line-height:1.1;margin:0 0 24px;letter-spacing:-.01em}
+h2{font-size:46px;line-height:1.15;margin:0 0 28px;letter-spacing:-.01em}
+h3{font-size:26px;margin:0 0 10px}
+p{margin:0 0 16px}
+ul{margin:0;padding-left:1.1em}li{margin:0 0 12px}li::marker{color:var(--muted)}
+.lead{font-size:30px;color:var(--ink2);max-width:1250px}
+.small{font-size:21px;color:var(--ink2)}.muted{color:var(--muted)}
+.cap{font-size:20px;color:var(--ink2);margin-top:14px;max-width:1350px}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;padding-bottom:28px}
+/* text-only slides: larger type so the cards fill the slide */
+.roomy .card{padding:34px 36px}.roomy .card h3{font-size:32px;margin-bottom:18px}
+.roomy .card p,.roomy .card li{font-size:28px;line-height:1.4}.roomy .card li{margin-bottom:16px}
+.cols{display:grid;gap:40px;min-height:0;align-items:center}.cols>.card{align-self:stretch}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c55{grid-template-columns:1.25fr 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 28px}
+.card h3{margin-bottom:12px}.card p,.card li{font-size:22px;color:var(--ink2)}
+.n{font-size:56px;font-weight:650;line-height:1;margin-bottom:8px;font-variant-numeric:tabular-nums}
+figure{margin:0;display:flex;flex-direction:column;min-height:0}
+figure img{display:block;max-width:100%;max-height:560px;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:#fcfcfb}
+.shot img{box-shadow:0 4px 18px rgba(0,0,0,.08)}
+.good{color:var(--good)}.bad{color:var(--bad)}.lean{color:var(--lean)}
+.tag{font-weight:650}
+table{border-collapse:collapse;width:100%;font-size:22px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink2);font-weight:600;font-size:19px}td.num{text-align:right;font-variant-numeric:tabular-nums}
+.foot{position:absolute;left:88px;right:88px;bottom:22px;display:flex;justify-content:space-between;font-size:15px;color:var(--muted)}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:8px;vertical-align:1px}
+a{color:inherit}
+code{font:500 .85em ui-monospace,SFMono-Regular,Menlo,monospace;background:#f1f0ec;padding:1px 6px;border-radius:5px}
+/* pipeline diagram */
+.flow{display:grid;grid-template-columns:1.15fr 64px 1fr 64px 1.05fr;align-items:stretch;gap:0}
+.flow .arrow{display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--muted)}
+.src{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-bottom:16px}
+.src h3{font-size:23px;margin-bottom:6px}.src p,.src li{font-size:19px;color:var(--ink2);margin:0 0 4px}
+.src ul{padding-left:1em}
+.stack{display:flex;flex-direction:column;justify-content:center}
+.ver{display:flex;gap:14px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font-size:21px}
+.ver b{min-width:46px}
+/* speaker notes (N) */
+.notes{display:none}
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;background:#1d1d1c;color:#f2f1ec;
+  font-size:17px;line-height:1.5;padding:14px 22px 18px;z-index:5}
+#notes p{margin:0 0 8px}
+#bar{position:fixed;left:0;bottom:0;height:4px;background:var(--ink);transition:width .2s;z-index:6}
+#help{position:fixed;right:14px;top:10px;font:13px -apple-system,sans-serif;color:#6b6a65;z-index:6}
+@media print{
+  html,body{overflow:visible;background:#fff;height:auto}
+  .deck{position:static;transform:none!important;width:auto;height:auto}
+  .slide{position:relative;visibility:visible;width:1600px;height:900px;box-shadow:none;page-break-after:always;break-after:page}
+  #notes,#bar,#help{display:none!important}
+  @page{size:1600px 900px;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1 ─ Title -->
+<section class="slide" style="justify-content:center">
+  <p class="kicker">MSDS Capstone · Fall 2026 · Hidalga Technologies</p>
+  <h1 style="font-size:80px;max-width:1300px">Which posts work?</h1>
+  <p class="lead" style="font-size:34px">Data-driven content recommendations for Hidalga's LinkedIn, Instagram and Facebook, and a
+    tool the team can rerun every month.</p>
+  <p class="small" style="margin-top:40px">Grace Schmidt · November 2026<br>
+    Tool: <a href="https://graceschmidt1.github.io/MSDS-Capstone-26/">graceschmidt1.github.io/MSDS-Capstone-26</a></p>
+  <aside class="notes"><p>Thanks for making the time. About 20 minutes of slides, then a live demo and the rest of the hour
+    for your questions and what Hidalga wants next.</p></aside>
+</section>
+
+<!-- 2 ─ The question -->
+<section class="slide roomy">
+  <p class="kicker">The question</p>
+  <h2>Hidalga posts on three platforms. Which choices actually help a post do well?</h2>
+  <div class="body">
+    <div class="cols c2">
+      <div class="card"><h3>1 · Find what works</h3>
+        <p>For each platform, which choices go with higher engagement once reach is accounted for:
+          <b>format</b>, <b>content pillar</b>, <b>ICP segment</b>, <b>timing</b>, <b>paid boost</b>?</p></div>
+      <div class="card"><h3>2 · Hand it over</h3>
+        <p>A tool the marketing team can rerun each month on new exports, with plain verdicts
+          (“do more”, “do less”, “keep testing”) and scores for planned posts. No data science needed.</p></div>
+    </div>
+    <p class="cap" style="margin-top:32px">Engagement rate = (reactions + comments + shares + clicks) ÷ impressions,
+      one formula for every platform. Results are patterns in past posts, not proof of cause.</p>
+  </div>
+  <aside class="notes"><p>Two goals: an answer now, and a tool that keeps answering as new posts come in.</p>
+    <p>The unified rate matters: Loomly's Instagram rate divided by reach, LinkedIn's by impressions. One formula makes
+    posts comparable within a platform.</p></aside>
+</section>
+
+<!-- 3 ─ Data: exports → master -->
+<section class="slide">
+  <p class="kicker">The data</p>
+  <h2>Two tools' exports, combined into one master workbook</h2>
+  <div class="body">
+    <div class="flow">
+      <div class="stack">
+        <div class="src"><h3>Loomly <span class="muted" style="font-weight:400">(scheduling tool)</span></h3>
+          <ul><li>Social media workbook: every Facebook, Instagram and LinkedIn post with date, time, format,
+            labels (pillar, ICP segment) and metrics</li>
+            <li>Monthly follower counts; click data for Loomly short links</li></ul></div>
+        <div class="src"><h3>LinkedIn <span class="muted" style="font-weight:400">(page admin exports)</span></h3>
+          <ul><li>Content export: LinkedIn's own numbers per post, plus daily page metrics</li>
+            <li>Visitors export: daily visitors and visitor demographics</li></ul></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="stack">
+        <div class="src" style="margin:0"><h3>Clean and choose</h3>
+          <ul><li>~35 files were <b>repeated, overlapping pulls</b> of the same accounts, so keep the most complete,
+            latest copy of each record, not all of them</li>
+            <li>Facebook and Instagram numbers from Loomly; <b>LinkedIn numbers from LinkedIn's own export</b>;
+            pillar and segment tags from Loomly labels</li>
+            <li>Backfill tags on older posts, one unified engagement rate</li></ul></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="stack">
+        <div class="src" style="margin:0"><h3>Master workbook</h3>
+          <p style="margin-bottom:10px">One row per post, plus supporting sheets</p>
+          <div class="n" style="font-size:52px">391</div>
+          <p>posts, Sep 2025 – Sep 2026<br>
+            <span class="dot" style="background:var(--fb)"></span>Facebook 124
+            <span class="dot" style="background:var(--ig);margin-left:10px"></span>Instagram 130<br>
+            <span class="dot" style="background:var(--li)"></span>LinkedIn 137 · 100% tagged</p></div>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>You know these exports better than anyone. The work was deciding which copy to trust: each month's
+    Loomly workbook restarts at January 1, so the files overlap heavily. Concatenating them would multiply posts 3–8×.</p>
+    <p>LinkedIn rule we agreed on: LinkedIn's native numbers are the record; Loomly's LinkedIn numbers are kept only for
+    comparison. Every choice is written down in DATA_CLEANING_PLAN.md and merge_decisions.csv.</p></aside>
+</section>
+
+<!-- 4 ─ Data: master versions -->
+<section class="slide">
+  <p class="kicker">The data</p>
+  <h2>The master grows by versions, and old rows never change</h2>
+  <div class="body">
+    <div class="cols c55">
+      <div>
+        <div class="ver"><b>v1</b><span>Full consolidation of the Loomly and LinkedIn exports: <b>374 posts</b>, tags reviewed by hand</span></div>
+        <div class="ver"><b>v2</b><span>September Loomly workbook merged in: <b>+17 posts</b>, +3 follower months, +6 links</span></div>
+        <div class="ver"><b>v3</b><span>Reviewed corrections: 40 pillars recovered, experiment period flagged; <b>100% tagged</b></span></div>
+        <div class="ver"><b>v4…</b><span>Next month: drop the new exports into the web page, download the next version</span></div>
+        <p class="cap" style="margin-top:22px">Each update starts from a copy of the last master, only appends new rows, logs
+          (never applies) changed numbers for posts it already has, then re-reads every original cell and stops if
+          anything differs.</p>
+      </div>
+      <div class="card" style="align-self:start"><h3>Partial exports are fine</h3>
+        <p>Any subset of the exports works. Without the LinkedIn content export, new LinkedIn posts use Loomly's numbers
+          and the tool says so.</p>
+        <h3 style="margin-top:22px">Things it flags</h3>
+        <ul><li>new posts with no pillar or ICP segment in Loomly</li>
+          <li>a post format the tool hasn't seen</li>
+          <li>a file it doesn't recognise</li></ul></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Append-only is what makes this safe to hand over: you can't accidentally overwrite history.</p>
+    <p>One practical ask (later slide): export a fresh Loomly workbook each time rather than adding to last month's file,
+    otherwise older posts carry stale numbers.</p></aside>
+</section>
+
+<!-- 5 ─ Key idea: reach -->
+<section class="slide">
+  <p class="kicker">The key idea</p>
+  <h2>Small posts naturally have high rates, so compare each post with its reach</h2>
+  <div class="body">
+    <figure><img src="img/reach.png" alt="Engagement rate against impressions for each platform, with a curve for the typical rate at each reach"></figure>
+    <p class="cap">Each dot is a post; the black line is the typical rate for that many impressions (a spline fitted per
+      platform). A post's <b>lift</b> is how far it sits above or below the line. Every result that follows compares lift,
+      not raw rate.</p>
+  </div>
+  <aside class="notes"><p>Without this, the analysis just rediscovers audience size. Example: early on “video is the worst
+    format” — but videos were reaching more people. After reach, video is no different from images.</p>
+    <p>Instagram shows it most clearly: rate falls steadily as impressions rise.</p></aside>
+</section>
+
+<!-- 6 ─ Approach -->
+<section class="slide roomy">
+  <p class="kicker">Approach</p>
+  <h2>Two stages: understand the past, then make it usable</h2>
+  <div class="body">
+    <div class="cols c3">
+      <div class="card"><h3>Stage 1 · Models</h3>
+        <ul><li>Regression on engagement rate, one model per platform</li>
+          <li>Classification: did a post beat its reach?</li>
+          <li>OLS, ridge, lasso, elastic net, trees, random forest</li></ul></div>
+      <div class="card"><h3>Stage 1 · Checks</h3>
+        <ul><li>Repeated cross-validation (5-fold × 10)</li>
+          <li>500 bootstrap refits, 5 sensitivity variants</li>
+          <li>Corrections for many comparisons; effect sizes</li></ul></div>
+      <div class="card"><h3>Stage 2 · Tool</h3>
+        <ul><li>Plain verdicts per choice, per platform</li>
+          <li>What changed in the last 90 days</li>
+          <li>Scores for planned posts</li>
+          <li>Runs in the browser; Excel and HTML reports</li></ul></div>
+    </div>
+    <p class="cap" style="margin-top:30px">Everything is in Python with versioned runs: each result records the data file's hash,
+      the code version and the random seed, so it can be reproduced exactly.</p>
+  </div>
+  <aside class="notes"><p>Stage 1 answered “is there anything here, and how sure are we?”. Stage 2 turned the reliable
+    parts into something the team can run without me.</p></aside>
+</section>
+
+<!-- 7 ─ What works -->
+<section class="slide">
+  <p class="kicker">Findings</p>
+  <h2>Format is what matters, most clearly on LinkedIn</h2>
+  <div class="body">
+    <figure><img src="img/formats.png" alt="Each format compared with Image after reach, with 95% intervals and the tool's verdicts"></figure>
+    <p class="cap">Lift compared with Image posts on the same platform, with 95% bootstrap intervals; post counts in brackets.
+      <b class="good">LinkedIn Documents</b> average <b>+14 points</b> (77% beat their reach) and hold in every check;
+      <b class="bad">LinkedIn Links</b> trail by 3 points (11% beat their reach). Instagram Carousel and LinkedIn
+      Multi-Image are promising.</p>
+  </div>
+  <aside class="notes"><p>Document = the PDF/carousel-style LinkedIn post. All 13 ran July–September 2026, so a
+    period-specific factor can't be fully ruled out; that's why “keep doing them and keep measuring”.</p>
+    <p>Format is the only factor whose joint test survives the multiple-comparison correction (LinkedIn and
+    Instagram).</p></aside>
+</section>
+
+<!-- 8 ─ What doesn't matter -->
+<section class="slide">
+  <p class="kicker">Findings</p>
+  <h2>Pillar, segment, timing and boost: no detectable difference yet</h2>
+  <div class="body">
+    <div class="cols c55">
+      <div>
+        <table>
+          <thead><tr><th>Joint test, after correction</th><th>Facebook</th><th>Instagram</th><th>LinkedIn</th></tr></thead>
+          <tbody>
+            <tr><td><b>Format</b></td><td class="num">0.33</td><td class="num"><b>0.02</b></td><td class="num"><b>&lt;0.001</b></td></tr>
+            <tr><td>Content pillar</td><td class="num">0.33</td><td class="num">0.52</td><td class="num">0.96</td></tr>
+            <tr><td>ICP segment</td><td class="num">0.41</td><td class="num">0.35</td><td class="num">0.96</td></tr>
+            <tr><td>Timing (weekend, time of day)</td><td class="num">0.83</td><td class="num">0.71</td><td class="num">0.96</td></tr>
+            <tr><td>Paid boost</td><td class="num">–</td><td class="num">–</td><td class="num">0.96</td></tr>
+          </tbody>
+        </table>
+        <p class="cap">Wald tests on whether a post beat its reach, Benjamini–Hochberg adjusted p-values. Below 0.05 = a real
+          difference among the options.</p>
+      </div>
+      <div class="card" style="align-self:start"><h3>What that means</h3>
+        <p>Choose pillar and segment on strategy, not on past engagement. The differences are small enough that ~125 posts
+          per platform can't separate them.</p>
+        <p>The tool lists each unsettled choice with roughly how many more posts would settle it (e.g. Instagram Carousel:
+          about 15).</p></div>
+    </div>
+  </div>
+  <aside class="notes"><p>A null result is still useful: it says the team isn't leaving engagement on the table by
+    choosing pillars and segments for business reasons.</p>
+    <p>“No detectable difference” is not “no difference”: with more posts some of these may separate.</p></aside>
+</section>
+
+<!-- 9 ─ How sure -->
+<section class="slide">
+  <p class="kicker">How sure are we?</p>
+  <h2>Better than guessing, but individual posts stay hard to predict</h2>
+  <div class="body">
+    <figure><img src="img/models.png" alt="Held-out R squared and AUC for each platform, mean and one standard deviation"></figure>
+    <p class="cap">Scores on posts the models didn't see (5-fold cross-validation × 10, mean ± 1 SD). Instagram's rate is
+      partly predictable (R² 0.44, mostly from reach); Facebook's isn't. Whether a post beats its reach is predicted
+      at AUC 0.64–0.67 on every platform: useful for ranking a plan, not for promising a number. The tool marks
+      Facebook's scores as rough.</p>
+  </div>
+  <aside class="notes"><p>Rigor behind every verdict: a choice is “Do more / Do less” only if it survives the
+    multiple-comparison correction AND holds whether reach is modelled with 3, 4 or 5 spline knots.</p>
+    <p>Also checked: standard errors when a post counts in several segments (naive ones were up to 1.8× too small,
+    so all tests use robust errors).</p></aside>
+</section>
+
+<!-- 10 ─ Facebook -->
+<section class="slide">
+  <p class="kicker">A closer look</p>
+  <h2>Facebook's recent rise is a swing, not a trend</h2>
+  <div class="body">
+    <div class="cols c55">
+      <figure><img src="img/quarters.png" alt="Share of posts beating their reach by quarter for each platform"></figure>
+      <div>
+        <p>Facebook went 18% → 61% → 27% → 69% of posts beating their reach, quarter by quarter.</p>
+        <ul class="small"><li>Median <b>17 impressions</b> per post: one or two interactions move a rate by 5–15 points</li>
+          <li>Not format, pillar, segment, timing or follower growth (6 → 18 followers, steady)</li>
+          <li>Not the Q2–Q3 experiment period: no effect on any platform once content is in the model</li></ul>
+        <p class="cap">Share of posts above the dashed 50% line = more posts beat their reach than not. Quarters with at
+          least 10 posts.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>The tool's 90-day check flagged Facebook as “doing better recently” (71% vs 38%). Rather
+    than report that as a win, I tested it: it's the latest upswing of a quarter-to-quarter swing on a tiny audience.
+    The report now carries a caution note for Facebook.</p>
+    <p>LinkedIn's rise is real but explained: it's the Document posts.</p></aside>
+</section>
+
+<!-- 11 ─ The tool -->
+<section class="slide">
+  <p class="kicker">The tool</p>
+  <h2>A web page: drop in the files, read the results</h2>
+  <div class="body">
+    <div class="cols c2">
+      <figure class="shot"><img src="img/tool_inputs.png" alt="The tool's input screen with three drop boxes"></figure>
+      <figure class="shot"><img src="img/tool_linkedin.png" alt="The LinkedIn results tab with verdicts and a chart"></figure>
+    </div>
+    <p class="cap">Left: master workbook (required), new exports and a plan of upcoming posts (both optional). Right: the
+      LinkedIn tab, with the 90-day check, the verdicts and every choice on a chart. Results download as Excel, a one-page
+      HTML report, or all files. Python runs inside the browser, so <b>no file leaves the computer</b>.</p>
+  </div>
+  <aside class="notes"><p>Same code as the command-line version; results match to 13 decimal places. Hosted free on GitHub
+    Pages, nothing to install. First visit takes about a minute to load Python; a run takes about 40 seconds.</p></aside>
+</section>
+
+<!-- 12 ─ Demo -->
+<section class="slide">
+  <p class="kicker">Live demo</p>
+  <h2>Monthly update in four steps</h2>
+  <div class="body">
+    <div class="cols c55">
+      <div>
+        <ol style="padding-left:1.2em">
+          <li>Open <a href="https://graceschmidt1.github.io/MSDS-Capstone-26/"><b>graceschmidt1.github.io/MSDS-Capstone-26</b></a></li>
+          <li>Drop in the latest master, plus whichever new Loomly / LinkedIn exports you have</li>
+          <li><b>Make recommendations</b> (~40 s)</li>
+          <li>Download the new master and keep it; read the tabs or share the HTML report</li>
+        </ol>
+        <p class="cap" style="margin-top:20px">Demo: v1 + the September Loomly workbook rebuilds v2 exactly (17 new posts),
+          with warnings for 3 untagged posts and 6 LinkedIn posts on Loomly's numbers.</p>
+      </div>
+      <figure class="shot"><img src="img/tool_update.png" alt="The Data update tab after adding the September exports"></figure>
+    </div>
+  </div>
+  <aside class="notes"><p>Live: open the page, “use the master saved in the repo” for a plain run, or v1 + 092026 workbook
+    to show the update. If the network is slow, the screenshot on this slide shows the same result.</p></aside>
+</section>
+
+<!-- 13 ─ Recommendations -->
+<section class="slide roomy">
+  <p class="kicker">Recommendations</p>
+  <h2>What I'd tell the marketing team</h2>
+  <div class="body">
+    <div class="cols c2">
+      <div class="card"><h3>Content</h3>
+        <ul><li><span class="tag good">Do more</span> LinkedIn Documents</li>
+          <li><span class="tag bad">Do less</span> LinkedIn Link posts; put the link in a Document or image post</li>
+          <li><span class="tag lean">Keep testing</span> Instagram Carousel, LinkedIn Multi-Image</li>
+          <li>Choose pillar and segment on strategy</li>
+          <li>Read Facebook changes with caution</li></ul></div>
+      <div class="card"><h3>Process</h3>
+        <ul><li>Run the tool monthly with fresh exports</li>
+          <li>Export a <b>new</b> Loomly workbook each time, not last month's with posts added</li>
+          <li>Include the LinkedIn content export, so LinkedIn posts get LinkedIn's numbers</li>
+          <li>Tag every post with a pillar and segment in Loomly</li>
+          <li>Score planned posts before the month starts</li></ul></div>
+    </div>
+  </div>
+  <aside class="notes"><p>The process points matter as much as the content ones: the tool is only as good as the
+    exports it gets.</p></aside>
+</section>
+
+<!-- 14 ─ Limitations -->
+<section class="slide roomy">
+  <p class="kicker">Limits and next steps</p>
+  <h2>What this can't say yet</h2>
+  <div class="body">
+    <div class="cols c2">
+      <div class="card"><h3>Limits</h3>
+        <ul><li>391 posts, about 125 per platform: only large effects show</li>
+          <li>Associations in past posts, not causes</li>
+          <li>The experiment period is the same as “Q2–Q3 2026”, so it can't be told apart from a time trend</li>
+          <li>Post text is cut at 200 characters, so length and calls to action can't be tested</li></ul></div>
+      <div class="card"><h3>Next</h3>
+        <ul><li>Full post text from Loomly → test length and calls to action</li>
+          <li>Day of week, posting hour, number of segments as features</li>
+          <li>Link Loomly click data to posts</li>
+          <li>Planned A/B tests (e.g. Document vs Image on the same topic) to move from association to cause</li></ul></div>
+    </div>
+  </div>
+  <aside class="notes"><p>The most valuable next step is a deliberate test: alternate formats on matched topics for a
+    quarter. That's the only way to get from “Documents go with higher engagement” to “Documents cause it”.</p></aside>
+</section>
+
+<!-- 15 ─ How we worked -->
+<section class="slide roomy">
+  <p class="kicker">How the work was run</p>
+  <h2>Decisions made together, every step written down</h2>
+  <div class="body">
+    <div class="cols c2">
+      <div class="card"><h3>With Hidalga</h3>
+        <ul><li>Source rules agreed with Joshua: LinkedIn's native numbers for LinkedIn, Loomly for Facebook and
+          Instagram, no pre-Sep-2025 backfill</li>
+          <li>Tag fixes reviewed by hand before they went into the master</li>
+          <li>Experiment-period posts kept in and flagged, not dropped</li></ul></div>
+      <div class="card"><h3>In the repository</h3>
+        <ul><li>Seven pull requests, one per stage</li>
+          <li>232 automated tests; versioned runs with data hash and code version</li>
+          <li><code>FINDINGS.md</code>: every result logged with the run that produced it</li>
+          <li>Data plan and merge log for every cleaning decision</li></ul></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Joshua: anything here you'd describe differently? This slide is about how decisions were made,
+    so it should match your view.</p></aside>
+</section>
+
+<!-- 16 ─ Discussion -->
+<section class="slide">
+  <p class="kicker">Discussion</p>
+  <h2>Questions for Hidalga</h2>
+  <div class="body">
+    <ul style="font-size:34px;max-width:1350px">
+      <li>Does the monthly workflow fit the team? Who would run it and keep the master?</li>
+      <li>Can we get full post text out of Loomly?</li>
+      <li>Is a planned format test (Document vs Image) possible next quarter?</li>
+      <li>Which results would you want in front of leadership, and in what form?</li>
+    </ul>
+    <p class="small" style="margin-top:60px">Code, data pipeline and full results:
+      <a href="https://github.com/GraceSchmidt1/MSDS-Capstone-26">github.com/GraceSchmidt1/MSDS-Capstone-26</a> ·
+      written report: <a href="report.html">report.html</a></p>
+  </div>
+  <aside class="notes"><p>Open it up. Have the tool open in another tab in case Joshua wants to try a different file.</p></aside>
+</section>
+
+</div>
+<div id="notes" hidden></div>
+<div id="bar"></div>
+<div id="help">← → to move · F full screen · N notes</div>
+<script>
+const slides = [...document.querySelectorAll(".slide")];
+const deck = document.getElementById("deck"), notes = document.getElementById("notes");
+slides.forEach((s, i) => {
+  const f = document.createElement("div");
+  f.className = "foot";
+  f.innerHTML = i ? `<span>Which posts work? · Hidalga Technologies</span><span>${i + 1} / ${slides.length}</span>` : "";
+  s.append(f);
+});
+let cur = 0;
+function fit() {
+  const k = Math.min(innerWidth / 1600, innerHeight / 900);
+  deck.style.transform = `translate(-50%, -50%) scale(${k})`;
+}
+function show(i) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, j) => s.classList.toggle("on", j === cur));
+  const n = slides[cur].querySelector(".notes");
+  notes.innerHTML = n ? n.innerHTML : "";
+  document.getElementById("bar").style.width = `${(cur + 1) / slides.length * 100}%`;
+  history.replaceState(null, "", `#${cur + 1}`);
+}
+addEventListener("resize", fit);
+addEventListener("keydown", (e) => {
+  if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  else if (e.key === "Home") show(0);
+  else if (e.key === "End") show(slides.length - 1);
+  else if (e.key === "n" || e.key === "N") notes.hidden = !notes.hidden;
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+  }
+});
+addEventListener("click", (e) => {
+  if (e.target.closest("a") || e.target.closest("#notes")) return;
+  show(cur + (e.clientX > innerWidth / 3 ? 1 : -1));
+});
+fit();
+show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+</script>
+</body>
+</html>
