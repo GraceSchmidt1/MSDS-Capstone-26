@@ -379,6 +379,13 @@ the tool; OLS with HC3 SEs; content = format, pillar, ICP and timing columns.
   numbers. With the user's choice (a), the page adds new LinkedIn posts with Loomly's numbers when the LinkedIn content
   export is missing and warns that they keep them (append-only).
 - **Time (headless Chrome):** update + analysis 38–40 s; without exports unchanged (≈ 45 s).
+- **Verified live (2026-11-23, after the push of `7a0b200`):** on https://graceschmidt1.github.io/MSDS-Capstone-26/ in
+  headless Chrome:
+  - v1 + the September Loomly workbook made v2 in 39 s. The downloaded file matches the committed v2 on every sheet
+    except the merge time and cleaned-file name.
+  - v3 + all four exports said "nothing new" (38 s).
+  - An unknown file was refused with the list of expected exports.
+  - A plain run without exports took 35 s.
 
 ## Methodological and code findings
 
