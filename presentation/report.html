@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Posts Work? Report</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#fcfcfb;--card:#ffffff;--ink:#0b0b0b;--ink2:#52514e;--muted:#6b6a65;--line:#e6e5e0;
+--good:#1d7a4f;--bad:#b3261e;--lean:#8a5a00;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:860px;margin:0 auto;padding:56px 20px 80px}
+header{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:8px}
+.kicker{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+h1{font-size:40px;line-height:1.12;margin:0 0 12px;letter-spacing:-.01em}
+.sub{font-size:20px;color:var(--ink2);margin:0 0 16px}
+.byline{font-size:15px;color:var(--ink2);margin:0}
+h2{font-size:26px;margin:48px 0 14px;padding-top:6px}
+h3{font-size:19px;margin:28px 0 8px}
+p{margin:0 0 14px}ul,ol{margin:0 0 14px;padding-left:1.3em}li{margin:0 0 6px}li::marker{color:var(--muted)}
+a{color:inherit}
+.muted{color:var(--muted)}
+.summary{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin:28px 0 8px}
+.summary h2{margin:0 0 10px;padding:0;font-size:20px}
+.summary li{margin-bottom:8px}
+figure{margin:24px 0 28px}
+figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px;background:#fcfcfb}
+figcaption,.tcap{font-size:14.5px;color:var(--ink2);margin-top:8px;line-height:1.5}
+figcaption b,.tcap b{color:var(--ink)}
+.tbl{overflow-x:auto;margin:20px 0 8px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink2);font-weight:600;font-size:14px}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tcap{margin:0 0 6px}
+.good{color:var(--good)}.bad{color:var(--bad)}.lean{color:var(--lean)}.tag{font-weight:650}
+code{font:500 .86em ui-monospace,SFMono-Regular,Menlo,monospace;background:#f1f0ec;padding:1px 5px;border-radius:4px}
+.toc{font-size:15px;color:var(--ink2);columns:2;column-gap:32px;margin:20px 0 0;padding-left:1.2em}
+.toc li{margin:0 0 4px;break-inside:avoid}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+@media (max-width:600px){h1{font-size:30px}.toc{columns:1}body{font-size:16px}}
+@media print{
+  body{background:#fff;font-size:11pt}
+  main{max-width:none;padding:0}
+  h2{break-after:avoid}h3{break-after:avoid}
+  figure,.tbl,.summary{break-inside:avoid}
+  a{text-decoration:none}
+  @page{margin:18mm 16mm}
+}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <p class="kicker">MSDS Capstone · Fall 2026 · Hidalga Technologies</p>
+  <h1>Which posts work?</h1>
+  <p class="sub">Data-driven content recommendations for Hidalga's LinkedIn, Instagram and Facebook, and a tool the team
+    can rerun every month</p>
+  <p class="byline">Grace Schmidt · November 2026 ·
+    Tool: <a href="https://graceschmidt1.github.io/MSDS-Capstone-26/">graceschmidt1.github.io/MSDS-Capstone-26</a> ·
+    Code: <a href="https://github.com/GraceSchmidt1/MSDS-Capstone-26">github.com/GraceSchmidt1/MSDS-Capstone-26</a> ·
+    Slides: <a href="index.html">index.html</a></p>
+  <ol class="toc">
+    <li><a href="#background">Background and goals</a></li>
+    <li><a href="#data">Data</a></li>
+    <li><a href="#methods">Methods</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#tool">The recommendation tool</a></li>
+    <li><a href="#recs">Recommendations</a></li>
+    <li><a href="#limits">Limitations and next steps</a></li>
+    <li><a href="#repro">Reproducibility</a></li>
+  </ol>
+</header>
+
+<section class="summary">
+  <h2>Summary</h2>
+  <ul>
+    <li><b>Data.</b> About 35 overlapping Loomly and LinkedIn exports were combined into one versioned master workbook
+      of 391 posts (September 2025 – September 2026) with one engagement-rate definition for every platform and complete
+      pillar and ICP-segment tags.</li>
+    <li><b>Method.</b> Because small posts naturally have high engagement rates, every post is compared with the typical
+      rate for its reach. Effects are tested per platform with cross-validation, bootstrap refits, sensitivity checks and
+      corrections for multiple comparisons.</li>
+    <li><b>Findings.</b> Format is the one choice that clearly matters. <span class="good tag">LinkedIn Documents</span>
+      average 14 points above Image posts after reach; <span class="bad tag">LinkedIn Link posts</span> trail by 3.
+      Content pillar, ICP segment, timing and paid boost show no detectable difference at this sample size.
+      Facebook's recent improvement is part of a quarter-to-quarter swing on a very small audience.</li>
+    <li><b>Deliverable.</b> A web page that adds new exports to the master, reruns the analysis and reports plain
+      verdicts (“do more”, “do less”, “keep testing”) in about 40 seconds, entirely in the browser.</li>
+  </ul>
+</section>
+
+<h2 id="background">1. Background and goals</h2>
+<p>Hidalga Technologies publishes on LinkedIn, Instagram and Facebook, scheduling posts in Loomly and labelling each one
+  with a content pillar and the ICP segments it targets. The marketing team had performance numbers for every post but
+  no reliable way to tell which choices go with better engagement: raw engagement rates mostly reflect how many
+  people a post reached, and the data was spread across many overlapping exports.</p>
+<p>The project had two goals:</p>
+<ol>
+  <li><b>Find what works.</b> For each platform, identify which choices (format, content pillar, ICP segment, posting
+    time, LinkedIn paid boost) are associated with higher engagement once reach is accounted for, and how confident
+    we can be.</li>
+  <li><b>Hand it over.</b> Give the team a tool they can rerun each month on new exports, with results in plain language
+    and no data-science setup.</li>
+</ol>
+<p>All results describe patterns in past posts. They are associations, not proof that a choice causes higher
+  engagement.</p>
+
+<h2 id="data">2. Data</h2>
+<h3>2.1 Sources</h3>
+<p>All data comes from two tools Hidalga already uses:</p>
+<ul>
+  <li><b>Loomly</b> (scheduling tool): the social media workbook, with one entry per Facebook, Instagram and LinkedIn
+    post (date, time, format, title and text, labels holding the pillar and ICP segments, and engagement metrics), plus
+    monthly follower counts and click data for Loomly short links.</li>
+  <li><b>LinkedIn</b> (company page admin exports): the content export, with LinkedIn's own numbers per post and daily
+    page metrics, and the visitors export, with daily visitors and visitor demographics.</li>
+</ul>
+
+<h3>2.2 Building the master workbook</h3>
+<p>The roughly 35 export files were not separate datasets but repeated, overlapping pulls of the same growing accounts.
+  Each monthly Loomly workbook restarts at January 1, so concatenating the files would have counted most posts three to
+  eight times. Consolidation therefore picked the single most complete, most recent source for each record. The main
+  rules, documented in <code>DATA_CLEANING_PLAN.md</code>:</p>
+<ul>
+  <li>Facebook and Instagram metrics come from Loomly. LinkedIn metrics come from LinkedIn's own content export, with
+    Loomly's LinkedIn numbers kept alongside for comparison only. Pillar and segment tags always come from Loomly's
+    labels.</li>
+  <li>Older posts that predated the current tag taxonomy were tagged with keyword suggestions and then reviewed by hand;
+    non-standard values were corrected. Every post now carries one of the four ICP segments and five pillars.</li>
+  <li>One engagement rate for every platform: (reactions + comments + shares + clicks) ÷ impressions × 100. The exported
+    rates used different denominators (Loomly's Instagram rate divides by reach), so they were not comparable. Instagram
+    exports carry no clicks or shares, so platforms are analysed separately.</li>
+  <li>Superseded files were archived, never deleted, and every merge decision was logged
+    (<code>merge_decisions.csv</code>).</li>
+</ul>
+
+<div class="tbl">
+<p class="tcap"><b>Table 1. Master workbook versions.</b> Each version is a new file; earlier versions stay unchanged.</p>
+<table>
+  <thead><tr><th>Version</th><th>Source</th><th class="num">Posts</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>v1</td><td>Full consolidation of the Loomly and LinkedIn exports</td><td class="num">374</td><td>Tags reviewed by hand</td></tr>
+    <tr><td>v2</td><td>September 2026 Loomly workbook merged in</td><td class="num">391</td><td>+17 posts, +3 follower months, +6 Loomly links</td></tr>
+    <tr><td>v3</td><td>Reviewed corrections applied to v2</td><td class="num">391</td><td>40 pillars recovered from raw labels; experiment period flagged; 100% tagged</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The current master (v3) holds 391 posts: 124 Facebook, 130 Instagram and 137 LinkedIn, from September 23, 2025 to
+  September 29, 2026. One Facebook post with zero impressions has no rate, leaving 390 posts for analysis.</p>
+
+<h3>2.3 Updating the master</h3>
+<p>New exports are added with an append-only merge. The update starts from a byte copy of the current master, appends
+  only records it does not already have, logs (but never applies) changed numbers for posts already present, then
+  re-reads every original cell and checks the old file's hash; any difference deletes the output and stops. Any subset
+  of the exports can be used. Without the LinkedIn content export, new LinkedIn posts fall back to Loomly's numbers, and
+  the tool warns about it.</p>
+
+<h2 id="methods">3. Methods</h2>
+<h3>3.1 Comparing posts with their reach</h3>
+<p>Engagement rate falls as reach grows (Figure 1): a post seen by 10 people needs one reaction for a 10% rate, while a
+  post seen by 1,000 needs a hundred. Without adjusting for this, any choice that tends to reach more people looks
+  worse. For each platform, a cubic spline in log₂(impressions) (four knots) gives the typical rate for a post's reach.
+  A post's <b>lift</b> is its rate minus that typical rate, and it <b>beats its reach</b> when its lift is positive.</p>
+<figure>
+  <img src="img/reach.png" alt="Engagement rate against impressions for each platform, with the typical-rate curve">
+  <figcaption><b>Figure 1. Engagement rate falls as reach grows.</b> Each dot is a post (impressions on a log scale); the
+    black line is the typical rate for that reach, fitted separately per platform. Lift is the vertical distance from a
+    post to the line. Instagram shows the pattern most clearly; on Facebook most posts reach fewer than 50 people.</figcaption>
+</figure>
+
+<h3>3.2 Stage 1: models</h3>
+<ul>
+  <li><b>Unit and features.</b> One row per post. Features: log₂(impressions) as the reach control, the four ICP segments
+    and five pillars as 0/1 columns, format, weekend, after 11 a.m., and LinkedIn paid boost.</li>
+  <li><b>Regression</b> on engagement rate: OLS with robust (HC3) standard errors, plus ridge, lasso and elastic net,
+    one model per platform, with a pooled model as a check.</li>
+  <li><b>Classification</b> of whether a post beats its reach: logistic (plain and penalised), decision tree and random
+    forest. The reach curve is fitted on training posts only.</li>
+  <li><b>Validation.</b> Repeated 5-fold cross-validation (10 repeats, 50 splits) on shared splits, with penalties tuned by
+    nested cross-validation; cross-posted content is kept in one fold.</li>
+  <li><b>Trust checks.</b> 500 bootstrap refits, permutation importance on held-out folds, five sensitivity variants,
+    alternative labels and spline knot counts, effect sizes (Hedges' g, odds ratios, partial R²), Benjamini–Hochberg
+    correction, and a comparison of naive and clustered standard errors for posts that target several segments.</li>
+</ul>
+
+<h3>3.3 Stage 2: verdicts</h3>
+<p>For each option (for example, Document posts on LinkedIn), the tool compares the lift of posts with that option
+  against the baseline (Image posts for formats, posts without the option for tags), using a Welch t-test and a
+  2,000-sample bootstrap interval. A joint Wald test per factor comes from a regression of lift on every option with
+  robust standard errors. Both sets of p-values are Benjamini–Hochberg adjusted. Verdicts:</p>
+<ul>
+  <li><span class="good tag">Do more</span> / <span class="bad tag">Do less</span>: the factor and the option both pass
+    the adjusted test at 0.05, and the verdict holds when reach is modelled with three or five knots.</li>
+  <li><span class="lean tag">Promising</span> / <span class="lean tag">Watch</span>: leaning one way but not settled. The
+    tool estimates how many more posts would settle it (80% power).</li>
+  <li><b>No clear difference</b>, or <b>Not enough posts yet</b> (fewer than 10).</li>
+</ul>
+
+<h2 id="results">4. Results</h2>
+<h3>4.1 Format matters, most clearly on LinkedIn</h3>
+<figure>
+  <img src="img/formats.png" alt="Each format compared with Image after reach, with 95% intervals and verdicts">
+  <figcaption><b>Figure 2. Lift of each format compared with Image posts on the same platform.</b> Dots are differences in
+    mean lift (percentage points), bars are 95% bootstrap intervals, and post counts are in brackets. Labels show the
+    tool's verdict. LinkedIn Documents are the clear outlier; Facebook formats are indistinguishable.</figcaption>
+</figure>
+<p>LinkedIn Document posts average <b>14 points</b> more lift than Image posts (95% interval 6 to 23), and 77% of them beat
+  their reach. The result holds in every check: all five sensitivity variants, 96% of bootstrap refits, every label
+  definition and knot count, and with the experiment-period flag in the model. All 13 Documents ran between July and
+  September 2026, so a factor specific to that period cannot be fully ruled out. LinkedIn Link posts trail Image posts
+  by 3 points, and only 11% beat their reach. Instagram Carousel (+2.6 points) and LinkedIn Multi-Image (+5.2 points) are
+  promising; Instagram Video tends to underperform (−2.0 points).</p>
+<p>The exploratory analysis suggested video was the weakest format. After reach, video is no different from images on
+  any platform: videos simply reached more people.</p>
+
+<h3>4.2 Pillar, segment, timing and boost show no detectable difference</h3>
+<div class="tbl">
+<p class="tcap"><b>Table 2. Does each factor matter?</b> Benjamini–Hochberg adjusted p-values of joint Wald tests from a
+  regression of lift on every option (robust standard errors). Values below 0.05 (bold) are evidence that the options
+  within a factor differ.</p>
+<table>
+  <thead><tr><th>Factor</th><th class="num">Facebook</th><th class="num">Instagram</th><th class="num">LinkedIn</th></tr></thead>
+  <tbody>
+    <tr><td>Format</td><td class="num">0.33</td><td class="num"><b>0.02</b></td><td class="num"><b>&lt;0.001</b></td></tr>
+    <tr><td>Content pillar</td><td class="num">0.33</td><td class="num">0.52</td><td class="num">0.96</td></tr>
+    <tr><td>ICP segment</td><td class="num">0.41</td><td class="num">0.35</td><td class="num">0.96</td></tr>
+    <tr><td>Timing (weekend, after 11 a.m.)</td><td class="num">0.83</td><td class="num">0.71</td><td class="num">0.96</td></tr>
+    <tr><td>Paid boost</td><td class="num">–</td><td class="num">–</td><td class="num">0.96</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Only format passes. No pillar or segment comparison passes an adjusted ANOVA, Welch or Kruskal–Wallis test or a
+  Tukey pair, and effect sizes are small (ω² ≤ 0.05). With about 125 posts per platform, only fairly large differences
+  can be detected, so “no detectable difference” means pillar and segment can be chosen on strategy without giving up
+  measurable engagement, not that they never matter. One methods finding applies throughout: naive standard errors
+  were up to 1.8 times too small because variances differ between groups, so all tests use robust or clustered errors.</p>
+
+<h3>4.3 How predictable are posts?</h3>
+<figure>
+  <img src="img/models.png" alt="Held-out R squared and AUC per platform with one standard deviation">
+  <figcaption><b>Figure 3. Performance on posts the models did not see</b> (5-fold cross-validation × 10, mean ± 1 SD).
+    Left: share of variation in engagement rate explained (0 = no better than predicting the average). Right: how well
+    the model ranks posts that beat their reach above those that do not (0.5 = guessing).</figcaption>
+</figure>
+<p>Instagram's rate is partly predictable (R² 0.44), almost entirely through reach. Facebook's is not (R² −0.05), and
+  LinkedIn's is close to zero on average but varies widely between splits; without a single 3-impression outlier it
+  reaches 0.19. Whether a post beats its reach is predicted at an AUC of 0.64–0.67 on every platform. Those numbers are
+  good enough to rank a content plan, not to promise a number for a single post, and the tool labels Facebook's
+  planned-post scores as rough.</p>
+
+<h3>4.4 Facebook's recent rise is a swing, not a trend</h3>
+<figure>
+  <img src="img/quarters.png" alt="Share of posts beating their reach by quarter for each platform" style="width:78%">
+  <figcaption><b>Figure 4. Share of posts that beat their reach, by quarter</b> (quarters with at least 10 posts; the dashed
+    line marks 50%). Facebook alternates between low and high quarters; LinkedIn's Q3 rise comes from its Document
+    posts.</figcaption>
+</figure>
+<p>The tool's 90-day check flagged Facebook as doing better recently (71% of recent posts beat their reach, against 38%
+  before). Facebook's quarters run 18%, 61%, 27% and 69%. The differences between quarters are clear (joint Wald
+  p &lt; 0.001), but no recorded choice explains them: not format, pillar, segment or timing, and not follower growth,
+  which rose steadily from 6 to 18. The Q2–Q3 experiment period has no effect on lift on any platform once content is
+  in the model. With a median of 17 impressions per Facebook post, one or two interactions move a rate by 5 to 15
+  points. The recent rise is the latest upswing of this pattern, and the next quarter may swing back. The tool's reports
+  now carry a caution note for Facebook.</p>
+
+<h2 id="tool">5. The recommendation tool</h2>
+<p>The tool is a web page at <a href="https://graceschmidt1.github.io/MSDS-Capstone-26/">graceschmidt1.github.io/MSDS-Capstone-26</a>,
+  hosted on GitHub Pages. Python runs inside the browser (Pyodide), so files never leave the computer and nothing needs
+  to be installed. A monthly update takes four steps: drop in the latest master; optionally add any new Loomly or
+  LinkedIn exports and a plan of upcoming posts; click <b>Make recommendations</b> (about 40 seconds); then download the
+  new master and read the results.</p>
+<figure>
+  <img src="img/tool_update.png" alt="The tool's Data update tab after adding the September Loomly workbook">
+  <figcaption><b>Figure 5. The Data update tab.</b> Adding the September Loomly workbook to v1 rebuilds v2 exactly: 17
+    new posts, with warnings for 3 posts missing tags and 6 LinkedIn posts that use Loomly's numbers because the
+    LinkedIn content export was not included.</figcaption>
+</figure>
+<figure>
+  <img src="img/tool_linkedin.png" alt="The LinkedIn results tab with the 90-day check and verdicts">
+  <figcaption><b>Figure 6. The LinkedIn results tab.</b> The 90-day check, the reliability of planned-post scores, and the
+    verdicts in plain language; a chart of every option follows below. Results download as an Excel workbook, a
+    one-page HTML report, or all files.</figcaption>
+</figure>
+<p>The page runs the same code as the command-line version, and its results match to within 10⁻¹³. Guards built in:
+  files that are not one of the known exports are refused with a clear message; two copies of the same export are
+  refused; unknown post formats, untagged posts and LinkedIn posts on Loomly's numbers raise warnings; and if the
+  exports hold nothing new, no new master is made.</p>
+
+<h2 id="recs">6. Recommendations</h2>
+<h3>Content</h3>
+<ul>
+  <li><span class="good tag">Do more</span> LinkedIn Documents.</li>
+  <li><span class="bad tag">Do less</span> LinkedIn Link posts; carry the link in a Document or image post instead.</li>
+  <li><span class="lean tag">Keep testing</span> Instagram Carousel (about 15 more posts would settle it) and LinkedIn
+    Multi-Image.</li>
+  <li>Choose pillar and segment on strategy; past engagement does not separate them.</li>
+  <li>Read Facebook changes with caution until the audience is larger.</li>
+</ul>
+<h3>Process</h3>
+<ul>
+  <li>Run the tool monthly with fresh exports and keep each new master version.</li>
+  <li>Export a new Loomly workbook each time rather than adding posts to last month's file, whose older posts carry
+    stale numbers.</li>
+  <li>Include the LinkedIn content export so new LinkedIn posts get LinkedIn's own numbers.</li>
+  <li>Tag every post with a pillar and ICP segment in Loomly before it goes out.</li>
+  <li>Score the coming month's planned posts with the plan template before the month starts.</li>
+</ul>
+
+<h2 id="limits">7. Limitations and next steps</h2>
+<ul>
+  <li><b>Sample size.</b> 390 posts, about 125 per platform; only fairly large effects can be detected. The original goal
+    of about 550 posts was not reachable because post-level exports before September 2025 are not available.</li>
+  <li><b>Association, not cause.</b> Choices were not assigned at random. The experiment-period flag covers every post
+    from April to September 2026, so it cannot be told apart from a time trend over the same months.</li>
+  <li><b>Truncated text.</b> Post text in the exports is cut at 200 characters, so post length and calls to action
+    cannot be tested.</li>
+  <li><b>Instagram metrics</b> lack clicks and shares, so Instagram rates are not directly comparable with the other
+    platforms.</li>
+</ul>
+<p>Next steps, in order of value: a planned format test (for example, alternating Document and Image posts on matched
+  topics for a quarter) to move from association to cause; full post text from Loomly to test length and calls to
+  action; day of week, posting hour and number of segments as features; and linking Loomly click data to individual
+  posts.</p>
+
+<h2 id="repro">8. Reproducibility</h2>
+<ul>
+  <li>All code is in the public repository: data scripts in <code>data/</code>, models and the tool in
+    <code>modeling/</code>, the web page in <code>index.html</code> and <code>site/</code>, and analysis notebooks in
+    <code>notebooks/</code>. Pinned package versions are in <code>requirements.txt</code>.</li>
+  <li>Every run writes a versioned folder (<code>outputs/runs/&lt;date&gt;_&lt;tag&gt;/</code>) recording the master
+    file's SHA-256 hash, the git commit, the configuration, package versions and the random seed (26). Reruns are
+    byte-identical.</li>
+  <li>232 automated tests cover the data pipeline, models, verdicts and web page.</li>
+  <li>Every result is logged in <code>FINDINGS.md</code> with the run and commit that produced it; data decisions are in
+    <code>DATA_CLEANING_PLAN.md</code> and <code>data/merge_decisions.csv</code>.</li>
+  <li>Figures in this report come from <code>presentation/make_figures.py</code>, using runs
+    <code>2026-11-17_recommendations</code> (Figure 2, Table 2) and <code>2026-11-04_eval_framework</code> (Figure 3),
+    and the v3 master (Figures 1 and 4).</li>
+</ul>
+
+<footer>Which posts work? · Grace Schmidt · MSDS Capstone, Fall 2026 · Prepared for Hidalga Technologies</footer>
+</main>
+</body>
+</html>
